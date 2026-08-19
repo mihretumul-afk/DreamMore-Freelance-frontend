@@ -1,0 +1,129 @@
+import {
+  CalendarDays,
+  CheckCircle2,
+  Pencil,
+  RotateCcw,
+  Send,
+  Trash2,
+} from 'lucide-react';
+import Card, { CardBody } from '../ui/Card';
+import Button from '../ui/Button';
+import StatusBadge from '../marketplace/StatusBadge';
+import { formatDate, formatETB } from '../../utils/format';
+
+/** Backend-gated statuses for each action (MilestoneController rules). */
+const EDITABLE_STATUSES = ['pending', 'in_progress'];
+const SUBMITTABLE_STATUSES = ['pending', 'in_progress'];
+
+/**
+ * Single milestone row. `onAction(milestone, action)` is raised for the
+ * confirmed backend actions — submit (freelancer) and approve / revision /
+ * edit / delete (employer). Actions are only offered when the contract is
+ * active and the milestone status allows them; the backend enforces anyway.
+ */
+export default function MilestoneCard({
+  milestone,
+  role = 'freelancer',
+  contractActive = false,
+  busy = false,
+  onAction,
+}) {
+  const isFreelancerView = role === 'freelancer';
+
+  const canSubmit = isFreelancerView && contractActive && SUBMITTABLE_STATUSES.includes(milestone.status);
+  const canEdit = !isFreelancerView && contractActive && EDITABLE_STATUSES.includes(milestone.status);
+  const canDelete = !isFreelancerView && contractActive && milestone.status === 'pending';
+  const canApprove = !isFreelancerView && contractActive && milestone.status === 'submitted';
+  const canRevision = !isFreelancerView && contractActive && milestone.status === 'submitted';
+
+  const actionButtonClass =
+    'h-8 px-2.5 text-xs disabled:pointer-events-none disabled:opacity-50';
+
+  return (
+    <Card variant="bordered">
+      <CardBody>
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm font-bold text-ink-900">{milestone.title}</p>
+              <StatusBadge status={milestone.status} size="xs" />
+            </div>
+            <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+              <span className="font-semibold text-brand-600">{formatETB(milestone.amount)}</span>
+              <span className="inline-flex items-center gap-1">
+                <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
+                Due {formatDate(milestone.dueDate)}
+              </span>
+            </p>
+          </div>
+
+          <div className="flex shrink-0 flex-wrap gap-2">
+            {canSubmit && (
+              <Button
+                variant="primary"
+                className={actionButtonClass}
+                disabled={busy}
+                onClick={() => onAction?.(milestone, 'submit')}
+              >
+                <Send className="h-3.5 w-3.5" aria-hidden="true" /> Submit
+              </Button>
+            )}
+            {canEdit && (
+              <Button
+                variant="outline"
+                className={actionButtonClass}
+                disabled={busy}
+                onClick={() => onAction?.(milestone, 'edit')}
+              >
+                <Pencil className="h-3.5 w-3.5" aria-hidden="true" /> Edit
+              </Button>
+            )}
+            {canDelete && (
+              <Button
+                variant="danger"
+                className={actionButtonClass}
+                disabled={busy}
+                onClick={() => onAction?.(milestone, 'delete')}
+              >
+                <Trash2 className="h-3.5 w-3.5" aria-hidden="true" /> Delete
+              </Button>
+            )}
+            {canApprove && (
+              <Button
+                variant="success"
+                className={actionButtonClass}
+                disabled={busy}
+                onClick={() => onAction?.(milestone, 'approve')}
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> Approve
+              </Button>
+            )}
+            {canRevision && (
+              <Button
+                variant="outline"
+                className={actionButtonClass}
+                disabled={busy}
+                onClick={() => onAction?.(milestone, 'revision')}
+              >
+                <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" /> Request Revision
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {milestone.description && (
+          <p className="mt-2.5 whitespace-pre-line text-xs leading-relaxed text-gray-500">
+            {milestone.description}
+          </p>
+        )}
+
+        {(milestone.submittedAt || milestone.approvedAt) && (
+          <p className="mt-2.5 text-[11px] text-gray-400">
+            Submitted {formatDate(milestone.submittedAt)}
+            {milestone.approvedAt && ` · Approved ${formatDate(milestone.approvedAt)}`}
+          </p>
+        )}
+      </CardBody>
+    </Card>
+  );
+}

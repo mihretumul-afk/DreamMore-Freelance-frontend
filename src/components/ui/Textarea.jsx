@@ -1,0 +1,47 @@
+import { useId } from 'react';
+import { cn } from '../../utils/cn';
+
+/**
+ * Labeled textarea with hint, error, and required indicator support.
+ */
+export default function Textarea({ label, error, hint, required, id, className, rows = 4, ...props }) {
+  const generatedId = useId();
+  const textareaId = id ?? generatedId;
+  return (
+    <div className="space-y-1.5">
+      {label && (
+        <label htmlFor={textareaId} className="block text-sm font-medium text-ink-800">
+          {label}
+          {required && (
+            <span className="text-danger-500" aria-hidden="true">
+              {' '}
+              *
+            </span>
+          )}
+        </label>
+      )}
+      <textarea
+        id={textareaId}
+        rows={rows}
+        required={required || undefined}
+        aria-required={required || undefined}
+        aria-invalid={error ? 'true' : undefined}
+        className={cn(
+          'w-full resize-y rounded-input border bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder:text-gray-400 transition-colors focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400',
+          error
+            ? 'border-danger-400 focus:border-danger-500 focus:ring-danger-500/20'
+            : 'border-gray-300 focus:border-brand-500 focus:ring-brand-500/20',
+          className,
+        )}
+        {...props}
+      />
+      {error ? (
+        <p role="alert" className="text-xs font-medium text-danger-600">
+          {error}
+        </p>
+      ) : hint ? (
+        <p className="text-xs text-gray-500">{hint}</p>
+      ) : null}
+    </div>
+  );
+}

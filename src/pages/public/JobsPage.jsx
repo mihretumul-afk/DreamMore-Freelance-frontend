@@ -1,0 +1,322 @@
+import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { SlidersHorizontal, SearchX, X } from 'lucide-react';
+import Container from '../../components/common/Container';
+import ErrorState from '../../components/common/ErrorState';
+import EmptyState from '../../components/common/EmptyState';
+import PageHeader from '../../components/marketplace/PageHeader';
+import JobCard from '../../components/marketplace/JobCard';
+import Pagination from '../../components/marketplace/Pagination';
+import FilterButton from '../../components/marketplace/FilterButton';
+import SearchBar from '../../components/marketplace/SearchBar';
+import Modal from '../../components/ui/Modal';
+import JobFiltersPanel from '../../components/jobs/JobFiltersPanel';
+import JobCardSkeleton from '../../components/jobs/JobCardSkeleton';
+import { jobService } from '../../services/jobService';
+import { normalizeJob } from '../../utils/jobMapper';
+import { getErrorMessage } from '../../utils/errors';
+import { usePageTitle } from '../../hooks/usePageTitle';
+
+const FILTER_LABELS = {
+  search: 'Search',
+  category_id: 'Category',
+  location: 'Location',
+  budget_type: 'Budget type',
+  experience_level: 'Experience',
+  location_type: 'Work mode',
+  min_budget: 'Min budget',
+  max_budget: 'Max budget',
+};
+
+export default function JobsPage() {
+  usePageTitle('Browse Jobs');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [jobs, setJobs] = useState(null);
+  const [meta, setMeta] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  // Text filter drafts — the URL stays the source of truth; these are applied
+  // on submit/apply so typing does not rewrite the URL on every keystroke.
+  const [searchInput, setSearchInput] = useState(searchParams.get('search') ?? '');
+  const [locationInput, setLocationInput] = useState(searchParams.get('location') ?? '');
+  const [minBudget, setMinBudget] = useState(searchParams.get('min_budget') ?? '');
+  const [maxBudget, setMaxBudget] = useState(searchParams.get('max_budget') ?? '');
+
+  const page = Math.max(1, Number(searchParams.get('page')) || 1);
+
+  // Keep text drafts in sync when the URL changes externally.
+  useEffect(() => {
+    setSearchInput(searchParams.get('search') ?? '');
+    setLocationInput(searchParams.get('location') ?? '');
+    setMinBudget(searchParams.get('min_budget') ?? '');
+    setMaxBudget(searchParams.get('max_budget') ?? '');
+  }, [searchParams]);
+
+  const loadJobs = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await jobService.getJobs({
+        search: searchParams.get('search') ?? undefined,
+        category_id: searchParams.get('category_id') ?? undefined,
+        budget_type: searchParams.get('budget_type') ?? undefined,
+        experience_level: searchParams.get('experience_level') ?? undefined,
+        location_type: searchParams.get('location_type') ?? undefined,
+        location: searchParams.get('location') ?? undefined,
+        min_budget: searchParams.get('min_budget') ?? undefined,
+        max_budget: searchParams.get('max_budget') ?? undefined,
+        page,
+      });
+      if (response.success) {
+        setJobs((response.data ?? []).map(normalizeJob));
+        setMeta(response.meta ?? null);
+      } else {
+        setError(response.message || 'Unable to load jobs.');
+      }
+    } catch (err) {
+      setError(getErrorMessage(err, 'Unable to load jobs right now. Please try again.'));
+    } finally {
+      setLoading(false);
+    }
+  }, [searchParams, page]);
+
+  useEffect(() => {
+    loadJobs();
+  }, [loadJobs]);
+
+  /** Write params into the URL; reset to page 1 for filter changes. */
+  const updateParams = useCallback(
+    (updates, { resetPage = true } = {}) => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        Object.entries(updates).forEach(([key, value]) => {
+          if (value === undefined || value === null || value === '') {
+            next.delete(key);
+          } else {
+            next.set(key, String(value));
+          }
+        });
+        if (resetPage) next.delete('page');
+        return next;
+      });
+    },
+    [setSearchParams],
+  );
+
+  const applyTextFilters = () => {
+    updateParams({
+      search: searchInput.trim(),
+      location: locationInput.trim(),
+      min_budget: minBudget,
+      max_budget: maxBudget,
+    });
+    setFiltersOpen(false);
+  };
+
+  const clearAll = () => setSearchParams({});
+  const goToPage = (nextPage) => updateParams({ page: nextPage }, { resetPage: false });
+
+  const activeFilters = [...searchParams.entries()]
+    .filter(([key]) => key !== 'page')
+    .map(([key, value]) => ({ key, value, label: `${FILTER_LABELS[key] ?? key}: ${value}` }));
+
+  const total = meta?.total;
+  const totalPages = meta?.last_page ?? 1;
+  const showSkeletons = loading;
+  const showError = !loading && error;
+  const showEmpty = !loading && !error && jobs?.length === 0;
+
+  return (
+    <Container className="py-8 lg:py-12">
+      <PageHeader
+        eyebrow="Marketplace"
+        title="Browse Jobs"
+        description="Search open jobs from employers across Ethiopia. Filters and search are live against the API."
+        breadcrumbs={[{ label: 'Home', to: '/' }, { label: 'Browse Jobs' }]}
+      />
+
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        {/* Desktop filter sidebar */}
+        <aside className="hidden w-64 shrink-0 lg:block" aria-label="Job filters">
+          <JobFiltersPanel
+            values={{
+              search: searchInput,
+              category_id: searchParams.get('category_id') ?? '',
+              location: locationInput,
+              min_budget: minBudget,
+              max_budget: maxBudget,
+              budget_type: searchParams.get('budget_type') ?? '',
+              experience_level: searchParams.get('experience_level') ?? '',
+              location_type: searchParams.get('location_type') ?? '',
+            }}
+            onChange={(key, value) => {
+              if (['search', 'location', 'min_budget', 'max_budget'].includes(key)) {
+                if (key === 'search') setSearchInput(value);
+                if (key === 'location') setLocationInput(value);
+                if (key === 'min_budget') setMinBudget(value);
+                if (key === 'max_budget') setMaxBudget(value);
+              } else {
+                updateParams({ [key]: value });
+              }
+            }}
+            onApply={applyTextFilters}
+            onClear={clearAll}
+          />
+        </aside>
+
+        {/* Results column */}
+        <div className="min-w-0 flex-1">
+          {/* Toolbar */}
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="w-full sm:w-auto sm:min-w-72 sm:max-w-md">
+              <SearchBar
+                value={searchInput}
+                onChange={(value) => {
+                  setSearchInput(value);
+                  if (value === '') updateParams({ search: '' });
+                }}
+                onSubmit={applyTextFilters}
+                placeholder="Search jobs, skills, or talent"
+                label="Search jobs"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <p className="text-sm text-gray-500" aria-live="polite">
+                {showSkeletons
+                  ? 'Loading jobs…'
+                  : total != null
+                    ? `${total} job${total === 1 ? '' : 's'} found`
+                    : ''}
+              </p>
+              <FilterButton
+                active={activeFilters.length > 0}
+                icon={SlidersHorizontal}
+                label="Filters"
+                onClick={() => setFiltersOpen(true)}
+                className="lg:hidden"
+              />
+            </div>
+          </div>
+
+          {/* Active filter chips */}
+          {activeFilters.length > 0 && (
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              {activeFilters.map((filter) => (
+                <span
+                  key={filter.key}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white py-1 pl-3 pr-1.5 text-xs font-medium text-ink-700 shadow-sm"
+                >
+                  <span className="max-w-48 truncate">{filter.label}</span>
+                  <button
+                    type="button"
+                    onClick={() => updateParams({ [filter.key]: '' })}
+                    aria-label={`Remove ${filter.label} filter`}
+                    className="rounded-full p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-ink-900"
+                  >
+                    <X className="h-3 w-3" aria-hidden="true" />
+                  </button>
+                </span>
+              ))}
+              <button
+                type="button"
+                onClick={clearAll}
+                className="text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
+              >
+                Clear all
+              </button>
+            </div>
+          )}
+
+          {/* Results */}
+          {showSkeletons && (
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-2">
+              {Array.from({ length: 6 }, (_, index) => (
+                <JobCardSkeleton key={index} />
+              ))}
+            </div>
+          )}
+
+          {showError && (
+            <ErrorState
+              title="Unable to load jobs"
+              description={error}
+              onRetry={loadJobs}
+            />
+          )}
+
+          {showEmpty && (
+            <EmptyState
+              icon={SearchX}
+              title="No jobs found"
+              description="Try adjusting your search or filters."
+              action={
+                <button
+                  type="button"
+                  onClick={clearAll}
+                  className="text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
+                >
+                  Clear filters
+                </button>
+              }
+            />
+          )}
+
+          {!showSkeletons && !showError && jobs?.length > 0 && (
+            <>
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                {jobs.map((job) => (
+                  <JobCard key={job.id} job={job} />
+                ))}
+              </div>
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                onChange={goToPage}
+                className="mt-8"
+              />
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile filter modal */}
+      <Modal
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        title="Filters"
+        description="Refine the jobs you see."
+      >
+        <JobFiltersPanel
+          values={{
+            search: searchInput,
+            category_id: searchParams.get('category_id') ?? '',
+            location: locationInput,
+            min_budget: minBudget,
+            max_budget: maxBudget,
+            budget_type: searchParams.get('budget_type') ?? '',
+            experience_level: searchParams.get('experience_level') ?? '',
+            location_type: searchParams.get('location_type') ?? '',
+          }}
+          onChange={(key, value) => {
+            if (['search', 'location', 'min_budget', 'max_budget'].includes(key)) {
+              if (key === 'search') setSearchInput(value);
+              if (key === 'location') setLocationInput(value);
+              if (key === 'min_budget') setMinBudget(value);
+              if (key === 'max_budget') setMaxBudget(value);
+            } else {
+              updateParams({ [key]: value });
+            }
+          }}
+          onApply={applyTextFilters}
+          onClear={() => {
+            clearAll();
+            setFiltersOpen(false);
+          }}
+        />
+      </Modal>
+    </Container>
+  );
+}
