@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import Container from '../common/Container';
 import Reveal from '../common/Reveal';
 import Button from '../ui/Button';
@@ -19,12 +20,12 @@ export default function CtaSection() {
             </h2>
             <p className="mt-4 text-base leading-relaxed text-gray-500">{t('cta.description')}</p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button as="a" href="/register" size="lg" className="w-full sm:w-auto">
+              <Button as={Link} to="/register" size="lg" className="w-full sm:w-auto">
                 {t('cta.createAccount')}
               </Button>
               <Button
-                as="a"
-                href="/freelancers"
+                as={Link}
+                to="/freelancers"
                 variant="outline"
                 size="lg"
                 className="w-full sm:w-auto"

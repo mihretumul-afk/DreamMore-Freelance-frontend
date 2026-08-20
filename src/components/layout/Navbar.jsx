@@ -1,39 +1,199 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { LogOut, Menu, X } from 'lucide-react';
+import { ChevronDown, LogOut, Menu, X, Search, Briefcase } from 'lucide-react';
 import Logo from '../common/Logo';
 import Button from '../ui/Button';
 import Avatar from '../marketplace/Avatar';
 import UserMenu from './UserMenu';
+import NotificationBell from './NotificationBell';
 import LanguageSelector from '../common/LanguageSelector';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../../i18n';
-import { PUBLIC_NAV_LINKS, INFO_NAV_LINKS } from '../../constants/navigation';
+import { categoryService } from '../../services/categoryService';
 import { getNavPaths, ROLE_LABELS } from '../../utils/auth';
 import { cn } from '../../utils/cn';
 
+// ────────────────────────────────────────────────────────────────────
+// Category Dropdown (always dark theme)
+// ────────────────────────────────────────────────────────────────────
+function CategoryDropdown({ label, toPrefix }) {
+  const [open, setOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(null);
+  const containerRef = useRef(null);
+  const timeoutRef = useRef(null);
+
+  const fetchCategories = useCallback(async () => {
+    if (loaded) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await categoryService.getCategories();
+      if (res.success) {
+        setCategories(res.data ?? []);
+        setLoaded(true);
+      } else {
+        setError('Failed to load');
+      }
+    } catch {
+      setError('Failed to load');
+    } finally {
+      setLoading(false);
+    }
+  }, [loaded]);
+
+  const openMenu = useCallback(() => {
+    clearTimeout(timeoutRef.current);
+    setOpen(true);
+    fetchCategories();
+  }, [fetchCategories]);
+
+  const closeMenu = useCallback(() => {
+    timeoutRef.current = setTimeout(() => setOpen(false), 150);
+  }, []);
+
+  const cancelClose = useCallback(() => {
+    clearTimeout(timeoutRef.current);
+  }, []);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return undefined;
+    const handler = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return undefined;
+    const handler = (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative"
+      onMouseEnter={openMenu}
+      onMouseLeave={closeMenu}
+    >
+      <button
+        type="button"
+        onClick={() => (open ? setOpen(false) : openMenu())}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') setOpen(false);
+        }}
+        aria-haspopup="true"
+        aria-expanded={open}
+        className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-white/5 hover:text-white"
+      >
+        {label}
+        <ChevronDown
+          className={cn('h-4 w-4 transition-transform', open && 'rotate-180')}
+          aria-hidden="true"
+        />
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          onMouseEnter={cancelClose}
+          onMouseLeave={closeMenu}
+          className="absolute left-0 top-full z-50 mt-1 min-w-[420px] rounded-xl border border-white/10 bg-ink-900 p-3 shadow-xl"
+        >
+          {loading && (
+            <div className="px-3 py-6 text-center text-sm text-gray-400">Loading categories…</div>
+          )}
+          {error && (
+            <div className="px-3 py-4 text-center text-sm text-red-400">
+              {error}
+              <button
+                type="button"
+                onClick={fetchCategories}
+                className="ml-2 underline hover:text-red-300"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+          {!loading && !error && categories.length > 0 && (
+            <div className="grid grid-cols-2 gap-1">
+              {categories.map((cat) => (
+                <Link
+                  key={cat.id}
+                  to={`${toPrefix}?category_id=${cat.id}`}
+                  onClick={() => setOpen(false)}
+                  className="block rounded-lg px-3 py-2 text-sm text-slate-200 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  <span className="font-medium">{cat.name}</span>
+                  {cat.skills_count != null && cat.skills_count > 0 && (
+                    <span className="ml-1 text-xs opacity-50">({cat.skills_count})</span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          )}
+          {!loading && !error && categories.length === 0 && (
+            <div className="px-3 py-4 text-center text-sm text-gray-400">No categories available</div>
+          )}
+          {/* View All link */}
+          <div className="mt-2 border-t border-white/10 pt-2">
+            <Link
+              to={toPrefix}
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-1 text-sm font-semibold text-brand-400 hover:text-brand-300"
+            >
+              View all →
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Main Navbar — always black/dark
+// ────────────────────────────────────────────────────────────────────
 export default function Navbar() {
   const { user, logout } = useAuth();
   const { t } = useI18n();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileJobsOpen, setMobileJobsOpen] = useState(false);
+  const [mobileTalentOpen, setMobileTalentOpen] = useState(false);
+  const [mobileJobsCats, setMobileJobsCats] = useState([]);
+  const [mobileTalentCats, setMobileTalentCats] = useState([]);
+  const [mobileJobsLoading, setMobileJobsLoading] = useState(false);
+  const [mobileTalentLoading, setMobileTalentLoading] = useState(false);
   const drawerRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
 
   const { dashboardPath, profilePath } = getNavPaths(user?.role);
 
-  // Close the mobile drawer on navigation.
+  // Close mobile drawer on navigation
   useEffect(() => {
     setMenuOpen(false);
+    setMobileJobsOpen(false);
+    setMobileTalentOpen(false);
   }, [location.pathname]);
 
-  // Drawer: Escape to close, focus first control, simple Tab trap, scroll lock.
+  // Drawer: Escape to close, focus trap, scroll lock
   useEffect(() => {
     if (!menuOpen) return undefined;
-
     const drawer = drawerRef.current;
     const focusables = drawer?.querySelectorAll(
-      'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      'a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])',
     );
     const first = focusables?.[0];
     const last = focusables?.[focusables.length - 1];
@@ -54,7 +214,6 @@ export default function Navbar() {
         }
       }
     };
-
     document.addEventListener('keydown', onKeyDown);
     document.body.style.overflow = 'hidden';
     return () => {
@@ -68,14 +227,39 @@ export default function Navbar() {
     navigate('/');
   };
 
-  const desktopLinkClass = ({ isActive }) =>
+  const loadMobileCategories = async (type) => {
+    const setCategories = type === 'jobs' ? setMobileJobsCats : setMobileTalentCats;
+    const setLoading = type === 'jobs' ? setMobileJobsLoading : setMobileTalentLoading;
+    const categories = type === 'jobs' ? mobileJobsCats : mobileTalentCats;
+    const isLoading = type === 'jobs' ? mobileJobsLoading : mobileTalentLoading;
+    if (categories.length > 0 || isLoading) return;
+    setLoading(true);
+    try {
+      const res = await categoryService.getCategories();
+      if (res.success) setCategories(res.data ?? []);
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleMobileJobs = () => {
+    setMobileJobsOpen((v) => !v);
+    if (!mobileJobsOpen) loadMobileCategories('jobs');
+  };
+
+  const toggleMobileTalent = () => {
+    setMobileTalentOpen((v) => !v);
+    if (!mobileTalentOpen) loadMobileCategories('talent');
+  };
+
+  // ── Desktop link styles (always dark) ──
+  const authLinkClass = ({ isActive }) =>
     cn(
       'rounded-lg px-3 py-2 text-sm font-medium transition-colors',
       isActive ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white',
     );
-
-  const mobileLinkClass =
-    'flex items-center rounded-lg px-3 py-2.5 text-sm font-medium text-slate-200 hover:bg-white/5 hover:text-white';
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-ink-950">
@@ -90,23 +274,31 @@ export default function Navbar() {
 
         {/* Desktop links */}
         <div className="hidden items-center gap-1 md:flex">
-          {PUBLIC_NAV_LINKS.map((link) => (
-            <NavLink key={link.to} to={link.to} className={desktopLinkClass}>
-              {t(link.key)}
-            </NavLink>
-          ))}
-          {INFO_NAV_LINKS.map((link) => (
-            <Link key={link.key} to={link.to} className={desktopLinkClass({ isActive: false })}>
-              {t(link.key)}
-            </Link>
-          ))}
+          {user ? (
+            <>
+              <NavLink to="/jobs" className={authLinkClass}>
+                {t('nav.findJobs')}
+              </NavLink>
+              <NavLink to="/freelancers" className={authLinkClass}>
+                {t('nav.findTalent')}
+              </NavLink>
+            </>
+          ) : (
+            <>
+              <CategoryDropdown label={t('nav.findJobs')} toPrefix="/jobs" />
+              <CategoryDropdown label={t('nav.findTalent')} toPrefix="/freelancers" />
+            </>
+          )}
         </div>
 
-        {/* Desktop right side: language + auth */}
+        {/* Desktop right side */}
         <div className="hidden items-center gap-2 md:flex">
           <LanguageSelector variant="dark" />
           {user ? (
-            <UserMenu />
+            <>
+              <NotificationBell />
+              <UserMenu />
+            </>
           ) : (
             <>
               <Button as={Link} to="/login" variant="nav" size="sm">
@@ -136,7 +328,7 @@ export default function Navbar() {
         </button>
       </nav>
 
-      {/* Mobile drawer — always mounted so transitions can animate; inert when closed */}
+      {/* Mobile drawer */}
       <div
         id="mobile-menu"
         ref={drawerRef}
@@ -164,6 +356,7 @@ export default function Navbar() {
             menuOpen ? 'translate-x-0' : 'translate-x-full',
           )}
         >
+          {/* Mobile drawer header */}
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
             <Link to="/" onClick={() => setMenuOpen(false)} aria-label={t('nav.home')}>
               <Logo variant="light" markClassName="h-8" />
@@ -182,23 +375,98 @@ export default function Navbar() {
             </div>
           </div>
 
+          {/* Mobile nav links */}
           <nav aria-label={t('nav.mobile')} className="flex-1 space-y-1 px-3 py-4">
-            {PUBLIC_NAV_LINKS.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={({ isActive }) => cn(mobileLinkClass, isActive && 'bg-white/10 text-white')}
+            {/* Find Jobs — expandable */}
+            <div>
+              <button
+                type="button"
+                onClick={toggleMobileJobs}
+                aria-expanded={mobileJobsOpen}
+                className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-slate-200 hover:bg-white/5"
               >
-                {t(link.key)}
-              </NavLink>
-            ))}
-            {INFO_NAV_LINKS.map((link) => (
-              <Link key={link.key} to={link.to} className={mobileLinkClass}>
-                {t(link.key)}
-              </Link>
-            ))}
+                <span className="flex items-center gap-2">
+                  <Briefcase className="h-4 w-4 opacity-50" aria-hidden="true" />
+                  {t('nav.findJobs')}
+                </span>
+                <ChevronDown
+                  className={cn('h-4 w-4 transition-transform', mobileJobsOpen && 'rotate-180')}
+                  aria-hidden="true"
+                />
+              </button>
+              {mobileJobsOpen && (
+                <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-white/10 pl-3">
+                  <Link
+                    to="/jobs"
+                    onClick={() => setMenuOpen(false)}
+                    className="block rounded-lg px-3 py-2 text-sm font-medium text-slate-300 hover:bg-white/5"
+                  >
+                    All Jobs
+                  </Link>
+                  {mobileJobsLoading ? (
+                    <div className="px-3 py-2 text-xs text-gray-400">Loading…</div>
+                  ) : (
+                    mobileJobsCats.map((cat) => (
+                      <Link
+                        key={cat.id}
+                        to={`/jobs?category_id=${cat.id}`}
+                        onClick={() => setMenuOpen(false)}
+                        className="block rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-white/5"
+                      >
+                        {cat.name}
+                      </Link>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Find Talent — expandable */}
+            <div>
+              <button
+                type="button"
+                onClick={toggleMobileTalent}
+                aria-expanded={mobileTalentOpen}
+                className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-slate-200 hover:bg-white/5"
+              >
+                <span className="flex items-center gap-2">
+                  <Search className="h-4 w-4 opacity-50" aria-hidden="true" />
+                  {t('nav.findTalent')}
+                </span>
+                <ChevronDown
+                  className={cn('h-4 w-4 transition-transform', mobileTalentOpen && 'rotate-180')}
+                  aria-hidden="true"
+                />
+              </button>
+              {mobileTalentOpen && (
+                <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-white/10 pl-3">
+                  <Link
+                    to="/freelancers"
+                    onClick={() => setMenuOpen(false)}
+                    className="block rounded-lg px-3 py-2 text-sm font-medium text-slate-300 hover:bg-white/5"
+                  >
+                    All Talent
+                  </Link>
+                  {mobileTalentLoading ? (
+                    <div className="px-3 py-2 text-xs text-gray-400">Loading…</div>
+                  ) : (
+                    mobileTalentCats.map((cat) => (
+                      <Link
+                        key={cat.id}
+                        to={`/freelancers?category_id=${cat.id}`}
+                        onClick={() => setMenuOpen(false)}
+                        className="block rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-white/5"
+                      >
+                        {cat.name}
+                      </Link>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
           </nav>
 
+          {/* Mobile drawer footer */}
           <div className="space-y-2 border-t border-white/10 px-3 py-4">
             {user ? (
               <>

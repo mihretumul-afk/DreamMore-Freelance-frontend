@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, X } from 'lucide-react';
+import { ArrowLeft, Save, X, Search, Plus, Loader2 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import PageHeader from '../../components/marketplace/PageHeader';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
@@ -10,6 +10,7 @@ import Select from '../../components/ui/Select';
 import Textarea from '../../components/ui/Textarea';
 import FreelancerProfileSkeleton from '../../components/freelancers/FreelancerProfileSkeleton';
 import { freelancerService } from '../../services/freelancerService';
+import { skillService } from '../../services/skillService';
 import {
   normalizeFreelancer,
   freelancerProfileToForm,
@@ -44,6 +45,156 @@ const AVAILABILITY_OPTIONS = [
   { value: 'busy', label: 'Busy' },
   { value: 'not_available', label: 'Not available' },
 ];
+
+/**
+ * SkillSearch — Debounced search input that queries the skills catalog
+ * and shows a dropdown of matching results for selection.
+ */
+function SkillSearch({ existingSkillIds, onAdd, disabled }) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState(null);
+  const containerRef = useRef(null);
+  const debounceRef = useRef(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!open) return undefined;
+    const handler = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return undefined;
+    const handler = (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open]);
+
+  const searchSkills = useCallback(async (searchQuery) => {
+    if (!searchQuery.trim()) {
+      setResults([]);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await skillService.getSkills({ search: searchQuery.trim() });
+      if (response.success) {
+        setResults(response.data ?? []);
+      } else {
+        setError('Failed to search skills.');
+      }
+    } catch {
+      setError('Failed to search skills. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setQuery(value);
+    setOpen(true);
+
+    // Debounce API calls
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      searchSkills(value);
+    }, 300);
+  };
+
+  const handleAdd = (skill) => {
+    onAdd(skill);
+    setQuery('');
+    setResults([]);
+    setOpen(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && results.length > 0) {
+      e.preventDefault();
+      // Add the first non-duplicate result
+      const available = results.find((s) => !existingSkillIds.has(s.id));
+      if (available) handleAdd(available);
+    }
+  };
+
+  const filteredResults = results.filter((s) => !existingSkillIds.has(s.id));
+
+  return (
+    <div ref={containerRef} className="relative">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+        <input
+          type="text"
+          value={query}
+          onChange={handleChange}
+          onFocus={() => { if (query.trim()) setOpen(true); }}
+          onKeyDown={handleKeyDown}
+          placeholder="Search skills to add (e.g. React, Laravel, Figma)..."
+          disabled={disabled}
+          aria-label="Search skills to add"
+          aria-expanded={open}
+          aria-controls="skill-search-results"
+          aria-autocomplete="list"
+          className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-3 text-sm text-ink-900 placeholder-gray-400 transition-colors focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 disabled:opacity-50"
+        />
+        {loading && (
+          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-gray-400" aria-hidden="true" />
+        )}
+      </div>
+
+      {error && (
+        <p className="mt-1 text-xs text-danger-600">{error}</p>
+      )}
+
+      {open && !loading && filteredResults.length > 0 && (
+        <ul
+          id="skill-search-results"
+          role="listbox"
+          aria-label="Available skills"
+          className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg"
+        >
+          {filteredResults.slice(0, 10).map((skill) => (
+            <li
+              key={skill.id}
+              role="option"
+              tabIndex={0}
+              onClick={() => handleAdd(skill)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleAdd(skill); } }}
+              className="flex items-center justify-between gap-2 px-4 py-2.5 text-sm text-ink-900 cursor-pointer transition-colors hover:bg-brand-50 focus:bg-brand-50 focus:outline-none"
+            >
+              <div className="min-w-0">
+                <span className="font-medium">{skill.name}</span>
+                {skill.category?.name && (
+                  <span className="ml-2 text-xs text-gray-400">{skill.category.name}</span>
+                )}
+              </div>
+              <Plus className="h-4 w-4 shrink-0 text-brand-500" aria-hidden="true" />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {open && !loading && query.trim() && filteredResults.length === 0 && !error && (
+        <div className="absolute z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white p-4 text-center shadow-lg">
+          <p className="text-sm text-gray-500">No skills found matching &quot;{query}&quot;</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function FreelancerProfileEditPage() {
   usePageTitle('Edit Profile');
@@ -98,6 +249,17 @@ export default function FreelancerProfileEditPage() {
     setForm((prev) => ({ ...prev, skills: prev.skills.filter((skill) => skill.id !== id) }));
   };
 
+  const handleAddSkill = (skill) => {
+    setForm((prev) => ({
+      ...prev,
+      skills: [...prev.skills, { id: skill.id, name: skill.name, yearsOfExperience: 1 }],
+    }));
+    // Clear any skills error
+    if (fieldErrors.skills) {
+      setFieldErrors((prev) => ({ ...prev, skills: undefined }));
+    }
+  };
+
   /** Light client-side checks; the backend remains the source of truth. */
   const validateForm = () => {
     const errors = {};
@@ -141,7 +303,6 @@ export default function FreelancerProfileEditPage() {
     setSubmitting(true);
     try {
       await freelancerService.updateMyProfile(freelancerFormToPayload(form));
-      // Profile page refetches on mount, showing the updated data.
       navigate('/freelancer/profile', { replace: true });
     } catch (error) {
       const errors = getFieldErrors(error);
@@ -172,6 +333,8 @@ export default function FreelancerProfileEditPage() {
       />
     );
   }
+
+  const existingSkillIds = new Set(form.skills.map((s) => s.id));
 
   return (
     <div className="space-y-6">
@@ -342,9 +505,10 @@ export default function FreelancerProfileEditPage() {
           <Card>
             <CardHeader
               title="Skills & expertise"
-              description="Update experience years or remove skills you no longer want to list."
+              description="Search the skills catalog to add new skills, or manage your existing ones."
             />
             <CardBody>
+              {/* Current skills */}
               {form.skills.length > 0 ? (
                 <ul className="space-y-3">
                   {form.skills.map((skill) => (
@@ -390,18 +554,29 @@ export default function FreelancerProfileEditPage() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-gray-500">No skills listed.</p>
+                <p className="text-sm text-gray-500">No skills added yet. Search below to add your first skill.</p>
               )}
+
               {fieldErrors.skills && (
                 <p role="alert" className="mt-3 text-xs font-medium text-danger-600">
                   {fieldErrors.skills}
                 </p>
               )}
-              <p className="mt-4 rounded-lg bg-gray-50 px-3 py-2.5 text-xs leading-relaxed text-gray-500">
-                Adding brand-new skills is not available yet — the skills catalog API has not
-                shipped on the backend. You can update experience years or remove skills from your
-                list.
-              </p>
+
+              {/* Skill search / add */}
+              <div className="mt-4">
+                <label className="mb-1.5 block text-sm font-medium text-ink-800">
+                  Add a skill
+                </label>
+                <SkillSearch
+                  existingSkillIds={existingSkillIds}
+                  onAdd={handleAddSkill}
+                  disabled={submitting}
+                />
+                <p className="mt-1.5 text-xs text-gray-400">
+                  Search the skills catalog and select a skill to add it to your profile.
+                </p>
+              </div>
             </CardBody>
           </Card>
         </div>

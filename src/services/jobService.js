@@ -16,12 +16,14 @@ import apiClient from '../api/client';
 const INDEX_PARAMS = [
   'search',
   'category_id',
+  'skill_id',
   'budget_type',
   'experience_level',
   'location_type',
   'location',
   'min_budget',
   'max_budget',
+  'sort',
   'page',
 ];
 

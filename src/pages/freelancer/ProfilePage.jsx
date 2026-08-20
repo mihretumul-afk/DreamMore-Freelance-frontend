@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  Award,
   Banknote,
   Briefcase,
   BriefcaseBusiness,
+  CheckCircle,
   Clock,
   Code,
   FolderOpen,
@@ -14,10 +16,12 @@ import {
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import PageHeader from '../../components/marketplace/PageHeader';
-import Avatar from '../../components/marketplace/Avatar';
+import AvatarUpload from '../../components/marketplace/AvatarUpload';
 import RatingDisplay from '../../components/marketplace/RatingDisplay';
 import SkillBadge from '../../components/marketplace/SkillBadge';
 import StatusBadge from '../../components/marketplace/StatusBadge';
+import CredentialManager from '../../components/freelancers/CredentialManager';
+import ReviewList from '../../components/ui/ReviewList';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import FreelancerProfileSkeleton from '../../components/freelancers/FreelancerProfileSkeleton';
@@ -26,6 +30,7 @@ import { normalizeFreelancer } from '../../utils/freelancerMapper';
 import { getErrorMessage } from '../../utils/errors';
 import { formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import apiClient from '../../api/client';
 
 export default function FreelancerProfilePage() {
   usePageTitle('My Profile');
@@ -33,6 +38,7 @@ export default function FreelancerProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [forbidden, setForbidden] = useState(false);
+  const [rawData, setRawData] = useState(null);
 
   const loadProfile = useCallback(async () => {
     setLoading(true);
@@ -41,6 +47,7 @@ export default function FreelancerProfilePage() {
     try {
       const response = await freelancerService.getMyProfile();
       if (response.success) {
+        setRawData(response.data);
         setProfile(normalizeFreelancer(response.data));
       } else {
         setError(response.message || 'Unable to load your profile.');
@@ -98,7 +105,22 @@ export default function FreelancerProfilePage() {
       {/* Header */}
       <Card className="p-6 sm:p-8">
         <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:items-start sm:text-left">
-          <Avatar name={profile.name} src={profile.avatar} size="xl" variant="brand" />
+          <AvatarUpload
+            name={profile.name}
+            src={profile.avatar}
+            onUpload={async (file) => {
+              const formData = new FormData();
+              formData.append('avatar', file);
+              await apiClient.post('/avatar', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+              });
+              loadProfile();
+            }}
+            onRemove={async () => {
+              await apiClient.delete('/avatar');
+              loadProfile();
+            }}
+          />
           <div className="min-w-0">
             <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
               <h2 className="text-2xl font-extrabold tracking-tight text-ink-900">
@@ -218,6 +240,53 @@ export default function FreelancerProfilePage() {
           )}
         </CardBody>
       </Card>
+
+      {/* Verified Credentials */}
+      {rawData?.verified_credentials?.length > 0 && (
+        <Card>
+          <CardHeader
+            title="Verified Credentials"
+            description="Your approved certificates and professional qualifications."
+          />
+          <CardBody>
+            <ul className="space-y-3">
+              {rawData.verified_credentials.map((cred) => (
+                <li key={cred.id} className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success-50">
+                    <Award className="h-4 w-4 text-success-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-ink-900">{cred.title}</p>
+                    <p className="text-xs text-gray-500">
+                      {cred.type === 'dream_more_certificate' ? 'Dream More Certified' : 'Verified Certificate'}
+                      {cred.issuing_organization && ` — ${cred.issuing_organization}`}
+                    </p>
+                  </div>
+                  <CheckCircle className="ml-auto h-4 w-4 text-success-500" />
+                </li>
+              ))}
+            </ul>
+          </CardBody>
+        </Card>
+      )}
+
+      {/* Reviews */}
+      <Card>
+        <CardHeader
+          title="Reviews"
+          description={rawData?.review_count > 0 ? `${rawData.review_count} review${rawData.review_count === 1 ? '' : 's'}` : 'No reviews yet'}
+        />
+        <CardBody>
+          <ReviewList
+            reviews={rawData?.reviews ?? []}
+            averageRating={rawData?.rating ?? null}
+            reviewCount={rawData?.review_count ?? 0}
+          />
+        </CardBody>
+      </Card>
+
+      {/* Credentials Manager */}
+      <CredentialManager />
 
       {/* External links */}
       <Card>

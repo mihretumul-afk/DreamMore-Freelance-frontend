@@ -14,6 +14,8 @@ const variants = {
   success: 'bg-success-500 text-white hover:bg-success-600 active:bg-success-700',
   /** For quiet text buttons on dark surfaces (navbar). */
   nav: 'text-slate-200 hover:bg-white/10 hover:text-white',
+  /** For text buttons on light surfaces (public navbar). */
+  'nav-light': 'text-ink-600 hover:bg-ink-50 hover:text-ink-900',
 };
 
 const sizes = {

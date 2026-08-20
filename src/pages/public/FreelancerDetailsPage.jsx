@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   MapPin,
   Clock,
@@ -10,11 +10,12 @@ import {
   Send,
   Briefcase,
   Banknote,
-  FolderOpen,
-  History,
   Star,
   Compass,
   ArrowLeft,
+  Bookmark,
+  Award,
+  CheckCircle,
 } from 'lucide-react';
 import Container from '../../components/common/Container';
 import ErrorState from '../../components/common/ErrorState';
@@ -29,45 +30,13 @@ import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import FreelancerProfileSkeleton from '../../components/freelancers/FreelancerProfileSkeleton';
 import { freelancerService } from '../../services/freelancerService';
+import { savedService } from '../../services/savedService';
+import { useAuth } from '../../hooks/useAuth';
 import { normalizeFreelancer } from '../../utils/freelancerMapper';
 import { getErrorMessage } from '../../utils/errors';
-import { formatETB } from '../../utils/format';
+import { formatETB, formatDate } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
-
-/**
- * EXAMPLE-BY-DEFAULT content for sections the public API does not provide yet
- * (portfolio, work history, reviews). Always labeled as examples — never
- * presented as real data. Replaced by live API data in later phases.
- */
-const EXAMPLE_PORTFOLIO = [
-  {
-    title: 'E-commerce dashboard',
-    description: 'Admin panel with live analytics, order management, and reporting.',
-    tags: ['React', 'Laravel'],
-  },
-  {
-    title: 'Fintech mobile UI kit',
-    description: 'A scalable Figma design system for a banking app.',
-    tags: ['Figma', 'Design System'],
-  },
-];
-
-const EXAMPLE_WORK_HISTORY = [
-  {
-    role: 'Freelance Full-Stack Developer',
-    company: 'Independent projects',
-    period: 'Example period',
-    note: 'Example entry — real work history appears here in a later phase.',
-  },
-];
-
-const EXAMPLE_REVIEWS = [
-  {
-    name: 'Example client',
-    rating: 5,
-    text: 'Example review — real client reviews appear here in a later phase.',
-  },
-];
+import { cn } from '../../utils/cn';
 
 export default function FreelancerDetailsPage() {
   const { id } = useParams();
@@ -75,8 +44,48 @@ export default function FreelancerDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notFound, setNotFound] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   usePageTitle(profile ? `${profile.name} — Freelancer` : 'Freelancer Profile');
+
+  const checkSaved = useCallback(async () => {
+    if (!user || !id) return;
+    try {
+      const res = await savedService.isFreelancerSaved(id);
+      if (res.success) setIsSaved(res.data.saved);
+    } catch {
+      // Silently ignore.
+    }
+  }, [user, id]);
+
+  useEffect(() => {
+    checkSaved();
+  }, [checkSaved]);
+
+  const handleToggleSave = async () => {
+    if (!user) {
+      navigate('/login', { state: { from: window.location.pathname } });
+      return;
+    }
+    setSaving(true);
+    try {
+      if (isSaved) {
+        await savedService.unsaveFreelancer(id);
+        setIsSaved(false);
+      } else {
+        await savedService.saveFreelancer(id);
+        setIsSaved(true);
+      }
+    } catch {
+      checkSaved();
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const loadProfile = useCallback(async () => {
     setLoading(true);
@@ -141,6 +150,11 @@ export default function FreelancerDetailsPage() {
     profile.website && { href: profile.website, label: 'Website', icon: Globe },
   ].filter(Boolean);
 
+  // Real verified credentials from API
+  const verifiedCredentials = profile.verified_credentials ?? [];
+  // Real reviews from API
+  const reviews = profile.reviews ?? [];
+
   return (
     <Container className="py-8 lg:py-12">
       <Breadcrumbs
@@ -165,6 +179,19 @@ export default function FreelancerDetailsPage() {
                     {profile.name ?? 'Freelancer'}
                   </h1>
                   <StatusBadge status={profile.availability} dot />
+                  <button
+                    type="button"
+                    onClick={handleToggleSave}
+                    disabled={saving}
+                    aria-pressed={isSaved}
+                    aria-label={isSaved ? 'Remove from saved freelancers' : 'Save freelancer'}
+                    className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-brand-500 disabled:opacity-50"
+                  >
+                    <Bookmark
+                      className={cn('h-5 w-5', isSaved && 'fill-brand-500 text-brand-500')}
+                      aria-hidden="true"
+                    />
+                  </button>
                 </div>
                 <p className="mt-1 text-base font-medium text-gray-600">
                   {profile.headline ?? 'Professional headline not set yet.'}
@@ -277,88 +304,89 @@ export default function FreelancerDetailsPage() {
             </CardBody>
           </Card>
 
-          {/* Portfolio — example by default (API not provided yet) */}
-          <Card>
-            <CardHeader
-              title="Portfolio"
-              description="Selected work samples."
-              action={<Badge tone="warning">Example</Badge>}
-            />
-            <CardBody>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {EXAMPLE_PORTFOLIO.map((item) => (
-                  <div
-                    key={item.title}
-                    className="rounded-xl border border-gray-200 bg-gray-50/50 p-4"
-                  >
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50">
-                      <FolderOpen className="h-4 w-4 text-brand-500" aria-hidden="true" />
-                    </div>
-                    <h3 className="mt-3 text-sm font-bold text-ink-900">{item.title}</h3>
-                    <p className="mt-1 text-xs leading-relaxed text-gray-500">{item.description}</p>
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {item.tags.map((tag) => (
-                        <SkillBadge key={tag}>{tag}</SkillBadge>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-4 text-xs text-gray-400">
-                Example items shown by default — the portfolio section will be replaced
-                by real data in a later phase.
-              </p>
-            </CardBody>
-          </Card>
+          {/* Verified credentials */}
+          {verifiedCredentials.length > 0 && (
+            <Card>
+              <CardHeader title="Credentials & certifications" description="Verified professional qualifications." />
+              <CardBody>
+                <div className="space-y-3">
+                  {verifiedCredentials.map((cred) => {
+                    const isDmCertified = cred.verification_source === 'dream_more_lms' && cred.auto_verified;
+                    return (
+                      <div
+                        key={cred.id}
+                        className="flex items-start gap-3 rounded-xl border border-gray-200 p-4"
+                      >
+                        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${isDmCertified ? 'bg-green-50' : 'bg-blue-50'}`}>
+                          {isDmCertified ? (
+                            <CheckCircle className="h-4 w-4 text-green-600" aria-hidden="true" />
+                          ) : (
+                            <Award className="h-4 w-4 text-blue-600" aria-hidden="true" />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-sm font-bold text-ink-900">{cred.title}</h3>
+                            <Badge tone={isDmCertified ? 'success' : 'info'} size="xs">
+                              {isDmCertified ? 'Dream More Certified' : 'Verified Credential'}
+                            </Badge>
+                            {cred.type && (
+                              <Badge tone="neutral" size="xs">
+                                {cred.type.replace(/_/g, ' ')}
+                              </Badge>
+                            )}
+                          </div>
+                          {cred.issuing_organization && (
+                            <p className="mt-0.5 text-xs text-gray-500">
+                              Issued by {cred.issuing_organization}
+                              {cred.certificate_identifier && ` · ID: ${cred.certificate_identifier}`}
+                            </p>
+                          )}
+                          {cred.description && (
+                            <p className="mt-1 text-xs text-gray-400">{cred.description}</p>
+                          )}
+                          {isDmCertified && cred.lms_course_name && (
+                            <p className="mt-1 text-xs text-green-600 font-medium">
+                              Verified through Dream More learning records
+                            </p>
+                          )}
+                          <div className="mt-1 flex items-center gap-2 text-xs text-gray-400">
+                            {cred.issue_date && <span>Issued {formatDate(cred.issue_date)}</span>}
+                            {cred.expiry_date && <span>· Expires {formatDate(cred.expiry_date)}</span>}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardBody>
+            </Card>
+          )}
 
-          {/* Work history — example by default */}
-          <Card>
-            <CardHeader
-              title="Work history"
-              description="Recent professional experience."
-              action={<Badge tone="warning">Example</Badge>}
-            />
-            <CardBody>
-              <ol className="space-y-5">
-                {EXAMPLE_WORK_HISTORY.map((item) => (
-                  <li key={item.role} className="flex gap-4">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-ink-50">
-                      <History className="h-4 w-4 text-ink-600" aria-hidden="true" />
+          {/* Reviews (real data) */}
+          {reviews.length > 0 && (
+            <Card>
+              <CardHeader title="Reviews" description="What clients say about working together." />
+              <CardBody>
+                <div className="space-y-4">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="rounded-xl border border-gray-200 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-bold text-ink-900">{review.reviewer_name}</p>
+                        <RatingDisplay rating={review.rating} showValue={false} />
+                      </div>
+                      {review.contract_title && (
+                        <p className="mt-0.5 text-xs text-gray-500">{review.contract_title}</p>
+                      )}
+                      {review.comment && (
+                        <p className="mt-2 text-sm italic text-gray-500">“{review.comment}”</p>
+                      )}
                     </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-ink-900">{item.role}</h3>
-                      <p className="text-xs text-gray-500">
-                        {item.company} · {item.period}
-                      </p>
-                      <p className="mt-1 text-xs italic text-gray-400">{item.note}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </CardBody>
-          </Card>
-
-          {/* Reviews — example by default */}
-          <Card>
-            <CardHeader
-              title="Reviews"
-              description="What clients say about working together."
-              action={<Badge tone="warning">Example</Badge>}
-            />
-            <CardBody>
-              <div className="space-y-4">
-                {EXAMPLE_REVIEWS.map((review) => (
-                  <div key={review.name} className="rounded-xl border border-gray-200 p-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-bold text-ink-900">{review.name}</p>
-                      <RatingDisplay rating={review.rating} showValue={false} />
-                    </div>
-                    <p className="mt-2 text-sm italic text-gray-500">“{review.text}”</p>
-                  </div>
-                ))}
-              </div>
-            </CardBody>
-          </Card>
+                  ))}
+                </div>
+              </CardBody>
+            </Card>
+          )}
         </div>
 
         {/* Sidebar */}

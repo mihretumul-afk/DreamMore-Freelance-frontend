@@ -16,29 +16,34 @@ import {
   FolderTree,
   Wrench,
   Settings,
+  Bookmark,
+  Award,
 } from 'lucide-react';
 
 /**
  * Primary navigation shown in the navbar (desktop + mobile drawer).
  * Labels render through the i18n dictionaries via their `key`.
  */
+/**
+ * Primary navigation shown in the navbar (desktop + mobile drawer).
+ * Labels render through the i18n dictionaries via their `key`.
+ * Categories and section anchors were removed for a cleaner marketplace nav.
+ */
 export const PUBLIC_NAV_LINKS = [
   { key: 'nav.findJobs', to: '/jobs' },
   { key: 'nav.findTalent', to: '/freelancers' },
-  { key: 'nav.categories', to: '/categories' },
 ];
 
-/** Secondary navbar links that anchor to landing-page sections. */
-export const INFO_NAV_LINKS = [
-  { key: 'nav.forFreelancers', to: '/#for-freelancers' },
-  { key: 'nav.forEmployers', to: '/#for-employers' },
-];
+/** Secondary navbar links — currently unused (reserved for future). */
+export const INFO_NAV_LINKS = [];
 
 /** Sidebar navigation for the freelancer dashboard. */
 export const FREELANCER_NAV_LINKS = [
   { label: 'Dashboard', to: '/freelancer/dashboard', icon: LayoutDashboard, end: true },
   { label: 'My Profile', to: '/freelancer/profile', icon: User, end: true },
   { label: 'Find Jobs', to: '/freelancer/jobs', icon: Briefcase, end: true },
+  { label: 'Saved Jobs', to: '/freelancer/saved-jobs', icon: Bookmark, end: true },
+  { label: 'Credentials', to: '/freelancer/credentials', icon: Award, end: true },
   { label: 'Proposals', to: '/freelancer/proposals', icon: FileText, end: false },
   { label: 'Contracts', to: '/freelancer/contracts', icon: Handshake, end: true },
   { label: 'Messages', to: '/freelancer/messages', icon: MessageSquare, end: true },
@@ -51,6 +56,7 @@ export const EMPLOYER_NAV_LINKS = [
   { label: 'Company Profile', to: '/employer/profile', icon: Building2, end: true },
   { label: 'My Jobs', to: '/employer/jobs', icon: ClipboardList, end: false },
   { label: 'Post a Job', to: '/employer/jobs/create', icon: PlusCircle, end: true },
+  { label: 'Saved Talent', to: '/employer/saved-freelancers', icon: Bookmark, end: true },
   { label: 'Contracts', to: '/employer/contracts', icon: Handshake, end: true },
   { label: 'Messages', to: '/employer/messages', icon: MessageSquare, end: true },
   { label: 'Notifications', to: '/employer/notifications', icon: Bell, end: true },

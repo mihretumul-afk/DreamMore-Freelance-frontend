@@ -8,7 +8,7 @@ import FeaturedFreelancersSection from '../../components/landing/FeaturedFreelan
 import HowItWorksSection from '../../components/landing/HowItWorksSection';
 import TrustSection from '../../components/landing/TrustSection';
 import CtaSection from '../../components/landing/CtaSection';
-
+import VideoShowcase from '../../components/landing/VideoShowcase';
 export default function LandingPage() {
   usePageTitle('Ethiopian Freelance Marketplace');
   const { hash } = useLocation();
@@ -25,13 +25,16 @@ export default function LandingPage() {
 
   return (
     <>
-      <HeroSection />
+    <VideoShowcase>
+        <HeroSection />
+      </VideoShowcase>
       <CategoriesSection />
       <FeaturedJobsSection />
       <FeaturedFreelancersSection />
       <HowItWorksSection />
       <TrustSection />
       <CtaSection />
+      
     </>
   );
 }

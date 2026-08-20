@@ -26,7 +26,6 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [generalError, setGeneralError] = useState(null);
-  const [googleNotice, setGoogleNotice] = useState(false);
 
   // While an existing session is being verified, don't redirect yet — this
   // avoids a flash of the form (or a stale dashboard) during hydration.
@@ -72,12 +71,6 @@ export default function LoginPage() {
     }
   };
 
-  // No Google OAuth endpoint exists on the backend yet — this button never
-  // pretends to authenticate; it explains the state instead.
-  const handleGoogleClick = () => {
-    setGoogleNotice(true);
-  };
-
   const checkboxClass =
     'h-4 w-4 shrink-0 rounded border-gray-300 text-brand-600 transition-colors focus:ring-brand-500/30 focus:outline-none focus-visible:ring-2';
 
@@ -90,26 +83,27 @@ export default function LoginPage() {
         <h1 className="mt-5 text-2xl font-bold tracking-tight text-ink-900">{t('login.title')}</h1>
         <p className="mt-1 text-sm text-gray-500">{t('login.description')}</p>
 
-        {/* Google sign-in (preparation only — no backend endpoint yet) */}
-        <Button
-          type="button"
-          variant="outline"
-          className="mt-6 w-full"
-          onClick={handleGoogleClick}
-        >
-          <GoogleIcon className="h-4 w-4" />
-          {t('login.googleContinue')}
-        </Button>
-
-        {googleNotice && (
+        {/* Google sign-in — coming soon, no backend endpoint */}
+        <div className="mt-6">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full opacity-60 cursor-not-allowed"
+            disabled
+            aria-disabled="true"
+            title={t('login.googleSoon')}
+          >
+            <GoogleIcon className="h-4 w-4" />
+            {t('login.googleContinue')}
+          </Button>
           <p
             role="status"
             aria-live="polite"
-            className="mt-3 rounded-xl border border-info-200 bg-info-50 px-4 py-2.5 text-center text-xs font-medium text-info-700"
+            className="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-center text-xs text-gray-500"
           >
             {t('login.googleSoon')}
           </p>
-        )}
+        </div>
 
         {/* Divider */}
         <div className="my-6 flex items-center gap-3" aria-hidden="true">

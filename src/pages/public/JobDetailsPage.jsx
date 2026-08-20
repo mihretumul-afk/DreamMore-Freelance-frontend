@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   MapPin,
   Clock,
@@ -10,6 +10,7 @@ import {
   GraduationCap,
   ArrowLeft,
   Compass,
+  Bookmark,
 } from 'lucide-react';
 import Container from '../../components/common/Container';
 import ErrorState from '../../components/common/ErrorState';
@@ -23,10 +24,13 @@ import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import JobProposalPanel from '../../components/proposals/JobProposalPanel';
 import { jobService } from '../../services/jobService';
+import { savedService } from '../../services/savedService';
+import { useAuth } from '../../hooks/useAuth';
 import { normalizeJob } from '../../utils/jobMapper';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate, formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { cn } from '../../utils/cn';
 
 function DetailSkeleton() {
   return (
@@ -43,8 +47,48 @@ export default function JobDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notFound, setNotFound] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   usePageTitle(job ? job.title : 'Job Details');
+
+  const checkSaved = useCallback(async () => {
+    if (!user || !id) return;
+    try {
+      const res = await savedService.isJobSaved(id);
+      if (res.success) setIsSaved(res.data.saved);
+    } catch {
+      // Silently ignore.
+    }
+  }, [user, id]);
+
+  useEffect(() => {
+    checkSaved();
+  }, [checkSaved]);
+
+  const handleToggleSave = async () => {
+    if (!user) {
+      navigate('/login', { state: { from: window.location.pathname } });
+      return;
+    }
+    setSaving(true);
+    try {
+      if (isSaved) {
+        await savedService.unsaveJob(id);
+        setIsSaved(false);
+      } else {
+        await savedService.saveJob(id);
+        setIsSaved(true);
+      }
+    } catch {
+      checkSaved();
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const loadJob = useCallback(async () => {
     setLoading(true);
@@ -120,9 +164,24 @@ export default function JobDetailsPage() {
         <div className="min-w-0 space-y-6">
           {/* Header */}
           <Card className="p-6 sm:p-8">
-            <div className="flex flex-wrap items-center gap-2">
-              {job.categoryName && <Badge tone="primary">{job.categoryName}</Badge>}
-              <StatusBadge status={job.status} dot />
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {job.categoryName && <Badge tone="primary">{job.categoryName}</Badge>}
+                <StatusBadge status={job.status} dot />
+              </div>
+              <button
+                type="button"
+                onClick={handleToggleSave}
+                disabled={saving}
+                aria-pressed={isSaved}
+                aria-label={isSaved ? 'Remove from saved jobs' : 'Save this job'}
+                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-brand-500 disabled:opacity-50"
+              >
+                <Bookmark
+                  className={cn('h-5 w-5', isSaved && 'fill-brand-500 text-brand-500')}
+                  aria-hidden="true"
+                />
+              </button>
             </div>
             <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-ink-900 sm:text-3xl">
               {job.title}

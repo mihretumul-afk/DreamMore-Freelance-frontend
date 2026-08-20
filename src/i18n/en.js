@@ -195,8 +195,8 @@ export const en = {
   'login.newTo': 'New to Dream More AppWorks?',
   'login.createAccount': 'Create an account',
   'login.orContinueWith': 'or continue with',
-  'login.googleContinue': 'Continue with Google',
-  'login.googleSoon': 'Google sign-in will be available soon.',
+  'login.googleContinue': 'Continue with Google — Coming Soon',
+  'login.googleSoon': 'Google sign-in is not yet available. This feature is coming soon.',
   'login.checkingSession': 'Checking session…',
 
   // ---- Register ----

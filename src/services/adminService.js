@@ -68,6 +68,35 @@ export const adminService = {
     return response.data;
   },
 
+  // ── Credentials ───────────────────────────────────────────────────────
+  /** GET /admin/credentials/:id — single credential detail. */
+  getCredentialById: async (id) => {
+    const response = await apiClient.get(`/admin/credentials/${id}`);
+    return response.data;
+  },
+
+  /** PUT /admin/credentials/:id/approve — approve a credential. */
+  approveCredential: async (id) => {
+    const response = await apiClient.put(`/admin/credentials/${id}/approve`);
+    return response.data;
+  },
+
+  /** PUT /admin/credentials/:id/reject — reject a credential. */
+  rejectCredential: async (id, reason = '') => {
+    const response = await apiClient.put(`/admin/credentials/${id}/reject`, {
+      reason,
+    });
+    return response.data;
+  },
+
+  /** GET /admin/credentials/:id/download — download credential file. */
+  downloadCredential: async (id) => {
+    const response = await apiClient.get(`/admin/credentials/${id}/download`, {
+      responseType: 'blob',
+    });
+    return response;
+  },
+
   // ── Jobs ─────────────────────────────────────────────────────────────
   /** GET /admin/jobs?page=&search=&status= — paginated job list. */
   getJobs: async (params = {}) => {

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Briefcase, CalendarDays, CheckCircle2, MapPin } from 'lucide-react';
+import { ArrowLeft, Briefcase, CalendarDays, CheckCircle2, MapPin, Star } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import PageHeader from '../../components/marketplace/PageHeader';
 import Card, { CardHeader, CardBody, CardFooter } from '../../components/ui/Card';
@@ -9,9 +9,12 @@ import { ContractDetailSkeleton } from '../../components/contracts/ContractSkele
 import ContractHeader from '../../components/contracts/ContractHeader';
 import ContractSummary from '../../components/contracts/ContractSummary';
 import MilestoneList from '../../components/contracts/MilestoneList';
+import ReviewForm from '../../components/ui/ReviewForm';
+import ReviewList from '../../components/ui/ReviewList';
 import ConfirmActionModal from '../../components/proposals/ConfirmActionModal';
 import { contractService } from '../../services/contractService';
 import { milestoneService } from '../../services/milestoneService';
+import { reviewService } from '../../services/reviewService';
 import { normalizeContract } from '../../utils/contractMapper';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate, formatETB } from '../../utils/format';
@@ -39,6 +42,9 @@ export default function FreelancerContractDetailsPage() {
   const [acting, setActing] = useState(false);
   const [actionError, setActionError] = useState(null);
   const [notice, setNotice] = useState(null);
+  const [contractReviews, setContractReviews] = useState([]);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
   const loadContract = useCallback(
     async (silent = false) => {
@@ -73,6 +79,23 @@ export default function FreelancerContractDetailsPage() {
   useEffect(() => {
     loadContract();
   }, [loadContract]);
+
+  // Load reviews for completed contracts
+  useEffect(() => {
+    if (contract?.status === 'completed') {
+      const loadReviews = async () => {
+        try {
+          // Check if current user has already reviewed
+          const response = await reviewService.getUserReviews(contract.freelancer?.id);
+          const reviews = response.data ?? [];
+          setContractReviews(reviews.filter((r) => r.contract_id === contract.id));
+        } catch {
+          // non-critical
+        }
+      };
+      loadReviews();
+    }
+  }, [contract?.status, contract?.freelancer?.id, contract?.id]);
 
   const openMilestoneAction = (milestone, _kind) => {
     setActionError(null);
@@ -188,9 +211,54 @@ export default function FreelancerContractDetailsPage() {
           />
         </div>
 
-        {/* Sidebar */}
-        <aside className="space-y-6 lg:sticky lg:top-24">
-          <ContractSummary contract={contract} role="freelancer" />
+      {/* Review section for completed contracts */}
+      {contract.status === 'completed' && (
+        <Card>
+          <CardHeader title="Review" description="Share your experience working on this contract." />
+          <CardBody>
+            {contractReviews.length > 0 && !showReviewForm ? (
+              <div>
+                <ReviewList reviews={contractReviews} />
+              </div>
+            ) : showReviewForm || reviewSubmitted ? (
+              <div>
+                {reviewSubmitted ? (
+                  <div className="flex items-center gap-2 text-success-600">
+                    <CheckCircle2 className="h-5 w-5" />
+                    <p className="text-sm font-medium">Review submitted successfully!</p>
+                  </div>
+                ) : (
+                  <ReviewForm
+                    contractId={contract.id}
+                    revieweeName={contract.employer?.name || 'the employer'}
+                    onSubmitted={() => {
+                      setReviewSubmitted(true);
+                      setShowReviewForm(false);
+                    }}
+                  />
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                <Star className="mx-auto h-8 w-8 text-gray-300" />
+                <p className="mt-2 text-sm text-gray-500">No reviews yet for this contract.</p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="mt-3"
+                  onClick={() => setShowReviewForm(true)}
+                >
+                  Leave a Review
+                </Button>
+              </div>
+            )}
+          </CardBody>
+        </Card>
+      )}
+
+      {/* Sidebar */}
+      <aside className="space-y-6 lg:sticky lg:top-24">
+        <ContractSummary contract={contract} role="freelancer" />
 
           <Card>
             <CardFooter>

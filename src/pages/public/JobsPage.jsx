@@ -13,19 +13,21 @@ import Modal from '../../components/ui/Modal';
 import JobFiltersPanel from '../../components/jobs/JobFiltersPanel';
 import JobCardSkeleton from '../../components/jobs/JobCardSkeleton';
 import { jobService } from '../../services/jobService';
+import { savedService } from '../../services/savedService';
+import { useAuth } from '../../hooks/useAuth';
 import { normalizeJob } from '../../utils/jobMapper';
 import { getErrorMessage } from '../../utils/errors';
-import { usePageTitle } from '../../hooks/usePageTitle';
-
-const FILTER_LABELS = {
+import { usePageTitle } from '../../hooks/usePageTitle';  const FILTER_LABELS = {
   search: 'Search',
   category_id: 'Category',
+  skill_id: 'Skill',
   location: 'Location',
   budget_type: 'Budget type',
   experience_level: 'Experience',
   location_type: 'Work mode',
   min_budget: 'Min budget',
   max_budget: 'Max budget',
+  sort: 'Sort',
 };
 
 export default function JobsPage() {
@@ -37,6 +39,10 @@ export default function JobsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [savedIds, setSavedIds] = useState(new Set());
+  const [savingId, setSavingId] = useState(null);
+
+  const { user } = useAuth();
 
   // Text filter drafts — the URL stays the source of truth; these are applied
   // on submit/apply so typing does not rewrite the URL on every keystroke.
@@ -55,6 +61,53 @@ export default function JobsPage() {
     setMaxBudget(searchParams.get('max_budget') ?? '');
   }, [searchParams]);
 
+  // Load saved state for authenticated users.
+  const loadSavedState = useCallback(async () => {
+    if (!user) return;
+    try {
+      const res = await savedService.getSavedJobs({ page: 1 });
+      if (res.success) {
+        setSavedIds(new Set((res.data ?? []).map((s) => s.job_id)));
+      }
+    } catch {
+      // Silently ignore — save state is non-critical.
+    }
+  }, [user]);
+
+  useEffect(() => {
+    loadSavedState();
+  }, [loadSavedState]);
+
+  const handleSaveJob = useCallback(async (jobId) => {
+    if (!user) return;
+    setSavingId(jobId);
+    try {
+      await savedService.saveJob(jobId);
+      setSavedIds((prev) => new Set(prev).add(jobId));
+    } catch {
+      loadSavedState();
+    } finally {
+      setSavingId(null);
+    }
+  }, [user, loadSavedState]);
+
+  const handleUnsaveJob = useCallback(async (jobId) => {
+    if (!user) return;
+    setSavingId(jobId);
+    try {
+      await savedService.unsaveJob(jobId);
+      setSavedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(jobId);
+        return next;
+      });
+    } catch {
+      loadSavedState();
+    } finally {
+      setSavingId(null);
+    }
+  }, [user, loadSavedState]);
+
   const loadJobs = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -62,12 +115,14 @@ export default function JobsPage() {
       const response = await jobService.getJobs({
         search: searchParams.get('search') ?? undefined,
         category_id: searchParams.get('category_id') ?? undefined,
+        skill_id: searchParams.get('skill_id') ?? undefined,
         budget_type: searchParams.get('budget_type') ?? undefined,
         experience_level: searchParams.get('experience_level') ?? undefined,
         location_type: searchParams.get('location_type') ?? undefined,
         location: searchParams.get('location') ?? undefined,
         min_budget: searchParams.get('min_budget') ?? undefined,
         max_budget: searchParams.get('max_budget') ?? undefined,
+        sort: searchParams.get('sort') ?? undefined,
         page,
       });
       if (response.success) {
@@ -145,12 +200,14 @@ export default function JobsPage() {
             values={{
               search: searchInput,
               category_id: searchParams.get('category_id') ?? '',
+              skill_id: searchParams.get('skill_id') ?? '',
               location: locationInput,
               min_budget: minBudget,
               max_budget: maxBudget,
               budget_type: searchParams.get('budget_type') ?? '',
               experience_level: searchParams.get('experience_level') ?? '',
               location_type: searchParams.get('location_type') ?? '',
+              sort: searchParams.get('sort') ?? '',
             }}
             onChange={(key, value) => {
               if (['search', 'location', 'min_budget', 'max_budget'].includes(key)) {
@@ -268,7 +325,14 @@ export default function JobsPage() {
             <>
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 {jobs.map((job) => (
-                  <JobCard key={job.id} job={job} />
+                  <JobCard
+                    key={job.id}
+                    job={{ ...job, saved: savedIds.has(job.id) }}
+                    savable
+                    onSave={handleSaveJob}
+                    onUnsave={handleUnsaveJob}
+                    saving={savingId === job.id}
+                  />
                 ))}
               </div>
               <Pagination
@@ -293,12 +357,14 @@ export default function JobsPage() {
           values={{
             search: searchInput,
             category_id: searchParams.get('category_id') ?? '',
+            skill_id: searchParams.get('skill_id') ?? '',
             location: locationInput,
             min_budget: minBudget,
             max_budget: maxBudget,
             budget_type: searchParams.get('budget_type') ?? '',
             experience_level: searchParams.get('experience_level') ?? '',
             location_type: searchParams.get('location_type') ?? '',
+            sort: searchParams.get('sort') ?? '',
           }}
           onChange={(key, value) => {
             if (['search', 'location', 'min_budget', 'max_budget'].includes(key)) {

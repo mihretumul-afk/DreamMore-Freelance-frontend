@@ -34,6 +34,42 @@ export const employerService = {
     const response = await apiClient.get('/employer/jobs', { params });
     return response.data; // { success, message, data, meta }
   },
+
+  /** Create a new job posting (employer). */
+  createJob: async (payload) => {
+    const response = await apiClient.post('/employer/jobs', payload);
+    return response.data; // { success, message, data }
+  },
+
+  /** Fetch a single job owned by the employer. */
+  getJob: async (id) => {
+    const response = await apiClient.get(`/employer/jobs/${id}`);
+    return response.data; // { success, message, data }
+  },
+
+  /** Update an existing job (employer, draft/open status). */
+  updateJob: async (id, payload) => {
+    const response = await apiClient.put(`/employer/jobs/${id}`, payload);
+    return response.data; // { success, message, data }
+  },
+
+  /** Close a job posting (employer). */
+  closeJob: async (id) => {
+    const response = await apiClient.post(`/employer/jobs/${id}/close`);
+    return response.data; // { success, message, data }
+  },
+
+  /** Reopen a closed job (employer). */
+  reopenJob: async (id) => {
+    const response = await apiClient.post(`/employer/jobs/${id}/reopen`);
+    return response.data; // { success, message, data }
+  },
+
+  /** Delete a job (employer, draft status only). */
+  deleteJob: async (id) => {
+    const response = await apiClient.delete(`/employer/jobs/${id}`);
+    return response.data; // { success, message, data: null }
+  },
 };
 
 export default employerService;

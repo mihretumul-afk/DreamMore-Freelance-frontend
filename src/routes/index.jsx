@@ -31,6 +31,8 @@ const FreelancerContractsPage = lazy(() => import('../pages/freelancer/Contracts
 const FreelancerContractDetailsPage = lazy(() => import('../pages/freelancer/ContractDetailsPage'));
 const FreelancerMessagesPage = lazy(() => import('../pages/freelancer/MessagesPage'));
 const FreelancerNotificationsPage = lazy(() => import('../pages/freelancer/NotificationsPage'));
+const FreelancerSavedJobsPage = lazy(() => import('../pages/freelancer/SavedJobsPage'));
+const FreelancerCredentialsPage = lazy(() => import('../pages/freelancer/CredentialsPage'));
 
 const EmployerDashboardPage = lazy(() => import('../pages/employer/DashboardPage'));
 const EmployerProfilePage = lazy(() => import('../pages/employer/ProfilePage'));
@@ -44,6 +46,7 @@ const EmployerContractsPage = lazy(() => import('../pages/employer/ContractsPage
 const EmployerContractDetailsPage = lazy(() => import('../pages/employer/ContractDetailsPage'));
 const EmployerMessagesPage = lazy(() => import('../pages/employer/MessagesPage'));
 const EmployerNotificationsPage = lazy(() => import('../pages/employer/NotificationsPage'));
+const EmployerSavedFreelancersPage = lazy(() => import('../pages/employer/SavedFreelancersPage'));
 
 const AdminLayout = lazy(() => import('../layouts/AdminLayout'));
 const AdminDashboardPage = lazy(() => import('../pages/admin/DashboardPage'));
@@ -135,6 +138,8 @@ export const router = createBrowserRouter([
           { path: 'proposals/:id', element: lazyPage(<FreelancerProposalDetailsPage />) },
           { path: 'contracts', element: lazyPage(<FreelancerContractsPage />) },
           { path: 'contracts/:id', element: lazyPage(<FreelancerContractDetailsPage />) },
+          { path: 'saved-jobs', element: lazyPage(<FreelancerSavedJobsPage />) },
+          { path: 'credentials', element: lazyPage(<FreelancerCredentialsPage />) },
           { path: 'messages', element: lazyPage(<FreelancerMessagesPage />) },
           { path: 'notifications', element: lazyPage(<FreelancerNotificationsPage />) },
         ],
@@ -158,6 +163,7 @@ export const router = createBrowserRouter([
           { path: 'jobs/:id/proposals', element: lazyPage(<EmployerJobProposalsPage />) },
           { path: 'contracts', element: lazyPage(<EmployerContractsPage />) },
           { path: 'contracts/:id', element: lazyPage(<EmployerContractDetailsPage />) },
+          { path: 'saved-freelancers', element: lazyPage(<EmployerSavedFreelancersPage />) },
           { path: 'messages', element: lazyPage(<EmployerMessagesPage />) },
           { path: 'notifications', element: lazyPage(<EmployerNotificationsPage />) },
         ],

@@ -14,8 +14,9 @@ import {
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import PageHeader from '../../components/marketplace/PageHeader';
-import Avatar from '../../components/marketplace/Avatar';
+import AvatarUpload from '../../components/marketplace/AvatarUpload';
 import RatingDisplay from '../../components/marketplace/RatingDisplay';
+import Badge from '../../components/ui/Badge';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import EmployerProfileSkeleton from '../../components/employers/EmployerProfileSkeleton';
@@ -24,6 +25,7 @@ import { normalizeEmployer } from '../../utils/employerMapper';
 import { getErrorMessage } from '../../utils/errors';
 import { formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import apiClient from '../../api/client';
 
 function DetailRow({ icon: Icon, label, value }) {
   return (
@@ -42,6 +44,7 @@ export default function EmployerProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [forbidden, setForbidden] = useState(false);
+  const [rawData, setRawData] = useState(null);
 
   const loadProfile = useCallback(async () => {
     setLoading(true);
@@ -50,6 +53,7 @@ export default function EmployerProfilePage() {
     try {
       const response = await employerService.getMyProfile();
       if (response.success) {
+        setRawData(response.data);
         setProfile(normalizeEmployer(response.data));
       } else {
         setError(response.message || 'Unable to load your company profile.');
@@ -86,6 +90,7 @@ export default function EmployerProfilePage() {
   }
 
   const displayName = profile.companyName || profile.name || 'Your company';
+  const verificationStatus = rawData?.verification_status;
 
   return (
     <div className="space-y-6">
@@ -103,7 +108,22 @@ export default function EmployerProfilePage() {
       {/* Header */}
       <Card className="p-6 sm:p-8">
         <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:items-start sm:text-left">
-          <Avatar name={displayName} src={profile.avatar} size="xl" variant="brand" />
+          <AvatarUpload
+            name={displayName}
+            src={profile.avatar}
+            onUpload={async (file) => {
+              const formData = new FormData();
+              formData.append('avatar', file);
+              await apiClient.post('/avatar', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+              });
+              loadProfile();
+            }}
+            onRemove={async () => {
+              await apiClient.delete('/avatar');
+              loadProfile();
+            }}
+          />
           <div className="min-w-0">
             <h2 className="text-2xl font-extrabold tracking-tight text-ink-900">{displayName}</h2>
             <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-gray-500 sm:justify-start">
@@ -160,6 +180,26 @@ export default function EmployerProfilePage() {
           </div>
         </div>
       </Card>
+
+      {/* Verification Status */}
+      {verificationStatus && (
+        <Card>
+          <CardBody>
+            <div className="flex items-center gap-3">
+              <Badge tone={verificationStatus === 'approved' ? 'success' : verificationStatus === 'rejected' ? 'danger' : 'warning'} dot>
+                {verificationStatus === 'approved' ? 'Verified' : verificationStatus === 'rejected' ? 'Verification Rejected' : 'Verification Pending'}
+              </Badge>
+              <p className="text-sm text-gray-500">
+                {verificationStatus === 'approved'
+                  ? 'Your company identity has been verified.'
+                  : verificationStatus === 'rejected'
+                  ? 'Your verification was rejected. Please contact support.'
+                  : 'Your verification is being reviewed by our team.'}
+              </p>
+            </div>
+          </CardBody>
+        </Card>
+      )}
 
       {/* About */}
       <Card>

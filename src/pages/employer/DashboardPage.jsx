@@ -11,6 +11,7 @@ import {
   PlusCircle,
   Send,
   Star,
+  Users,
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
@@ -25,6 +26,7 @@ import QuickActions from '../../components/dashboard/QuickActions';
 import DashboardSkeleton from '../../components/dashboard/DashboardSkeleton';
 import { employerService } from '../../services/employerService';
 import { contractService } from '../../services/contractService';
+import { recommendationService } from '../../services/recommendationService';
 import { normalizeEmployer } from '../../utils/employerMapper';
 import { normalizeJob } from '../../utils/jobMapper';
 import { normalizeContract } from '../../utils/contractMapper';
@@ -40,6 +42,7 @@ export default function EmployerDashboardPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [recommendations, setRecommendations] = useState([]);
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);
@@ -60,6 +63,14 @@ export default function EmployerDashboardPage() {
         jobsTotal: jobsRes.data?.meta?.total ?? jobs.length,
         contracts,
       });
+
+      // Load recommendations (non-blocking — failures are silent).
+      recommendationService
+        .getRecommendedFreelancers({ per_page: 5 })
+        .then((res) => {
+          if (res.success) setRecommendations(res.data ?? []);
+        })
+        .catch(() => {});
     } catch (err) {
       setError(getErrorMessage(err, 'Unable to load your dashboard. Please try again.'));
     } finally {
@@ -168,6 +179,61 @@ export default function EmployerDashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px] lg:items-start">
         {/* Main column */}
         <div className="min-w-0 space-y-6">
+          {/* Recommended talent */}
+          <Card>
+            <CardHeader
+              title="Recommended talent"
+              description="Freelancers matched to your job needs and saved preferences."
+              action={
+                recommendations.length > 0 ? (
+                  <Link
+                    to="/freelancers"
+                    className="text-sm font-semibold text-brand-600 hover:text-brand-700"
+                  >
+                    View all
+                  </Link>
+                ) : undefined
+              }
+            />
+            <CardBody>
+              {recommendations.length > 0 ? (
+                <ul className="divide-y divide-gray-100">
+                  {recommendations.map((rec) => (
+                    <li key={rec.freelancer?.id} className="py-3">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="min-w-0">
+                          <Link
+                            to={`/freelancers/${rec.freelancer?.id}`}
+                            className="block truncate text-sm font-bold text-ink-900 transition-colors hover:text-brand-600"
+                          >
+                            {rec.freelancer?.user?.name ?? rec.freelancer?.headline}
+                          </Link>
+                          <p className="mt-0.5 text-xs text-gray-500">
+                            {rec.reason}
+                          </p>
+                        </div>
+                        <Button as={Link} to={`/freelancers/${rec.freelancer?.id}`} variant="outline" size="xs">
+                          View
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <EmptyState
+                  icon={Users}
+                  title="No recommendations yet"
+                  description="Post jobs and save freelancers to get personalized recommendations."
+                  action={
+                    <Button as={Link} to="/freelancers" variant="outline" size="sm">
+                      <Users className="h-4 w-4" aria-hidden="true" /> Find talent
+                    </Button>
+                  }
+                />
+              )}
+            </CardBody>
+          </Card>
+
           {/* Recent jobs */}
           <Card>
             <CardHeader

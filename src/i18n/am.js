@@ -196,8 +196,8 @@ export const am = {
   'login.newTo': 'ለድሪም ሞር አፕወርክስ አዲስ ነዎት?',
   'login.createAccount': 'መለያ ይፍጠሩ',
   'login.orContinueWith': 'ወይም በሌላ ይቀጥሉ',
-  'login.googleContinue': 'በGoogle ይቀጥሉ',
-  'login.googleSoon': 'የGoogle መግቢያ በቅርቡ ይገኛል።',
+  'login.googleContinue': 'በGoogle ይቀጥሉ — በቅርቡ',
+  'login.googleSoon': 'የGoogle መግቢያ አሁን አይገኝም። ይህ ባህሪ በቅርቡ ይመጣል።',
   'login.checkingSession': 'ክፍለ ጊዜ በመፈተሽ ላይ…',
 
   // ---- Register ----

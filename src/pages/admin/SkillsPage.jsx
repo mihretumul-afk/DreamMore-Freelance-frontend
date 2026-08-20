@@ -11,6 +11,18 @@ import { adminService } from '../../services/adminService';
 import { getErrorMessage } from '../../utils/errors';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
+/** Safely extracts display name from a category (which may be an object, string, null, or undefined). */
+function getCategoryName(category) {
+  if (!category) return '—';
+  if (typeof category === 'object' && category !== null) {
+    return category.name || '—';
+  }
+  if (typeof category === 'string' && category.trim()) {
+    return category;
+  }
+  return '—';
+}
+
 export default function AdminSkillsPage() {
   usePageTitle('Skills — Admin');
 
@@ -24,7 +36,7 @@ export default function AdminSkillsPage() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSkill, setEditingSkill] = useState(null);
-  const [form, setForm] = useState({ name: '', slug: '', category: '' });
+  const [form, setForm] = useState({ name: '', slug: '', category: '', category_id: '' });
   const [saving, setSaving] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
@@ -60,14 +72,23 @@ export default function AdminSkillsPage() {
 
   const openCreate = () => {
     setEditingSkill(null);
-    setForm({ name: '', slug: '', category: '' });
+    setForm({ name: '', slug: '', category: '', category_id: '' });
     setFormErrors({});
     setModalOpen(true);
   };
 
   const openEdit = (skill) => {
     setEditingSkill(skill);
-    setForm({ name: skill.name ?? '', slug: skill.slug ?? '', category: skill.category ?? '' });
+    const categoryName = typeof skill.category === 'object' && skill.category !== null
+      ? (skill.category.name ?? '')
+      : (typeof skill.category === 'string' ? skill.category : '');
+
+    setForm({
+      name: skill.name ?? '',
+      slug: skill.slug ?? '',
+      category: categoryName,
+      category_id: skill.category_id ?? (typeof skill.category === 'object' ? skill.category?.id : '') ?? '',
+    });
     setFormErrors({});
     setModalOpen(true);
   };
@@ -195,7 +216,7 @@ export default function AdminSkillsPage() {
                       <Badge tone="neutral" size="xs">{skill.slug}</Badge>
                     </td>
                     <td className="hidden px-5 py-3 text-xs text-gray-500 md:table-cell">
-                      {skill.category || '—'}
+                      {getCategoryName(skill.category)}
                     </td>
                     <td className="hidden px-5 py-3 text-sm text-gray-600 md:table-cell">
                       {skill.freelancers_count ?? skill.freelancersCount ?? 0}
@@ -269,7 +290,7 @@ export default function AdminSkillsPage() {
           />
           <Input
             label="Category"
-            value={form.category}
+            value={typeof form.category === 'object' && form.category !== null ? (form.category.name ?? '') : (form.category ?? '')}
             onChange={(e) => setForm({ ...form, category: e.target.value })}
             error={formErrors.category}
             hint="Optional: group related skills"

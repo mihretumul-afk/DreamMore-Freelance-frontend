@@ -26,6 +26,7 @@ import DashboardSkeleton from '../../components/dashboard/DashboardSkeleton';
 import { freelancerService } from '../../services/freelancerService';
 import { proposalService } from '../../services/proposalService';
 import { contractService } from '../../services/contractService';
+import { recommendationService } from '../../services/recommendationService';
 import { normalizeFreelancer } from '../../utils/freelancerMapper';
 import { normalizeProposal } from '../../utils/proposalMapper';
 import { normalizeContract } from '../../utils/contractMapper';
@@ -41,6 +42,7 @@ export default function FreelancerDashboardPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [recommendations, setRecommendations] = useState([]);
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);
@@ -61,6 +63,14 @@ export default function FreelancerDashboardPage() {
         proposalsTotal: proposalsRes.data?.meta?.total ?? proposals.length,
         contracts,
       });
+
+      // Load recommendations (non-blocking — failures are silent).
+      recommendationService
+        .getRecommendedJobs({ per_page: 5 })
+        .then((res) => {
+          if (res.success) setRecommendations(res.data ?? []);
+        })
+        .catch(() => {});
     } catch (err) {
       setError(getErrorMessage(err, 'Unable to load your dashboard. Please try again.'));
     } finally {
@@ -165,6 +175,61 @@ export default function FreelancerDashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px] lg:items-start">
         {/* Main column */}
         <div className="min-w-0 space-y-6">
+          {/* Recommended jobs */}
+          <Card>
+            <CardHeader
+              title="Recommended for you"
+              description="Jobs matched to your skills, experience, and saved interests."
+              action={
+                recommendations.length > 0 ? (
+                  <Link
+                    to="/freelancer/jobs"
+                    className="text-sm font-semibold text-brand-600 hover:text-brand-700"
+                  >
+                    View all
+                  </Link>
+                ) : undefined
+              }
+            />
+            <CardBody>
+              {recommendations.length > 0 ? (
+                <ul className="divide-y divide-gray-100">
+                  {recommendations.map((rec) => (
+                    <li key={rec.job?.id ?? rec.job?.slug} className="py-3">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="min-w-0">
+                          <Link
+                            to={`/jobs/${rec.job?.id}`}
+                            className="block truncate text-sm font-bold text-ink-900 transition-colors hover:text-brand-600"
+                          >
+                            {rec.job?.title}
+                          </Link>
+                          <p className="mt-0.5 text-xs text-gray-500">
+                            {rec.reason}
+                          </p>
+                        </div>
+                        <Button as={Link} to={`/jobs/${rec.job?.id}`} variant="outline" size="xs">
+                          View
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <EmptyState
+                  icon={Briefcase}
+                  title="No recommendations yet"
+                  description="Complete your profile and save jobs to get personalized recommendations."
+                  action={
+                    <Button as={Link} to="/freelancer/jobs" variant="outline" size="sm">
+                      <Briefcase className="h-4 w-4" aria-hidden="true" /> Browse jobs
+                    </Button>
+                  }
+                />
+              )}
+            </CardBody>
+          </Card>
+
           {/* Recent proposals */}
           <Card>
             <CardHeader

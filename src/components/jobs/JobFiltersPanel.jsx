@@ -5,17 +5,19 @@ import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Select from '../ui/Select';
 import { categoryService } from '../../services/categoryService';
+import { skillService } from '../../services/skillService';
 
 /**
  * Job filter form. Every control maps 1:1 to a query parameter the backend
  * actually accepts (see src/services/jobService.js). Text values are drafts —
  * the parent applies them to the URL; selects change the URL immediately.
  *
- * values: { search, category_id, location, min_budget, max_budget, budget_type,
- *           experience_level, location_type }
+ * values: { search, category_id, skill_id, location, min_budget, max_budget,
+ *           budget_type, experience_level, location_type, sort }
  */
 export default function JobFiltersPanel({ values = {}, onChange, onApply, onClear, className }) {
   const [categories, setCategories] = useState([]);
+  const [skills, setSkills] = useState([]);
 
   useEffect(() => {
     let active = true;
@@ -25,6 +27,22 @@ export default function JobFiltersPanel({ values = {}, onChange, onApply, onClea
         if (!active) return;
         const list = res?.data ?? (Array.isArray(res) ? res : []);
         setCategories(list);
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    skillService
+      .getSkills()
+      .then((res) => {
+        if (!active) return;
+        const list = res?.data ?? (Array.isArray(res) ? res : []);
+        setSkills(list.filter((s) => s.is_active !== false));
       })
       .catch(() => {});
 
@@ -48,7 +66,7 @@ export default function JobFiltersPanel({ values = {}, onChange, onApply, onClea
           icon={Search}
           value={values.search ?? ''}
           onChange={(event) => set('search', event.target.value)}
-          placeholder="Search title or description"
+          placeholder="Search title, description, or skill"
         />
 
         {categories.length > 0 && (
@@ -65,6 +83,31 @@ export default function JobFiltersPanel({ values = {}, onChange, onApply, onClea
             ))}
           </Select>
         )}
+
+        {skills.length > 0 && (
+          <Select
+            label="Skill"
+            value={values.skill_id ?? ''}
+            onChange={(event) => set('skill_id', event.target.value)}
+          >
+            <option value="">Any skill</option>
+            {skills.map((skill) => (
+              <option key={skill.id} value={skill.id}>
+                {skill.name}
+              </option>
+            ))}
+          </Select>
+        )}
+
+        <Select
+          label="Sort by"
+          value={values.sort ?? ''}
+          onChange={(event) => set('sort', event.target.value)}
+        >
+          <option value="">Newest first</option>
+          <option value="budget">Highest budget</option>
+          <option value="newest">Most recent</option>
+        </Select>
 
         <Select
           label="Budget type"
