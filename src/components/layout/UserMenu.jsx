@@ -135,7 +135,7 @@ export default function UserMenu() {
             <p className="truncate text-sm font-bold text-ink-900">{user.name}</p>
             <p className="mt-0.5 truncate text-xs text-gray-500">{user.email}</p>
             <Badge tone="primary" size="xs" className="mt-2">
-              {ROLE_LABELS[user.role] ?? user.role}
+              {t(`role.${user.role}`) !== `role.${user.role}` ? t(`role.${user.role}`) : (ROLE_LABELS[user.role] ?? user.role)}
             </Badge>
           </div>
 

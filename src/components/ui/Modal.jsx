@@ -47,9 +47,9 @@ export default function Modal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto p-4 sm:p-6 flex min-h-full items-center justify-center">
       <div
-        className="absolute inset-0 bg-ink-950/60 backdrop-blur-sm"
+        className="fixed inset-0 bg-ink-950/60 backdrop-blur-sm"
         aria-hidden="true"
         onClick={closeOnBackdrop ? onClose : undefined}
       />
@@ -60,9 +60,13 @@ export default function Modal({
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        className={cn('relative w-full shadow-modal outline-none', sizes[size], className)}
+        className={cn(
+          'relative w-full max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)] flex flex-col shadow-modal outline-none my-auto z-10',
+          sizes[size],
+          className
+        )}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-5 py-4">
+        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-gray-100 px-5 py-4">
           <div>
             <h2 className="text-lg font-bold text-ink-900">{title}</h2>
             {description && <p className="mt-0.5 text-sm text-gray-500">{description}</p>}
@@ -76,7 +80,7 @@ export default function Modal({
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="px-5 py-5">{children}</div>
+        <div className="px-5 py-5 overflow-y-auto flex-1">{children}</div>
       </Card>
     </div>
   );

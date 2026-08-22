@@ -9,6 +9,7 @@ import {
   MapPin,
   PauseCircle,
   PlayCircle,
+  Star,
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import PageHeader from '../../components/marketplace/PageHeader';
@@ -20,9 +21,13 @@ import ContractHeader from '../../components/contracts/ContractHeader';
 import ContractSummary from '../../components/contracts/ContractSummary';
 import MilestoneList from '../../components/contracts/MilestoneList';
 import MilestoneForm from '../../components/contracts/MilestoneForm';
+import RequestRevisionModal from '../../components/contracts/RequestRevisionModal';
 import ConfirmActionModal from '../../components/proposals/ConfirmActionModal';
+import ReviewForm from '../../components/ui/ReviewForm';
+import ReviewList from '../../components/ui/ReviewList';
 import { contractService } from '../../services/contractService';
 import { milestoneService } from '../../services/milestoneService';
+import { reviewService } from '../../services/reviewService';
 import { normalizeContract } from '../../utils/contractMapper';
 import { milestoneFormToPayload } from '../../utils/milestoneMapper';
 import { getErrorMessage, getFieldErrors } from '../../utils/errors';
@@ -61,18 +66,11 @@ const CONTRACT_DIALOGS = {
 
 const MILESTONE_DIALOGS = {
   approve: {
-    title: 'Approve milestone?',
+    title: 'Approve milestone deliverable?',
     description:
-      'Approving marks this milestone as complete. The agreed amount is recorded as completed on the contract.',
-    confirmLabel: 'Approve Milestone',
+      'Approving confirms the freelancer\'s submitted work for this milestone. If all milestones on this contract are approved, the contract and job will automatically complete.',
+    confirmLabel: 'Approve Deliverable',
     tone: 'success',
-  },
-  revision: {
-    title: 'Request revision?',
-    description:
-      'This sends the milestone back to in-progress so the freelancer can revise and resubmit it.',
-    confirmLabel: 'Request Revision',
-    tone: 'primary',
   },
   delete: {
     title: 'Delete milestone?',
@@ -95,8 +93,14 @@ export default function EmployerContractDetailsPage() {
 
   // Contract-level actions (pause/resume/complete/cancel).
   const [contractAction, setContractAction] = useState(null); // 'pause' | 'resume' | 'complete' | 'cancel'
-  // Milestone confirm actions (approve/revision/delete) + submit handled on the freelancer side.
-  const [milestoneAction, setMilestoneAction] = useState(null); // { milestone, kind }
+  // Milestone confirm actions (approve / delete)
+  const [milestoneAction, setMilestoneAction] = useState(null); // { milestone, kind: 'approve' | 'delete' }
+  // Revision modal
+  const [revisionMilestone, setRevisionMilestone] = useState(null);
+  const [submittingRevision, setSubmittingRevision] = useState(false);
+  const [revisionFieldErrors, setRevisionFieldErrors] = useState({});
+  const [revisionGeneralError, setRevisionGeneralError] = useState(null);
+
   const [acting, setActing] = useState(false);
   const [actionError, setActionError] = useState(null);
 
@@ -108,6 +112,9 @@ export default function EmployerContractDetailsPage() {
   const [formGeneralError, setFormGeneralError] = useState(null);
 
   const [notice, setNotice] = useState(null);
+  const [contractReviews, setContractReviews] = useState([]);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
   const loadContract = useCallback(
     async (silent = false) => {
@@ -143,6 +150,22 @@ export default function EmployerContractDetailsPage() {
     loadContract();
   }, [loadContract]);
 
+  // Load reviews when contract is completed
+  useEffect(() => {
+    if (contract?.status === 'completed') {
+      const loadReviews = async () => {
+        try {
+          const response = await reviewService.getUserReviews(contract.employer?.id);
+          const reviews = response.data ?? [];
+          setContractReviews(reviews.filter((r) => r.contract_id === contract.id));
+        } catch {
+          // non-critical
+        }
+      };
+      loadReviews();
+    }
+  }, [contract?.status, contract?.employer?.id, contract?.id]);
+
   const openContractAction = (kind) => {
     setActionError(null);
     setContractAction(kind);
@@ -170,6 +193,12 @@ export default function EmployerContractDetailsPage() {
   };
 
   const openMilestoneAction = (milestone, kind) => {
+    if (kind === 'revision') {
+      setRevisionFieldErrors({});
+      setRevisionGeneralError(null);
+      setRevisionMilestone(milestone);
+      return;
+    }
     setActionError(null);
     setMilestoneAction({ milestone, kind });
   };
@@ -183,9 +212,7 @@ export default function EmployerContractDetailsPage() {
       const call =
         kind === 'approve'
           ? milestoneService.approveMilestone
-          : kind === 'revision'
-            ? milestoneService.requestMilestoneRevision
-            : milestoneService.deleteMilestone;
+          : milestoneService.deleteMilestone;
       const res = await call(contract.id, milestone.id);
       setNotice(res.message || 'Milestone updated.');
       setMilestoneAction(null);
@@ -193,6 +220,24 @@ export default function EmployerContractDetailsPage() {
     } catch (err) {
       setActionError(getErrorMessage(err, 'Unable to update this milestone. Please try again.'));
       setActing(false);
+    }
+  };
+
+  const handleRevisionSubmit = async (payload) => {
+    if (!revisionMilestone) return;
+    setSubmittingRevision(true);
+    setRevisionFieldErrors({});
+    setRevisionGeneralError(null);
+    try {
+      const res = await milestoneService.requestMilestoneRevision(contract.id, revisionMilestone.id, payload);
+      setNotice(res.message || 'Revision requested successfully.');
+      setRevisionMilestone(null);
+      await loadContract(true);
+    } catch (err) {
+      setRevisionFieldErrors(getFieldErrors(err));
+      setRevisionGeneralError(getErrorMessage(err, 'Unable to request revision. Please try again.'));
+    } finally {
+      setSubmittingRevision(false);
     }
   };
 
@@ -276,7 +321,7 @@ export default function EmployerContractDetailsPage() {
         eyebrow="Employer"
         title="Contract Details"
         breadcrumbs={[
-          { label: 'Contracts', to: '/employer/contracts' },
+          { label: 'My Contracts', to: '/employer/contracts' },
           { label: contract.title },
         ]}
       />
@@ -331,7 +376,7 @@ export default function EmployerContractDetailsPage() {
             </CardBody>
           </Card>
 
-          {/* Milestones */}
+          {/* Milestones list with Deliverables review & approval */}
           <MilestoneList
             contract={contract}
             role="employer"
@@ -346,6 +391,52 @@ export default function EmployerContractDetailsPage() {
               }
             }}
           />
+
+          {/* Reviews section when contract is completed */}
+          {contract.status === 'completed' && (
+            <Card>
+              <CardHeader
+                title="Reviews & Feedback"
+                description="Client and freelancer feedback for this contract."
+              />
+              <CardBody>
+                {contractReviews.length > 0 ? (
+                  <ReviewList reviews={contractReviews} />
+                ) : (
+                  <p className="text-sm text-gray-500">No reviews have been submitted yet.</p>
+                )}
+
+                {showReviewForm && !reviewSubmitted && (
+                  <div className="mt-6 border-t border-gray-100 pt-6">
+                    <h4 className="mb-4 text-sm font-semibold text-ink-900">
+                      Write a Review for {contract.freelancer?.name ?? 'the freelancer'}
+                    </h4>
+                    <ReviewForm
+                      contractId={contract.id}
+                      onSuccess={() => {
+                        setShowReviewForm(false);
+                        setReviewSubmitted(true);
+                        loadContract(true);
+                      }}
+                      onCancel={() => setShowReviewForm(false)}
+                    />
+                  </div>
+                )}
+
+                {!showReviewForm && !reviewSubmitted && (
+                  <div className="mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowReviewForm(true)}
+                    >
+                      <Star className="h-4 w-4 text-amber-500" aria-hidden="true" /> Leave a Review
+                    </Button>
+                  </div>
+                )}
+              </CardBody>
+            </Card>
+          )}
         </div>
 
         {/* Sidebar */}
@@ -443,17 +534,28 @@ export default function EmployerContractDetailsPage() {
         onConfirm={handleContractAction}
       />
 
-      {/* Milestone confirm action (approve / revision / delete) */}
+      {/* Milestone confirm action (approve / delete) */}
       <ConfirmActionModal
         open={Boolean(milestoneAction)}
         onClose={() => setMilestoneAction(null)}
-        title={milestoneAction ? MILESTONE_DIALOGS[milestoneAction.kind].title : ''}
-        description={milestoneAction ? MILESTONE_DIALOGS[milestoneAction.kind].description : ''}
-        confirmLabel={milestoneAction ? MILESTONE_DIALOGS[milestoneAction.kind].confirmLabel : ''}
-        tone={milestoneAction ? MILESTONE_DIALOGS[milestoneAction.kind].tone : 'primary'}
+        title={milestoneAction ? MILESTONE_DIALOGS[milestoneAction.kind]?.title ?? '' : ''}
+        description={milestoneAction ? MILESTONE_DIALOGS[milestoneAction.kind]?.description ?? '' : ''}
+        confirmLabel={milestoneAction ? MILESTONE_DIALOGS[milestoneAction.kind]?.confirmLabel ?? '' : ''}
+        tone={milestoneAction ? MILESTONE_DIALOGS[milestoneAction.kind]?.tone ?? 'primary' : 'primary'}
         busy={acting}
         error={actionError}
         onConfirm={handleMilestoneAction}
+      />
+
+      {/* Employer Request Revision Modal */}
+      <RequestRevisionModal
+        open={Boolean(revisionMilestone)}
+        onClose={() => setRevisionMilestone(null)}
+        milestone={revisionMilestone}
+        submitting={submittingRevision}
+        fieldErrors={revisionFieldErrors}
+        generalError={revisionGeneralError}
+        onSubmit={handleRevisionSubmit}
       />
 
       {/* Milestone create/edit form */}

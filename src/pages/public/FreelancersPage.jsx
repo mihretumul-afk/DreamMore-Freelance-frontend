@@ -17,10 +17,13 @@ import { freelancerService } from '../../services/freelancerService';
 import { savedService } from '../../services/savedService';
 import { categoryService } from '../../services/categoryService';
 import { useAuth } from '../../hooks/useAuth';
+import { useI18n } from '../../i18n';
 import { getErrorMessage } from '../../utils/errors';
 import { formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
-import { cn } from '../../utils/cn';  const FILTER_LABELS = {
+import { cn } from '../../utils/cn';
+
+const FILTER_LABELS = {
   search: 'Search',
   category_id: 'Category',
   skill_id: 'Skill',
@@ -34,6 +37,7 @@ import { cn } from '../../utils/cn';  const FILTER_LABELS = {
 
 function FreelancerCard({ freelancer, savedIds, onToggleSave, savingId }) {
   const { user } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const isSaved = savedIds.has(freelancer.id);
   const isSaving = savingId === freelancer.id;
@@ -121,7 +125,9 @@ function FreelancerCard({ freelancer, savedIds, onToggleSave, savingId }) {
         <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
           <div className="flex items-center gap-3 text-xs text-gray-400">
             {freelancer.completed_jobs_count > 0 && (
-              <span>{freelancer.completed_jobs_count} jobs completed</span>
+              <span>
+                {freelancer.completed_jobs_count} {t('freelancers.completedJobs')}
+              </span>
             )}
             {freelancer.availability_status && (
               <span
@@ -134,11 +140,9 @@ function FreelancerCard({ freelancer, savedIds, onToggleSave, savingId }) {
                       : 'text-gray-400',
                 )}
               >
-                {freelancer.availability_status === 'available'
-                  ? 'Available'
-                  : freelancer.availability_status === 'busy'
-                    ? 'Busy'
-                    : 'Unavailable'}
+                {t(`status.${freelancer.availability_status}`) !== `status.${freelancer.availability_status}`
+                  ? t(`status.${freelancer.availability_status}`)
+                  : freelancer.availability_status}
               </span>
             )}
           </div>
@@ -148,7 +152,7 @@ function FreelancerCard({ freelancer, savedIds, onToggleSave, savingId }) {
               onClick={handleToggleSave}
               disabled={isSaving}
               aria-pressed={isSaved}
-              aria-label={isSaved ? 'Remove from saved freelancers' : 'Save freelancer'}
+              aria-label={isSaved ? t('freelancers.removeFromSaved') : t('freelancers.saveTalent')}
               className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-brand-500 disabled:opacity-50"
             >
               <Bookmark
@@ -157,7 +161,7 @@ function FreelancerCard({ freelancer, savedIds, onToggleSave, savingId }) {
               />
             </button>
             <Button as={Link} to={`/freelancers/${freelancer.id}`} variant="outline" size="sm">
-              View Profile
+              {t('common.viewDetails')}
             </Button>
           </div>
         </div>
@@ -167,7 +171,8 @@ function FreelancerCard({ freelancer, savedIds, onToggleSave, savingId }) {
 }
 
 export default function FreelancersPage() {
-  usePageTitle('Find Talent');
+  const { t } = useI18n();
+  usePageTitle(t('freelancers.title'));
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [freelancers, setFreelancers] = useState(null);
@@ -308,10 +313,10 @@ export default function FreelancersPage() {
   return (
     <Container className="py-8 lg:py-12">
       <PageHeader
-        eyebrow="Marketplace"
-        title="Find Talent"
-        description="Discover skilled freelancers across Ethiopia — developers, designers, marketers, and more."
-        breadcrumbs={[{ label: 'Home', to: '/' }, { label: 'Find Talent' }]}
+        eyebrow={t('freelancers.eyebrow')}
+        title={t('freelancers.title')}
+        description={t('freelancers.description')}
+        breadcrumbs={[{ label: t('nav.homeShort'), to: '/' }, { label: t('freelancers.title') }]}
       />
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
@@ -466,22 +471,22 @@ export default function FreelancersPage() {
                   if (value === '') updateParams({ search: '' });
                 }}
                 onSubmit={() => updateParams({ search: searchInput.trim() })}
-                placeholder="Search freelancers by name, skill, or headline"
-                label="Search freelancers"
+                placeholder={t('hero.searchPlaceholder')}
+                label={t('common.search')}
               />
             </div>
             <div className="flex items-center gap-3">
               <p className="text-sm text-gray-500" aria-live="polite">
                 {loading
-                  ? 'Loading freelancers…'
+                  ? t('freelancers.loading')
                   : total != null
-                    ? `${total} freelancer${total === 1 ? '' : 's'} found`
+                    ? t('freelancers.foundCount', { count: total })
                     : ''}
               </p>
               <FilterButton
                 active={activeFilters.length > 0}
                 icon={Users}
-                label="Filters"
+                label={t('common.filter')}
                 onClick={() => setFiltersOpen(true)}
                 className="lg:hidden"
               />
@@ -512,7 +517,7 @@ export default function FreelancersPage() {
                 onClick={clearAll}
                 className="text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
               >
-                Clear all
+                {t('common.clearFilters')}
               </button>
             </div>
           )}
@@ -543,7 +548,7 @@ export default function FreelancersPage() {
 
           {error && (
             <ErrorState
-              title="Unable to load freelancers"
+              title={t('common.errorOccurred')}
               description={error}
               onRetry={loadFreelancers}
             />
@@ -552,15 +557,15 @@ export default function FreelancersPage() {
           {!loading && !error && freelancers?.length === 0 && (
             <EmptyState
               icon={SearchX}
-              title="No freelancers found"
-              description="Try adjusting your search or filters."
+              title={t('common.noResults')}
+              description={t('jobs.noJobs')}
               action={
                 <button
                   type="button"
                   onClick={clearAll}
                   className="text-sm font-semibold text-brand-600 hover:text-brand-700"
                 >
-                  Clear filters
+                  {t('common.clearFilters')}
                 </button>
               }
             />

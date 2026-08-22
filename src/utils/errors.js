@@ -3,23 +3,36 @@
  *
  * - Network failures get a connection hint.
  * - 5xx responses never surface backend internals (logs, SQL, stack traces).
- * - 4xx responses may use the backend's own `message` when one is present.
+ * - 4xx responses use the backend's own `message` when one is present.
+ * - Client runtime errors surface their error message instead of falsely claiming server failure.
  *
  * @param {unknown} error
  * @param {string} [fallback]
  * @returns {string}
  */
 export function getErrorMessage(error, fallback = 'Something went wrong. Please try again.') {
-  if (error?.code === 'ERR_NETWORK' || !error?.response) {
+  // Only surface "Unable to reach the server" when it is genuinely a network or timeout error
+  if (
+    error?.code === 'ERR_NETWORK' ||
+    error?.code === 'ECONNABORTED' ||
+    error?.message === 'Network Error'
+  ) {
     return 'Unable to reach the server. Please check your connection and try again.';
   }
 
-  const status = error.response.status;
-  if (status >= 500) {
-    return 'The service is temporarily unavailable. Please try again in a moment.';
+  if (error?.response) {
+    const status = error.response.status;
+    if (status >= 500) {
+      return 'The service is temporarily unavailable. Please try again in a moment.';
+    }
+    return error.response.data?.message || fallback;
   }
 
-  return error.response.data?.message || fallback;
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return fallback;
 }
 
 /**

@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Ban,
   CheckCircle,
+  Trash2,
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
@@ -19,6 +20,8 @@ import Select from '../../components/ui/Select';
 import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
 import { adminService } from '../../services/adminService';
+import { useAuth } from '../../hooks/useAuth';
+import { useToast } from '../../hooks/useToast';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
@@ -39,6 +42,8 @@ export default function AdminUserDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   usePageTitle('User Details — Admin');
+  const { user: currentUser } = useAuth();
+  const { showToast } = useToast();
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -47,6 +52,9 @@ export default function AdminUserDetailPage() {
   const [toggleTarget, setToggleTarget] = useState(null);
   const [toggling, setToggling] = useState(false);
   const [roleUpdating, setRoleUpdating] = useState(false);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const loadUser = useCallback(async () => {
     setLoading(true);
@@ -70,10 +78,11 @@ export default function AdminUserDetailPage() {
     setToggling(true);
     try {
       await adminService.toggleUserStatus(id, toggleTarget.is_active === false);
+      showToast(`User ${toggleTarget.is_active !== false ? 'deactivated' : 'activated'} successfully.`, 'success');
       setToggleTarget(null);
       loadUser();
-    } catch {
-      // non-critical
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Unable to update status.'), 'error');
     } finally {
       setToggling(false);
     }
@@ -84,11 +93,26 @@ export default function AdminUserDetailPage() {
     setRoleUpdating(true);
     try {
       await adminService.updateUserRole(id, newRole);
+      showToast(`Role updated to ${newRole}.`, 'success');
       loadUser();
-    } catch {
-      // non-critical
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Unable to change role.'), 'error');
     } finally {
       setRoleUpdating(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!user) return;
+    setDeleting(true);
+    try {
+      await adminService.deleteUser(user.id);
+      showToast(`User ${user.name} deleted successfully.`, 'success');
+      navigate('/admin/users');
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Unable to delete user.'), 'error');
+      setDeleting(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -107,6 +131,7 @@ export default function AdminUserDetailPage() {
 
   const isActive = user.is_active !== false;
   const createdAt = formatDate(user.created_at ?? user.createdAt);
+  const isSelf = currentUser?.id === user.id;
 
   return (
     <div className="space-y-6">
@@ -194,26 +219,38 @@ export default function AdminUserDetailPage() {
         {/* Sidebar — actions */}
         <aside className="space-y-6 lg:sticky lg:top-24">
           <Card>
-            <CardHeader title="Status" />
-            <CardBody className="space-y-4">
+            <CardHeader title="Status & Actions" />
+            <CardBody className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Account status</span>
                 <Badge tone={isActive ? 'success' : 'danger'} dot>
                   {isActive ? 'Active' : 'Inactive'}
                 </Badge>
               </div>
-              <Button
-                variant={isActive ? 'danger' : 'success'}
-                size="sm"
-                className="w-full"
-                onClick={() => setToggleTarget(user)}
-              >
-                {isActive ? (
-                  <><Ban className="h-4 w-4" /> Deactivate</>
-                ) : (
-                  <><CheckCircle className="h-4 w-4" /> Activate</>
-                )}
-              </Button>
+              {!isSelf && (
+                <>
+                  <Button
+                    variant={isActive ? 'danger' : 'success'}
+                    size="sm"
+                    className="w-full"
+                    onClick={() => setToggleTarget(user)}
+                  >
+                    {isActive ? (
+                      <><Ban className="h-4 w-4" /> Deactivate</>
+                    ) : (
+                      <><CheckCircle className="h-4 w-4" /> Activate</>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-red-600 hover:bg-red-50 hover:border-red-300"
+                    onClick={() => setShowDeleteModal(true)}
+                  >
+                    <Trash2 className="h-4 w-4 text-red-500" /> Delete User
+                  </Button>
+                </>
+              )}
             </CardBody>
           </Card>
 
@@ -223,7 +260,7 @@ export default function AdminUserDetailPage() {
               <Select
                 value={user.role}
                 onChange={(e) => handleRoleChange(e.target.value)}
-                disabled={roleUpdating}
+                disabled={roleUpdating || isSelf}
               >
                 {ROLE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -271,6 +308,29 @@ export default function AdminUserDetailPage() {
             onClick={handleToggle}
           >
             {toggleTarget?.is_active !== false ? 'Deactivate' : 'Activate'}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Confirm delete modal */}
+      <Modal
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        title="Delete User"
+        description={`Are you sure you want to permanently delete "${user?.name}" (${user?.email})? All associated records will be removed. This action cannot be undone.`}
+        size="sm"
+      >
+        <div className="flex justify-end gap-3">
+          <Button variant="outline" size="sm" onClick={() => setShowDeleteModal(false)} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            loading={deleting}
+            onClick={handleDelete}
+          >
+            Delete User
           </Button>
         </div>
       </Modal>

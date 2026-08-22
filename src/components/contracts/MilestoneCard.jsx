@@ -9,22 +9,23 @@ import {
 import Card, { CardBody } from '../ui/Card';
 import Button from '../ui/Button';
 import StatusBadge from '../marketplace/StatusBadge';
+import MilestoneSubmissionHistory from './MilestoneSubmissionHistory';
 import { formatDate, formatETB } from '../../utils/format';
 
 /** Backend-gated statuses for each action (MilestoneController rules). */
-const EDITABLE_STATUSES = ['pending', 'in_progress'];
-const SUBMITTABLE_STATUSES = ['pending', 'in_progress'];
+const EDITABLE_STATUSES = ['pending', 'in_progress', 'revision_requested'];
+const SUBMITTABLE_STATUSES = ['pending', 'in_progress', 'revision_requested'];
 
 /**
  * Single milestone row. `onAction(milestone, action)` is raised for the
  * confirmed backend actions — submit (freelancer) and approve / revision /
- * edit / delete (employer). Actions are only offered when the contract is
- * active and the milestone status allows them; the backend enforces anyway.
+ * edit / delete (employer).
  */
 export default function MilestoneCard({
   milestone,
   role = 'freelancer',
   contractActive = false,
+  contractId,
   busy = false,
   onAction,
 }) {
@@ -39,6 +40,8 @@ export default function MilestoneCard({
   const actionButtonClass =
     'h-8 px-2.5 text-xs disabled:pointer-events-none disabled:opacity-50';
 
+  const isResubmission = milestone.status === 'revision_requested';
+
   return (
     <Card variant="bordered">
       <CardBody>
@@ -50,10 +53,12 @@ export default function MilestoneCard({
             </div>
             <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
               <span className="font-semibold text-brand-600">{formatETB(milestone.amount)}</span>
-              <span className="inline-flex items-center gap-1">
-                <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
-                Due {formatDate(milestone.dueDate)}
-              </span>
+              {milestone.dueDate && (
+                <span className="inline-flex items-center gap-1">
+                  <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
+                  Due {formatDate(milestone.dueDate)}
+                </span>
+              )}
             </p>
           </div>
 
@@ -65,7 +70,8 @@ export default function MilestoneCard({
                 disabled={busy}
                 onClick={() => onAction?.(milestone, 'submit')}
               >
-                <Send className="h-3.5 w-3.5" aria-hidden="true" /> Submit
+                <Send className="h-3.5 w-3.5" aria-hidden="true" />{' '}
+                {isResubmission ? 'Resubmit Work' : 'Submit Work'}
               </Button>
             )}
             {canEdit && (
@@ -118,10 +124,19 @@ export default function MilestoneCard({
         )}
 
         {(milestone.submittedAt || milestone.approvedAt) && (
-          <p className="mt-2.5 text-[11px] text-gray-400">
-            Submitted {formatDate(milestone.submittedAt)}
+          <p className="mt-2 text-[11px] text-gray-400">
+            {milestone.submittedAt && `Submitted ${formatDate(milestone.submittedAt)}`}
             {milestone.approvedAt && ` · Approved ${formatDate(milestone.approvedAt)}`}
           </p>
+        )}
+
+        {/* Deliverable Submissions & Revision History */}
+        {milestone.submissions && milestone.submissions.length > 0 && (
+          <MilestoneSubmissionHistory
+            contractId={contractId || milestone.contractId}
+            milestone={milestone}
+            submissions={milestone.submissions}
+          />
         )}
       </CardBody>
     </Card>

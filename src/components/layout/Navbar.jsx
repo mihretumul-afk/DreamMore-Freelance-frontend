@@ -17,6 +17,7 @@ import { cn } from '../../utils/cn';
 // Category Dropdown (always dark theme)
 // ────────────────────────────────────────────────────────────────────
 function CategoryDropdown({ label, toPrefix }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -112,7 +113,7 @@ function CategoryDropdown({ label, toPrefix }) {
           className="absolute left-0 top-full z-50 mt-1 min-w-[420px] rounded-xl border border-white/10 bg-ink-900 p-3 shadow-xl"
         >
           {loading && (
-            <div className="px-3 py-6 text-center text-sm text-gray-400">Loading categories…</div>
+            <div className="px-3 py-6 text-center text-sm text-gray-400">{t('common.loadingCategories')}</div>
           )}
           {error && (
             <div className="px-3 py-4 text-center text-sm text-red-400">
@@ -122,7 +123,7 @@ function CategoryDropdown({ label, toPrefix }) {
                 onClick={fetchCategories}
                 className="ml-2 underline hover:text-red-300"
               >
-                Retry
+                {t('common.retry')}
               </button>
             </div>
           )}
@@ -144,7 +145,7 @@ function CategoryDropdown({ label, toPrefix }) {
             </div>
           )}
           {!loading && !error && categories.length === 0 && (
-            <div className="px-3 py-4 text-center text-sm text-gray-400">No categories available</div>
+            <div className="px-3 py-4 text-center text-sm text-gray-400">{t('categories.noCategories')}</div>
           )}
           {/* View All link */}
           <div className="mt-2 border-t border-white/10 pt-2">
@@ -153,7 +154,7 @@ function CategoryDropdown({ label, toPrefix }) {
               onClick={() => setOpen(false)}
               className="flex items-center gap-1 text-sm font-semibold text-brand-400 hover:text-brand-300"
             >
-              View all →
+              {t('common.viewAll')} →
             </Link>
           </div>
         </div>
@@ -311,21 +312,24 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Mobile toggle */}
-        <button
-          type="button"
-          className="rounded-lg p-2 text-slate-200 transition-colors hover:bg-white/10 hover:text-white md:hidden"
-          aria-label={menuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
-          aria-expanded={menuOpen}
-          aria-controls="mobile-menu"
-          onClick={() => setMenuOpen((open) => !open)}
-        >
-          {menuOpen ? (
-            <X className="h-5 w-5" aria-hidden="true" />
-          ) : (
-            <Menu className="h-5 w-5" aria-hidden="true" />
-          )}
-        </button>
+        {/* Mobile right controls */}
+        <div className="flex items-center gap-1.5 md:hidden">
+          {user && <NotificationBell />}
+          <button
+            type="button"
+            className="rounded-lg p-2 text-slate-200 transition-colors hover:bg-white/10 hover:text-white"
+            aria-label={menuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            {menuOpen ? (
+              <X className="h-5 w-5" aria-hidden="true" />
+            ) : (
+              <Menu className="h-5 w-5" aria-hidden="true" />
+            )}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile drawer */}

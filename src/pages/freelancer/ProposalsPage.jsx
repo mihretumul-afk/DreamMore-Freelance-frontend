@@ -29,8 +29,9 @@ export default function FreelancerProposalsPage() {
     setError(null);
     try {
       const res = await proposalService.getMyProposals({ page });
-      setProposals((res.data?.data ?? []).map(normalizeProposal));
-      setMeta(res.data?.meta ?? null);
+      const rawProposals = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
+      setProposals(rawProposals.map(normalizeProposal));
+      setMeta(res.meta ?? res.data?.meta ?? null);
     } catch (err) {
       setError(getErrorMessage(err, 'Unable to load your proposals. Please try again.'));
     } finally {

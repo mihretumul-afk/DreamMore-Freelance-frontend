@@ -35,39 +35,39 @@ export const employerService = {
     return response.data; // { success, message, data, meta }
   },
 
-  /** Create a new job posting (employer). */
+  /** Create a new job posting (employer). Backend route: POST /jobs */
   createJob: async (payload) => {
-    const response = await apiClient.post('/employer/jobs', payload);
+    const response = await apiClient.post('/jobs', payload);
     return response.data; // { success, message, data }
   },
 
-  /** Fetch a single job owned by the employer. */
+  /** Fetch a single job (open jobs are public; owners/admins see any status). Backend route: GET /jobs/{id} */
   getJob: async (id) => {
-    const response = await apiClient.get(`/employer/jobs/${id}`);
+    const response = await apiClient.get(`/jobs/${id}`);
     return response.data; // { success, message, data }
   },
 
-  /** Update an existing job (employer, draft/open status). */
+  /** Update an existing job (employer, draft/open status). Backend route: PUT /jobs/{id} */
   updateJob: async (id, payload) => {
-    const response = await apiClient.put(`/employer/jobs/${id}`, payload);
+    const response = await apiClient.put(`/jobs/${id}`, payload);
     return response.data; // { success, message, data }
   },
 
-  /** Close a job posting (employer). */
+  /** Close a job posting (employer). Backend route: POST /jobs/{id}/close */
   closeJob: async (id) => {
-    const response = await apiClient.post(`/employer/jobs/${id}/close`);
+    const response = await apiClient.post(`/jobs/${id}/close`);
     return response.data; // { success, message, data }
   },
 
-  /** Reopen a closed job (employer). */
+  /** Reopen a closed job (employer). Backend route: POST /jobs/{id}/reopen */
   reopenJob: async (id) => {
-    const response = await apiClient.post(`/employer/jobs/${id}/reopen`);
+    const response = await apiClient.post(`/jobs/${id}/reopen`);
     return response.data; // { success, message, data }
   },
 
-  /** Delete a job (employer, draft status only). */
+  /** Delete a job (employer). Backend route: DELETE /jobs/{id} */
   deleteJob: async (id) => {
-    const response = await apiClient.delete(`/employer/jobs/${id}`);
+    const response = await apiClient.delete(`/jobs/${id}`);
     return response.data; // { success, message, data: null }
   },
 };

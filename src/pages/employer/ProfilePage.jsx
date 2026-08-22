@@ -27,6 +27,8 @@ import { formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import apiClient from '../../api/client';
 
+import { useAuth } from '../../hooks/useAuth';
+
 function DetailRow({ icon: Icon, label, value }) {
   return (
     <div className="flex items-start justify-between gap-4 py-3">
@@ -40,6 +42,7 @@ function DetailRow({ icon: Icon, label, value }) {
 
 export default function EmployerProfilePage() {
   usePageTitle('Company Profile');
+  const { refreshUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -117,11 +120,13 @@ export default function EmployerProfilePage() {
               await apiClient.post('/avatar', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
               });
-              loadProfile();
+              await loadProfile();
+              if (refreshUser) await refreshUser();
             }}
             onRemove={async () => {
               await apiClient.delete('/avatar');
-              loadProfile();
+              await loadProfile();
+              if (refreshUser) await refreshUser();
             }}
           />
           <div className="min-w-0">

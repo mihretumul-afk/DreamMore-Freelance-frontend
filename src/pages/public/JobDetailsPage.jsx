@@ -26,6 +26,7 @@ import JobProposalPanel from '../../components/proposals/JobProposalPanel';
 import { jobService } from '../../services/jobService';
 import { savedService } from '../../services/savedService';
 import { useAuth } from '../../hooks/useAuth';
+import { useI18n } from '../../i18n';
 import { normalizeJob } from '../../utils/jobMapper';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate, formatETB } from '../../utils/format';
@@ -43,6 +44,7 @@ function DetailSkeleton() {
 
 export default function JobDetailsPage() {
   const { id } = useParams();
+  const { t } = useI18n();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -53,7 +55,7 @@ export default function JobDetailsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  usePageTitle(job ? job.title : 'Job Details');
+  usePageTitle(job ? job.title : t('jobs.jobDetails'));
 
   const checkSaved = useCallback(async () => {
     if (!user || !id) return;
@@ -134,14 +136,14 @@ export default function JobDetailsPage() {
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-card">
               <Compass className="h-7 w-7 text-brand-500" aria-hidden="true" />
             </div>
-            <h1 className="mt-5 text-xl font-bold text-ink-900">Job not found</h1>
+            <h1 className="mt-5 text-xl font-bold text-ink-900">{t('common.noResults')}</h1>
             <p className="mt-2 max-w-md text-sm text-gray-500">{error}</p>
             <Button as={Link} to="/jobs" variant="outline" className="mt-6">
-              <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back to jobs
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" /> {t('common.back')}
             </Button>
           </div>
         ) : (
-          <ErrorState title="Unable to load this job" description={error} onRetry={loadJob} />
+          <ErrorState title={t('common.errorOccurred')} description={error} onRetry={loadJob} />
         )}
       </Container>
     );
@@ -155,7 +157,7 @@ export default function JobDetailsPage() {
   return (
     <Container className="py-8 lg:py-12">
       <Breadcrumbs
-        items={[{ label: 'Home', to: '/' }, { label: 'Browse Jobs', to: '/jobs' }, { label: job.title }]}
+        items={[{ label: t('nav.homeShort'), to: '/' }, { label: t('jobs.title'), to: '/jobs' }, { label: job.title }]}
         className="mb-4"
       />
 
@@ -174,7 +176,7 @@ export default function JobDetailsPage() {
                 onClick={handleToggleSave}
                 disabled={saving}
                 aria-pressed={isSaved}
-                aria-label={isSaved ? 'Remove from saved jobs' : 'Save this job'}
+                aria-label={isSaved ? t('jobs.removeFromSaved') : t('jobs.saveJob')}
                 className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-brand-500 disabled:opacity-50"
               >
                 <Bookmark
@@ -202,12 +204,12 @@ export default function JobDetailsPage() {
               )}
               {job.postedAtLabel && (
                 <span className="inline-flex items-center gap-1.5">
-                  <Clock className="h-4 w-4" aria-hidden="true" /> Posted {job.postedAtLabel}
+                  <Clock className="h-4 w-4" aria-hidden="true" /> {job.postedAtLabel}
                 </span>
               )}
               {job.proposalsCount != null && (
                 <span className="inline-flex items-center gap-1.5">
-                  <Send className="h-4 w-4" aria-hidden="true" /> {job.proposalsCount} proposals
+                  <Send className="h-4 w-4" aria-hidden="true" /> {t('jobs.proposalCount', { count: job.proposalsCount })}
                 </span>
               )}
             </div>
@@ -215,10 +217,10 @@ export default function JobDetailsPage() {
 
           {/* Description */}
           <Card>
-            <CardHeader title="About this job" />
+            <CardHeader title={t('jobs.jobDetails')} />
             <CardBody>
               <p className="whitespace-pre-line text-sm leading-relaxed text-gray-600">
-                {job.description || 'No description provided.'}
+                {job.description || t('common.noResults')}
               </p>
             </CardBody>
           </Card>
@@ -226,7 +228,7 @@ export default function JobDetailsPage() {
           {/* Skills */}
           {job.skills?.length > 0 && (
             <Card>
-              <CardHeader title="Required skills" />
+              <CardHeader title={t('freelancers.skills')} />
               <CardBody>
                 <div className="flex flex-wrap gap-2">
                   {job.skills.map((skill) => (
@@ -246,7 +248,13 @@ export default function JobDetailsPage() {
               <PriceDisplay size="lg" amount={job.budget} interval={job.interval} />
               {budgetRange && <p className="text-xs text-gray-500">Range: {budgetRange}</p>}
               {job.currency && <p className="text-xs text-gray-400">Currency: {job.currency}</p>}
-              {job.jobType && <Badge tone="info">{job.jobType}</Badge>}
+              {job.jobType && (
+                <Badge tone="info">
+                  {t(`budgetType.${job.jobType}`) !== `budgetType.${job.jobType}`
+                    ? t(`budgetType.${job.jobType}`)
+                    : job.jobType}
+                </Badge>
+              )}
             </CardBody>
             <CardFooter>
               <JobProposalPanel job={job} onProposalSubmitted={loadJob} />
@@ -254,15 +262,19 @@ export default function JobDetailsPage() {
           </Card>
 
           <Card>
-            <CardHeader title="Overview" />
+            <CardHeader title={t('freelancers.overview')} />
             <CardBody>
               <dl className="space-y-3 text-sm">
                 {job.jobType && (
                   <div className="flex items-center justify-between gap-4">
                     <dt className="flex items-center gap-2 text-gray-500">
-                      <Briefcase className="h-4 w-4" aria-hidden="true" /> Job type
+                      <Briefcase className="h-4 w-4" aria-hidden="true" /> {t('budgetType.fixed')}
                     </dt>
-                    <dd className="font-medium text-ink-900">{job.jobType}</dd>
+                    <dd className="font-medium text-ink-900">
+                      {t(`budgetType.${job.jobType}`) !== `budgetType.${job.jobType}`
+                        ? t(`budgetType.${job.jobType}`)
+                        : job.jobType}
+                    </dd>
                   </div>
                 )}
                 {job.experienceLevel && (
@@ -270,7 +282,11 @@ export default function JobDetailsPage() {
                     <dt className="flex items-center gap-2 text-gray-500">
                       <GraduationCap className="h-4 w-4" aria-hidden="true" /> Experience
                     </dt>
-                    <dd className="font-medium text-ink-900">{job.experienceLevel}</dd>
+                    <dd className="font-medium text-ink-900">
+                      {t(`experience.${job.experienceLevel}`) !== `experience.${job.experienceLevel}`
+                        ? t(`experience.${job.experienceLevel}`)
+                        : job.experienceLevel}
+                    </dd>
                   </div>
                 )}
                 {job.locationTypeLabel && (
@@ -278,7 +294,12 @@ export default function JobDetailsPage() {
                     <dt className="flex items-center gap-2 text-gray-500">
                       <MapPin className="h-4 w-4" aria-hidden="true" /> Work mode
                     </dt>
-                    <dd className="font-medium text-ink-900">{job.locationTypeLabel}</dd>
+                    <dd className="font-medium text-ink-900">
+                      {t(`locationType.${job.locationTypeLabel.toLowerCase()}`) !==
+                      `locationType.${job.locationTypeLabel.toLowerCase()}`
+                        ? t(`locationType.${job.locationTypeLabel.toLowerCase()}`)
+                        : job.locationTypeLabel}
+                    </dd>
                   </div>
                 )}
                 {job.locationLabel && (
@@ -309,7 +330,7 @@ export default function JobDetailsPage() {
 
           {job.employer && (
             <Card>
-              <CardHeader title="Employer" />
+              <CardHeader title={t('role.employer')} />
               <CardBody>
                 <Link
                   to={`/employers/${job.employer.id}`}
@@ -320,7 +341,7 @@ export default function JobDetailsPage() {
                     <span className="block truncate text-sm font-bold text-ink-900 transition-colors group-hover:text-brand-600">
                       {job.employer.name}
                     </span>
-                    <span className="text-xs text-gray-500">View company profile</span>
+                    <span className="text-xs text-gray-500">{t('nav.companyProfile')}</span>
                   </span>
                 </Link>
               </CardBody>

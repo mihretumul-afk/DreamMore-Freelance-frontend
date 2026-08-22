@@ -1,0 +1,210 @@
+{
+  "test1": {
+    "name": "Employer Job Creation & Persistence",
+    "status": "FUNCTIONAL",
+    "details": {
+      "jobId": 29,
+      "title": "E2E Full Stack Platform Build 1787300170165",
+      "inEmployerJobs": true,
+      "inPublicJobs": true,
+      "persistsAfterRefresh": true
+    }
+  },
+  "test2": {
+    "name": "Freelancer Proposal & Acceptance",
+    "status": "FUNCTIONAL",
+    "details": {
+      "proposalId": 15,
+      "contractId": 7,
+      "jobStatus": "in_progress",
+      "seesFreelancer": true
+    }
+  },
+  "test3": {
+    "name": "Milestone Creation & Deliverable Work Submission",
+    "status": "FUNCTIONAL",
+    "details": {
+      "milestoneId": 5,
+      "milestoneStatus": "submitted",
+      "submissionId": 5,
+      "fileId": 5,
+      "storedPath": "deliverables/7/5/AjdyTqHvY55TvdUKUQkFtJzXHmUAd3R0G2pPcmMW.pdf"
+    }
+  },
+  "test4": {
+    "name": "Milestone Revision Request & Resubmission",
+    "status": "FUNCTIONAL",
+    "details": {
+      "revisionNote": "Please add comprehensive unit tests and enhance error handling before final approval.",
+      "milestoneStatus": "submitted",
+      "submissionsCount": 2,
+      "historyPreserved": true
+    }
+  },
+  "test5": {
+    "name": "Milestone Approval & Contract Auto-Completion",
+    "status": "FUNCTIONAL",
+    "details": {
+      "milestoneStatus": "approved",
+      "contractStatus": "completed",
+      "jobStatus": "completed"
+    }
+  },
+  "test6": {
+    "name": "Contract Rating & Review",
+    "status": "FUNCTIONAL",
+    "details": {
+      "employerReview": {
+        "contract_id": 7,
+        "reviewer_id": 2,
+        "reviewee_id": 38,
+        "reviewer_role": "employer",
+        "rating": 5,
+        "comment": "Outstanding freelancer! Delivered excellent code quality, passed all test criteria, and communicated very well.",
+        "updated_at": "2026-08-21T08:17:14.000000Z",
+        "created_at": "2026-08-21T08:17:14.000000Z",
+        "id": 5,
+        "reviewer": {
+          "id": 2,
+          "name": "Selam Tech Solutions",
+          "email": "selamtech@dreammore.com",
+          "role": "employer",
+          "status": "active",
+          "phone": "+251911223344",
+          "avatar": "http://localhost:8000/storage/avatars/2_1787254954_75d24565.jpg",
+          "bio": "Leading tech company in Ethiopia",
+          "email_verified_at": null,
+          "last_login_at": "2026-08-21T08:16:12.000000Z",
+          "created_at": "2026-08-18T20:52:45.000000Z",
+          "updated_at": "2026-08-21T08:16:12.000000Z"
+        },
+        "reviewee": {
+          "id": 38,
+          "name": "Abebe Tesfaye",
+          "email": "abebe.tesfaye@dreammore.com",
+          "role": "freelancer",
+          "status": "active",
+          "phone": null,
+          "avatar": null,
+          "bio": null,
+          "email_verified_at": null,
+          "last_login_at": "2026-08-21T08:16:09.000000Z",
+          "created_at": "2026-08-21T08:15:24.000000Z",
+          "updated_at": "2026-08-21T08:16:09.000000Z"
+        },
+        "contract": {
+          "id": 7,
+          "job_id": 29,
+          "proposal_id": 15,
+          "employer_id": 2,
+          "freelancer_id": 38,
+          "title": "E2E Full Stack Platform Build 1787300170165",
+          "budget_type": "fixed",
+          "agreed_rate": "25000.00",
+          "total_amount": "25000.00",
+          "status": "completed",
+          "start_date": "2026-08-21T01:16:46.000000Z",
+          "end_date": "2026-08-21T08:17:06.000000Z",
+          "created_at": "2026-08-21T08:16:46.000000Z",
+          "updated_at": "2026-08-21T08:17:06.000000Z"
+        }
+      },
+      "freelancerReview": {
+        "contract_id": 7,
+        "reviewer_id": 38,
+        "reviewee_id": 2,
+        "reviewer_role": "freelancer",
+        "rating": 5,
+        "comment": "Fantastic client to work with! Clear requirements and prompt milestone approvals.",
+        "updated_at": "2026-08-21T08:17:15.000000Z",
+        "created_at": "2026-08-21T08:17:15.000000Z",
+        "id": 6,
+        "reviewer": {
+          "id": 38,
+          "name": "Abebe Tesfaye",
+          "email": "abebe.tesfaye@dreammore.com",
+          "role": "freelancer",
+          "status": "active",
+          "phone": null,
+          "avatar": null,
+          "bio": null,
+          "email_verified_at": null,
+          "last_login_at": "2026-08-21T08:16:09.000000Z",
+          "created_at": "2026-08-21T08:15:24.000000Z",
+          "updated_at": "2026-08-21T08:16:09.000000Z"
+        },
+        "reviewee": {
+          "id": 2,
+          "name": "Selam Tech Solutions",
+          "email": "selamtech@dreammore.com",
+          "role": "employer",
+          "status": "active",
+          "phone": "+251911223344",
+          "avatar": "http://localhost:8000/storage/avatars/2_1787254954_75d24565.jpg",
+          "bio": "Leading tech company in Ethiopia",
+          "email_verified_at": null,
+          "last_login_at": "2026-08-21T08:16:12.000000Z",
+          "created_at": "2026-08-18T20:52:45.000000Z",
+          "updated_at": "2026-08-21T08:16:12.000000Z"
+        },
+        "contract": {
+          "id": 7,
+          "job_id": 29,
+          "proposal_id": 15,
+          "employer_id": 2,
+          "freelancer_id": 38,
+          "title": "E2E Full Stack Platform Build 1787300170165",
+          "budget_type": "fixed",
+          "agreed_rate": "25000.00",
+          "total_amount": "25000.00",
+          "status": "completed",
+          "start_date": "2026-08-21T01:16:46.000000Z",
+          "end_date": "2026-08-21T08:17:06.000000Z",
+          "created_at": "2026-08-21T08:16:46.000000Z",
+          "updated_at": "2026-08-21T08:17:06.000000Z"
+        }
+      },
+      "freelancerAvgRating": "5.0000"
+    }
+  },
+  "test7": {
+    "name": "Dynamic Freelancer Success Rate Calculation",
+    "status": "FUNCTIONAL",
+    "details": {
+      "successRate": 100,
+      "completedContracts": 1,
+      "totalContracts": 1,
+      "isDynamic": true
+    }
+  },
+  "test8": {
+    "name": "Deliverable File Access Security",
+    "status": "FUNCTIONAL",
+    "details": {
+      "employerStatus": 200,
+      "freelancerStatus": 200,
+      "unrelatedStatus": 403,
+      "unauthenticatedStatus": 401
+    }
+  },
+  "test9": {
+    "name": "Messaging & REST Fallback",
+    "status": "FUNCTIONAL",
+    "details": {
+      "messageId": 4,
+      "instantDeliveryRestFallback": true,
+      "readAt": "2026-08-21T08:17:16.000000Z"
+    }
+  },
+  "test10": {
+    "name": "Error Handling & Validation Feedback",
+    "status": "FUNCTIONAL",
+    "details": {
+      "unauthorizedApproval": "Only employers can manage milestones.",
+      "invalidStatusSubmission": "Milestones can only be submitted on active contracts.",
+      "invalidMilestone": "No query results for model [App\\Models\\Milestone] 999999",
+      "duplicateReview": "You have already reviewed this contract.",
+      "invalidContract": "No query results for model [App\\Models\\Contract] 999999"
+    }
+  }
+}

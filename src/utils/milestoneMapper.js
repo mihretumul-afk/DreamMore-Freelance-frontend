@@ -1,15 +1,41 @@
 import { timeAgo } from './format';
 
 /**
+ * Map a deliverable submission resource payload to UI model.
+ */
+export function normalizeMilestoneSubmission(sub) {
+  if (!sub) return null;
+
+  return {
+    id: sub.id,
+    milestoneId: sub.milestone_id,
+    submittedBy: sub.submitted_by,
+    submitter: sub.submitter,
+    description: sub.description,
+    links: sub.links ?? [],
+    status: sub.status,
+    revisionNote: sub.revision_note,
+    submittedAt: sub.submitted_at,
+    submittedAtLabel: timeAgo(sub.submitted_at),
+    reviewedAt: sub.reviewed_at,
+    reviewedAtLabel: sub.reviewed_at ? timeAgo(sub.reviewed_at) : null,
+    reviewedBy: sub.reviewed_by,
+    reviewer: sub.reviewer,
+    files: (sub.files || []).map((file) => ({
+      id: file.id,
+      originalFilename: file.original_filename,
+      mimeType: file.mime_type,
+      fileSize: file.file_size,
+      downloadUrl: file.download_url,
+      createdAt: file.created_at,
+    })),
+    createdAt: sub.created_at,
+    updatedAt: sub.updated_at,
+  };
+}
+
+/**
  * Map a Laravel `MilestoneResource` payload to the UI model.
- *
- * Confirmed API fields:
- *   id, contract_id, title, description, amount, currency ('ETB'), status,
- *   due_date, submitted_at, approved_at, created_at, updated_at
- *
- * Milestone statuses (backend enum):
- *   pending → in_progress → submitted → approved → paid
- *   (submitted → in_progress via employer revision request)
  */
 export function normalizeMilestone(milestone) {
   if (!milestone) return null;
@@ -28,6 +54,10 @@ export function normalizeMilestone(milestone) {
     submittedAt: milestone.submitted_at,
     approvedAt: milestone.approved_at,
 
+    submissions: (milestone.submissions || []).map(normalizeMilestoneSubmission),
+    latestSubmission: normalizeMilestoneSubmission(milestone.latest_submission),
+    submissionsCount: milestone.submissions_count ?? (milestone.submissions?.length ?? 0),
+
     createdAt: milestone.created_at,
     createdAtLabel: timeAgo(milestone.created_at),
     updatedAt: milestone.updated_at,
@@ -35,10 +65,7 @@ export function normalizeMilestone(milestone) {
 }
 
 /**
- * Map milestone form state into the backend payload (MilestoneRequest rules:
- * title required ≤255, description nullable ≤5000, amount numeric 1–99999999.99,
- * due_date nullable date). Sending null for optional fields lets the backend
- * clear them on update.
+ * Map milestone form state into the backend payload.
  */
 export function milestoneFormToPayload(form) {
   return {

@@ -9,7 +9,9 @@ import {
   Briefcase,
   Clock,
   CheckCheck,
+  Check,
   Star,
+  Trash2,
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
@@ -19,6 +21,7 @@ import { notificationService } from '../../services/notificationService';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { useToast } from '../../hooks/useToast';
 
 const TYPE_ICONS = {
   new_proposal: FileText,
@@ -47,6 +50,7 @@ const TYPE_COLORS = {
 export default function EmployerNotificationsPage() {
   usePageTitle('Notifications');
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -77,6 +81,7 @@ export default function EmployerNotificationsPage() {
         setNotifications((prev) =>
           prev.map((n) => (n.id === notification.id ? { ...n, read_at: new Date().toISOString() } : n))
         );
+        window.dispatchEvent(new CustomEvent('appworks:notifications-updated'));
       } catch {
         // non-critical
       }
@@ -87,14 +92,42 @@ export default function EmployerNotificationsPage() {
     }
   }, [navigate]);
 
+  const handleMarkAsRead = useCallback(async (e, notification) => {
+    e.stopPropagation();
+    try {
+      await notificationService.markAsRead(notification.id);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notification.id ? { ...n, read_at: new Date().toISOString() } : n))
+      );
+      window.dispatchEvent(new CustomEvent('appworks:notifications-updated'));
+      showToast('Notification marked as read.', 'success');
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Unable to mark notification as read.'), 'error');
+    }
+  }, [showToast]);
+
+  const handleDelete = useCallback(async (e, notificationId) => {
+    e.stopPropagation();
+    try {
+      await notificationService.deleteNotification(notificationId);
+      setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+      window.dispatchEvent(new CustomEvent('appworks:notifications-updated'));
+      showToast('Notification deleted successfully.', 'success');
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Unable to delete notification.'), 'error');
+    }
+  }, [showToast]);
+
   const markAllAsRead = useCallback(async () => {
     try {
       await notificationService.markAllAsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, read_at: n.read_at || new Date().toISOString() })));
-    } catch {
-      // non-critical
+      window.dispatchEvent(new CustomEvent('appworks:notifications-updated'));
+      showToast('All notifications marked as read.', 'success');
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Unable to mark all notifications as read.'), 'error');
     }
-  }, []);
+  }, [showToast]);
 
   if (loading) {
     return (
@@ -163,6 +196,28 @@ export default function EmployerNotificationsPage() {
                     </div>
                     <p className="mt-0.5 text-xs text-gray-500 line-clamp-2">{notification.message}</p>
                     <p className="mt-1 text-[10px] text-gray-400">{formatDate(notification.created_at)}</p>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    {isUnread && (
+                      <button
+                        type="button"
+                        onClick={(e) => handleMarkAsRead(e, notification)}
+                        title="Mark as read"
+                        aria-label="Mark as read"
+                        className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-brand-50 hover:text-brand-600"
+                      >
+                        <Check className="h-4 w-4" />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={(e) => handleDelete(e, notification.id)}
+                      title="Delete notification"
+                      aria-label="Delete notification"
+                      className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-danger-50 hover:text-danger-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                 </CardBody>
               </Card>

@@ -6,6 +6,7 @@ import Input from '../ui/Input';
 import Select from '../ui/Select';
 import { categoryService } from '../../services/categoryService';
 import { skillService } from '../../services/skillService';
+import { useI18n } from '../../i18n';
 
 /**
  * Job filter form. Every control maps 1:1 to a query parameter the backend
@@ -16,6 +17,7 @@ import { skillService } from '../../services/skillService';
  *           budget_type, experience_level, location_type, sort }
  */
 export default function JobFiltersPanel({ values = {}, onChange, onApply, onClear, className }) {
+  const { t } = useI18n();
   const [categories, setCategories] = useState([]);
   const [skills, setSkills] = useState([]);
 
@@ -56,26 +58,26 @@ export default function JobFiltersPanel({ values = {}, onChange, onApply, onClea
   return (
     <Card className={className}>
       <div className="border-b border-gray-100 px-5 py-4">
-        <h2 className="text-base font-semibold text-ink-900">Filters</h2>
-        <p className="mt-0.5 text-sm text-gray-500">Refine the jobs you see.</p>
+        <h2 className="text-base font-semibold text-ink-900">{t('common.filter')}</h2>
+        <p className="mt-0.5 text-sm text-gray-500">{t('categories.description')}</p>
       </div>
 
       <div className="space-y-4 px-5 py-5">
         <Input
-          label="Keyword"
+          label={t('common.search')}
           icon={Search}
           value={values.search ?? ''}
           onChange={(event) => set('search', event.target.value)}
-          placeholder="Search title, description, or skill"
+          placeholder={t('hero.searchPlaceholder')}
         />
 
         {categories.length > 0 && (
           <Select
-            label="Category"
+            label={t('nav.categories')}
             value={values.category_id ?? ''}
             onChange={(event) => set('category_id', event.target.value)}
           >
-            <option value="">All categories</option>
+            <option value="">{t('common.all')} {t('nav.categories')}</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
@@ -86,11 +88,11 @@ export default function JobFiltersPanel({ values = {}, onChange, onApply, onClea
 
         {skills.length > 0 && (
           <Select
-            label="Skill"
+            label={t('nav.skills')}
             value={values.skill_id ?? ''}
             onChange={(event) => set('skill_id', event.target.value)}
           >
-            <option value="">Any skill</option>
+            <option value="">{t('common.all')} {t('nav.skills')}</option>
             {skills.map((skill) => (
               <option key={skill.id} value={skill.id}>
                 {skill.name}
@@ -110,13 +112,13 @@ export default function JobFiltersPanel({ values = {}, onChange, onApply, onClea
         </Select>
 
         <Select
-          label="Budget type"
+          label={t('budgetType.fixed')}
           value={values.budget_type ?? ''}
           onChange={(event) => set('budget_type', event.target.value)}
         >
-          <option value="">Any budget</option>
-          <option value="fixed">Fixed price</option>
-          <option value="hourly">Hourly rate</option>
+          <option value="">{t('common.all')}</option>
+          <option value="fixed">{t('budgetType.fixed')}</option>
+          <option value="hourly">{t('budgetType.hourly')}</option>
         </Select>
 
         <Select
@@ -124,10 +126,10 @@ export default function JobFiltersPanel({ values = {}, onChange, onApply, onClea
           value={values.experience_level ?? ''}
           onChange={(event) => set('experience_level', event.target.value)}
         >
-          <option value="">Any level</option>
-          <option value="entry">Entry</option>
-          <option value="intermediate">Intermediate</option>
-          <option value="expert">Expert</option>
+          <option value="">{t('common.all')}</option>
+          <option value="entry">{t('experience.entry')}</option>
+          <option value="intermediate">{t('experience.intermediate')}</option>
+          <option value="expert">{t('experience.expert')}</option>
         </Select>
 
         <Select
@@ -135,10 +137,10 @@ export default function JobFiltersPanel({ values = {}, onChange, onApply, onClea
           value={values.location_type ?? ''}
           onChange={(event) => set('location_type', event.target.value)}
         >
-          <option value="">Any mode</option>
-          <option value="remote">Remote</option>
-          <option value="onsite">On-site</option>
-          <option value="hybrid">Hybrid</option>
+          <option value="">{t('common.all')}</option>
+          <option value="remote">{t('locationType.remote')}</option>
+          <option value="onsite">{t('locationType.onsite')}</option>
+          <option value="hybrid">{t('locationType.hybrid')}</option>
         </Select>
 
         <Input
@@ -174,10 +176,10 @@ export default function JobFiltersPanel({ values = {}, onChange, onApply, onClea
 
         <div className="grid grid-cols-2 gap-3 pt-1">
           <Button type="button" onClick={onApply}>
-            Apply
+            {t('common.apply')}
           </Button>
           <Button type="button" variant="outline" onClick={onClear}>
-            Clear
+            {t('common.clearFilters')}
           </Button>
         </div>
       </div>

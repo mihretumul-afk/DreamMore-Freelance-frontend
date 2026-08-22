@@ -8,6 +8,7 @@ import PriceDisplay from './PriceDisplay';
 import SkillBadge from './SkillBadge';
 import VerifiedBadge from './VerifiedBadge';
 import StatusBadge from './StatusBadge';
+import { useI18n } from '../../i18n';
 import { cn } from '../../utils/cn';
 
 /**
@@ -18,8 +19,19 @@ import { cn } from '../../utils/cn';
  * for real data. `completion` renders a profile-completion placeholder bar.
  */
 export default function FreelancerCard({ freelancer, to, sample = false, className }) {
+  const { t } = useI18n();
   const href = to ?? (freelancer?.id ? `/freelancers/${freelancer.id}` : '/freelancers');
   const completion = freelancer?.completion;
+
+  const name = freelancer?.name ?? freelancer?.user?.name ?? 'Freelancer';
+  const avatar = freelancer?.avatar ?? freelancer?.user?.avatar;
+  const headline = freelancer?.headline;
+  const location = freelancer?.location;
+  const hourlyRate = freelancer?.hourlyRate ?? freelancer?.hourly_rate;
+  const rating = freelancer?.rating;
+  const reviews = freelancer?.reviews ?? freelancer?.completedJobsCount ?? freelancer?.completed_jobs_count;
+  const availability = freelancer?.availability ?? freelancer?.availability_status;
+  const isVerified = freelancer?.verified ?? (freelancer?.verified_credentials?.length > 0);
 
   return (
     <Card
@@ -30,7 +42,8 @@ export default function FreelancerCard({ freelancer, to, sample = false, classNa
     >
       <div className="flex items-start gap-4">
         <Avatar
-          name={freelancer?.name}
+          name={name}
+          src={avatar}
           size="lg"
           className="transition-transform duration-200 group-hover:scale-105"
         />
@@ -41,24 +54,26 @@ export default function FreelancerCard({ freelancer, to, sample = false, classNa
                 to={href}
                 className="transition-colors after:absolute after:inset-0 hover:text-brand-600"
               >
-                {freelancer?.name}
+                {name}
               </Link>
             </h3>
-            {freelancer?.verified && <VerifiedBadge />}
-            {sample && !freelancer?.verified && <Badge tone="neutral">Sample</Badge>}
+            {isVerified && <VerifiedBadge />}
+            {sample && !isVerified && <Badge tone="neutral">{t('jobs.sample')}</Badge>}
           </div>
-          <p className="mt-0.5 truncate text-xs text-gray-500">{freelancer?.headline}</p>
+          {headline && <p className="mt-0.5 truncate text-xs text-gray-500">{headline}</p>}
         </div>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-500">
-        {freelancer?.location && (
+        {location && (
           <span className="inline-flex items-center gap-1">
-            <MapPin className="h-3.5 w-3.5" aria-hidden="true" /> {freelancer.location}
+            <MapPin className="h-3.5 w-3.5" aria-hidden="true" /> {location}
           </span>
         )}
-        <RatingDisplay rating={freelancer?.rating} count={freelancer?.reviews} />
-        <PriceDisplay amount={freelancer?.hourlyRate} interval="hr" />
+        <RatingDisplay rating={rating} count={reviews} />
+        {hourlyRate != null && hourlyRate > 0 && (
+          <PriceDisplay amount={hourlyRate} interval="hr" />
+        )}
       </div>
 
       {freelancer?.skills?.length > 0 && (
@@ -72,8 +87,8 @@ export default function FreelancerCard({ freelancer, to, sample = false, classNa
       )}
 
       <div className="mt-auto flex items-center justify-between gap-3 border-t border-gray-100 pt-4">
-        {freelancer?.availability && (
-          <StatusBadge status={freelancer.availability} dot />
+        {availability && (
+          <StatusBadge status={availability} dot />
         )}
         {completion != null && (
           <div className="flex min-w-0 items-center gap-2">
@@ -83,7 +98,9 @@ export default function FreelancerCard({ freelancer, to, sample = false, classNa
                 style={{ width: `${Math.max(0, Math.min(100, completion))}%` }}
               />
             </div>
-            <span className="text-[11px] text-gray-400">{completion}% complete</span>
+            <span className="text-[11px] text-gray-400">
+              {t('freelancers.complete', { count: completion })}
+            </span>
           </div>
         )}
       </div>

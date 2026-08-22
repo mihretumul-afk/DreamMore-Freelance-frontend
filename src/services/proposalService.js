@@ -33,6 +33,12 @@ export const proposalService = {
   },
 
   /** Submit a proposal for an open job (freelancer). */
+  submitProposal: async (jobId, payload) => {
+    const response = await apiClient.post(`/jobs/${jobId}/proposals`, payload);
+    return response.data; // { success, message, data }
+  },
+
+  /** Alias for submitProposal. */
   createProposal: async (jobId, payload) => {
     const response = await apiClient.post(`/jobs/${jobId}/proposals`, payload);
     return response.data; // { success, message, data }

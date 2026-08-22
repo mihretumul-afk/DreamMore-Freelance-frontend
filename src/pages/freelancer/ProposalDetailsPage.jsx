@@ -81,7 +81,7 @@ export default function FreelancerProposalDetailsPage() {
     setGeneralError(null);
     try {
       const res = await proposalService.updateProposal(proposal.id, proposalFormToPayload(form));
-      setProposal(normalizeProposal(res.data?.data));
+      setProposal(normalizeProposal(res.data?.proposal ?? res.data));
       setEditing(false);
       setNotice('Proposal updated successfully.');
     } catch (err) {
@@ -99,7 +99,7 @@ export default function FreelancerProposalDetailsPage() {
     setGeneralError(null);
     try {
       const res = await proposalService.withdrawProposal(proposal.id);
-      setProposal(normalizeProposal(res.data?.data));
+      setProposal(normalizeProposal(res.data?.proposal ?? res.data));
       setWithdrawOpen(false);
       setNotice('Proposal withdrawn.');
     } catch (err) {

@@ -33,6 +33,12 @@ export const notificationService = {
     const response = await apiClient.get('/notifications/unread');
     return response.data;
   },
+
+  /** Permanently delete a specific notification. */
+  deleteNotification: async (notificationId) => {
+    const response = await apiClient.delete(`/notifications/${notificationId}`);
+    return response.data;
+  },
 };
 
 export default notificationService;

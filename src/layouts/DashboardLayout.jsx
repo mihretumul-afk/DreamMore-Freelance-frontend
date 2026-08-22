@@ -1,7 +1,10 @@
+import { useCallback, useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import { useAuth } from '../hooks/useAuth';
+import { useI18n } from '../i18n';
+import { notificationService } from '../services/notificationService';
 import { FREELANCER_NAV_LINKS, EMPLOYER_NAV_LINKS } from '../constants/navigation';
 import { cn } from '../utils/cn';
 
@@ -12,8 +15,31 @@ import { cn } from '../utils/cn';
  */
 export default function DashboardLayout({ role }) {
   const { logout } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const navItems = role === 'employer' ? EMPLOYER_NAV_LINKS : FREELANCER_NAV_LINKS;
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchUnread = useCallback(async () => {
+    try {
+      const res = await notificationService.getUnreadCount();
+      setUnreadCount(res.data?.unread_count ?? 0);
+    } catch {
+      // non-critical
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 15000);
+    window.addEventListener('focus', fetchUnread);
+    window.addEventListener('appworks:notifications-updated', fetchUnread);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', fetchUnread);
+      window.removeEventListener('appworks:notifications-updated', fetchUnread);
+    };
+  }, [fetchUnread]);
 
   const handleLogout = async () => {
     await logout();
@@ -36,10 +62,16 @@ export default function DashboardLayout({ role }) {
             <nav className="sticky top-24 space-y-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
+                const isNotification = item.key === 'nav.notifications' || item.to.includes('notifications');
                 return (
                   <NavLink key={item.to} to={item.to} end={item.end} className={linkClass}>
                     <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                    {item.label}
+                    <span className="flex-1 truncate">{item.key ? t(item.key) : item.label}</span>
+                    {isNotification && unreadCount > 0 && (
+                      <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-danger-500 px-1.5 text-[11px] font-bold text-white">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
                   </NavLink>
                 );
               })}
@@ -48,7 +80,7 @@ export default function DashboardLayout({ role }) {
                 onClick={handleLogout}
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink-700 transition-colors hover:bg-gray-100"
               >
-                <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" /> Sign out
+                <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" /> {t('nav.signOut')}
               </button>
             </nav>
           </aside>
@@ -63,6 +95,7 @@ export default function DashboardLayout({ role }) {
               <div className="flex w-max gap-2">
                 {navItems.map((item) => {
                   const Icon = item.icon;
+                  const isNotification = item.key === 'nav.notifications' || item.to.includes('notifications');
                   return (
                     <NavLink
                       key={item.to}
@@ -78,7 +111,12 @@ export default function DashboardLayout({ role }) {
                       }
                     >
                       <Icon className="h-4 w-4" aria-hidden="true" />
-                      {item.label}
+                      <span>{item.key ? t(item.key) : item.label}</span>
+                      {isNotification && unreadCount > 0 && (
+                        <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-danger-500 px-1 text-[10px] font-bold text-white">
+                          {unreadCount > 99 ? '99+' : unreadCount}
+                        </span>
+                      )}
                     </NavLink>
                   );
                 })}

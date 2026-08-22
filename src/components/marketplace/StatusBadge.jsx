@@ -1,4 +1,5 @@
 import Badge from '../ui/Badge';
+import { useI18n } from '../../i18n';
 
 /**
  * Maps common marketplace statuses to badge tones. Later features (jobs,
@@ -20,6 +21,7 @@ const DEFAULT_TONES = {
   rejected: 'danger',
   hired: 'success',
   accepted: 'success',
+  withdrawn: 'neutral',
   // Contract / milestone statuses
   active: 'success',
   paused: 'warning',
@@ -28,6 +30,8 @@ const DEFAULT_TONES = {
   paid: 'success',
   completed: 'success',
   cancelled: 'danger',
+  disputed: 'danger',
+  resolved: 'success',
   // Availability
   available: 'success',
   busy: 'warning',
@@ -45,13 +49,19 @@ function humanize(status) {
 
 /**
  * Badge for a marketplace status. Pass `toneMap` to override the default
- * status → tone mapping for a specific feature.
+ * status → tone mapping for a specific feature. Automatically uses i18n
+ * dictionary keys (status.{status}).
  */
 export default function StatusBadge({ status, label, toneMap, size = 'xs', dot = false, className }) {
+  const { t } = useI18n();
   const tone = toneMap?.[status] ?? DEFAULT_TONES[status] ?? 'neutral';
+  const statusKey = status ? `status.${status}` : null;
+  const translated = statusKey ? t(statusKey) : null;
+  const displayLabel = label ?? (translated && translated !== statusKey ? translated : humanize(status));
+
   return (
     <Badge tone={tone} size={size} dot={dot} className={className}>
-      {label ?? humanize(status)}
+      {displayLabel}
     </Badge>
   );
 }

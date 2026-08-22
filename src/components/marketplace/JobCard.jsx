@@ -7,6 +7,7 @@ import SkillBadge from './SkillBadge';
 import PriceDisplay from './PriceDisplay';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../hooks/useAuth';
+import { useI18n } from '../../i18n';
 
 /**
  * JobCard — reusable job listing card.
@@ -22,6 +23,7 @@ import { useAuth } from '../../hooks/useAuth';
 export default function JobCard({ job, to, sample = false, savable = false, onSave, onUnsave, saving = false, className }) {
   const [localSaved, setLocalSaved] = useState(Boolean(job?.saved));
   const { user } = useAuth();
+  const { t } = useI18n();
   const navigate = useNavigate();
   const href = to ?? (job?.id ? `/jobs/${job.id}` : '/jobs');
   const jobType = job?.jobType || job?.type;
@@ -65,9 +67,9 @@ export default function JobCard({ job, to, sample = false, savable = false, onSa
           </Link>
         </h3>
         {job?.featured ? (
-          <Badge tone="primary">Featured</Badge>
+          <Badge tone="primary">{t('jobs.featured')}</Badge>
         ) : sample ? (
-          <Badge tone="neutral">Sample</Badge>
+          <Badge tone="neutral">{t('jobs.sample')}</Badge>
         ) : null}
       </div>
 
@@ -99,10 +101,18 @@ export default function JobCard({ job, to, sample = false, savable = false, onSa
         <div className="flex items-center justify-between gap-3 border-t border-gray-100 pt-4">
           <PriceDisplay amount={job?.budget} interval={job?.interval} />
           <div className="flex items-center gap-2">
-            {jobType && <Badge tone="info">{jobType}</Badge>}
+            {jobType && (
+              <Badge tone="info">
+                {t(`budgetType.${jobType}`) !== `budgetType.${jobType}`
+                  ? t(`budgetType.${jobType}`)
+                  : jobType}
+              </Badge>
+            )}
             {job?.experienceLevel && (
               <span className="hidden text-xs text-gray-400 sm:inline">
-                {job.experienceLevel}
+                {t(`experience.${job.experienceLevel}`) !== `experience.${job.experienceLevel}`
+                  ? t(`experience.${job.experienceLevel}`)
+                  : job.experienceLevel}
               </span>
             )}
             {savable && (
@@ -110,7 +120,7 @@ export default function JobCard({ job, to, sample = false, savable = false, onSa
                 type="button"
                 onClick={handleToggleSave}
                 aria-pressed={localSaved}
-                aria-label={localSaved ? 'Remove from saved jobs' : 'Save this job'}
+                aria-label={localSaved ? t('jobs.removeFromSaved') : t('jobs.saveJob')}
                 disabled={saving}
                 className="relative z-10 rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-brand-500 disabled:opacity-50"
               >
@@ -128,7 +138,11 @@ export default function JobCard({ job, to, sample = false, savable = false, onSa
               <Clock className="h-3.5 w-3.5" aria-hidden="true" /> {job.postedAt}
             </span>
           )}
-          {job?.proposalCount != null && <span>{job.proposalCount} proposals</span>}
+          {job?.proposalCount != null && (
+            <span>
+              {t('jobs.proposalCount', { count: job.proposalCount })}
+            </span>
+          )}
         </div>
       </div>
     </Card>

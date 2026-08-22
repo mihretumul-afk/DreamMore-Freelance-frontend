@@ -53,7 +53,15 @@ export function I18nProvider({ children }) {
   }, [language]);
 
   const t = useCallback(
-    (key) => MESSAGES[language]?.[key] ?? MESSAGES.en[key] ?? key,
+    (key, params) => {
+      let str = MESSAGES[language]?.[key] ?? MESSAGES.en[key] ?? key;
+      if (params && typeof params === 'object' && typeof str === 'string') {
+        Object.entries(params).forEach(([k, v]) => {
+          str = str.replaceAll(`{${k}}`, v ?? '');
+        });
+      }
+      return str;
+    },
     [language],
   );
 

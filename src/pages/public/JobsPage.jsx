@@ -15,6 +15,7 @@ import JobCardSkeleton from '../../components/jobs/JobCardSkeleton';
 import { jobService } from '../../services/jobService';
 import { savedService } from '../../services/savedService';
 import { useAuth } from '../../hooks/useAuth';
+import { useI18n } from '../../i18n';
 import { normalizeJob } from '../../utils/jobMapper';
 import { getErrorMessage } from '../../utils/errors';
 import { usePageTitle } from '../../hooks/usePageTitle';  const FILTER_LABELS = {
@@ -31,7 +32,8 @@ import { usePageTitle } from '../../hooks/usePageTitle';  const FILTER_LABELS = 
 };
 
 export default function JobsPage() {
-  usePageTitle('Browse Jobs');
+  const { t } = useI18n();
+  usePageTitle(t('jobs.title'));
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [jobs, setJobs] = useState(null);
@@ -187,10 +189,10 @@ export default function JobsPage() {
   return (
     <Container className="py-8 lg:py-12">
       <PageHeader
-        eyebrow="Marketplace"
-        title="Browse Jobs"
-        description="Search open jobs from employers across Ethiopia. Filters and search are live against the API."
-        breadcrumbs={[{ label: 'Home', to: '/' }, { label: 'Browse Jobs' }]}
+        eyebrow={t('jobs.eyebrow')}
+        title={t('jobs.title')}
+        description={t('jobs.description')}
+        breadcrumbs={[{ label: t('nav.homeShort'), to: '/' }, { label: t('jobs.title') }]}
       />
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
@@ -236,22 +238,22 @@ export default function JobsPage() {
                   if (value === '') updateParams({ search: '' });
                 }}
                 onSubmit={applyTextFilters}
-                placeholder="Search jobs, skills, or talent"
-                label="Search jobs"
+                placeholder={t('hero.searchPlaceholder')}
+                label={t('common.search')}
               />
             </div>
             <div className="flex items-center gap-3">
               <p className="text-sm text-gray-500" aria-live="polite">
                 {showSkeletons
-                  ? 'Loading jobs…'
+                  ? t('jobs.loading')
                   : total != null
-                    ? `${total} job${total === 1 ? '' : 's'} found`
+                    ? t('jobs.foundCount', { count: total })
                     : ''}
               </p>
               <FilterButton
                 active={activeFilters.length > 0}
                 icon={SlidersHorizontal}
-                label="Filters"
+                label={t('common.filter')}
                 onClick={() => setFiltersOpen(true)}
                 className="lg:hidden"
               />
@@ -282,7 +284,7 @@ export default function JobsPage() {
                 onClick={clearAll}
                 className="text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
               >
-                Clear all
+                {t('common.clearFilters')}
               </button>
             </div>
           )}
@@ -298,7 +300,7 @@ export default function JobsPage() {
 
           {showError && (
             <ErrorState
-              title="Unable to load jobs"
+              title={t('common.errorOccurred')}
               description={error}
               onRetry={loadJobs}
             />
@@ -307,15 +309,15 @@ export default function JobsPage() {
           {showEmpty && (
             <EmptyState
               icon={SearchX}
-              title="No jobs found"
-              description="Try adjusting your search or filters."
+              title={t('common.noResults')}
+              description={t('jobs.noJobs')}
               action={
                 <button
                   type="button"
                   onClick={clearAll}
                   className="text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
                 >
-                  Clear filters
+                  {t('common.clearFilters')}
                 </button>
               }
             />
@@ -350,8 +352,8 @@ export default function JobsPage() {
       <Modal
         open={filtersOpen}
         onClose={() => setFiltersOpen(false)}
-        title="Filters"
-        description="Refine the jobs you see."
+        title={t('common.filter')}
+        description={t('categories.description')}
       >
         <JobFiltersPanel
           values={{

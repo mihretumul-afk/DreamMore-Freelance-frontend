@@ -15,9 +15,11 @@ import { normalizeJob } from '../../utils/jobMapper';
 import { getErrorMessage } from '../../utils/errors';
 import { formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { useToast } from '../../hooks/useToast';
 
 export default function EmployerJobsPage() {
   usePageTitle('My Jobs');
+  const { showToast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Math.max(1, Number(searchParams.get('page')) || 1);
   const statusFilter = searchParams.get('status') ?? '';
@@ -61,12 +63,15 @@ export default function EmployerJobsPage() {
       switch (actionType) {
         case 'close':
           await employerService.closeJob(actionTarget.id);
+          showToast('Job closed successfully.', 'success');
           break;
         case 'reopen':
           await employerService.reopenJob(actionTarget.id);
+          showToast('Job reopened successfully.', 'success');
           break;
         case 'delete':
           await employerService.deleteJob(actionTarget.id);
+          showToast('Job deleted successfully.', 'success');
           break;
         default:
           break;
@@ -74,12 +79,12 @@ export default function EmployerJobsPage() {
       setActionTarget(null);
       setActionType(null);
       loadJobs();
-    } catch {
-      // Error is non-critical for UI actions
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Action failed. Please try again.'), 'error');
     } finally {
       setActing(false);
     }
-  }, [actionTarget, actionType, loadJobs]);
+  }, [actionTarget, actionType, loadJobs, showToast]);
 
   const openAction = (job, type) => {
     setActionTarget(job);

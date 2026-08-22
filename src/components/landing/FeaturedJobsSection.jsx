@@ -4,10 +4,13 @@ import { ArrowRight } from 'lucide-react';
 import Container from '../common/Container';
 import SectionHeading from '../common/SectionHeading';
 import JobCard from '../marketplace/JobCard';
+import HorizontalScrollRow from '../common/HorizontalScrollRow';
 import { jobService } from '../../services/jobService';
 import { normalizeJob } from '../../utils/jobMapper';
+import { useI18n } from '../../i18n';
 
 export default function FeaturedJobsSection() {
+  const { t } = useI18n();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,7 +21,7 @@ export default function FeaturedJobsSection() {
       .then((response) => {
         if (!active) return;
         const rawJobs = response?.data ?? (Array.isArray(response) ? response : []);
-        setJobs(rawJobs.map(normalizeJob).slice(0, 6));
+        setJobs(rawJobs.map(normalizeJob).slice(0, 8));
       })
       .catch(() => {
         // Fallback gracefully
@@ -33,46 +36,61 @@ export default function FeaturedJobsSection() {
   }, []);
 
   return (
-    <section className="bg-gray-50 py-16 lg:py-24" aria-labelledby="featured-jobs-heading">
+    <section className="bg-gray-50 py-12 lg:py-16" aria-labelledby="featured-jobs-heading">
       <Container>
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <SectionHeading
-            eyebrow="Featured"
-            title="Fresh opportunities"
-            description="Hand-picked jobs from employers across Ethiopia and beyond."
-          />
-          <Link
-            to="/jobs"
-            className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-brand-600 hover:text-brand-700"
-          >
-            Browse all jobs <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
-        </div>
+        <HorizontalScrollRow
+          scrollStep={340}
+          renderControls={({ controls }) => (
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <SectionHeading
+                eyebrow={t('featuredJobs.eyebrow') || 'Featured'}
+                title={t('featuredJobs.title') || 'Latest Job Opportunities'}
+                description={
+                  t('featuredJobs.description') ||
+                  'Hand-picked jobs from employers across Ethiopia and beyond.'
+                }
+              />
+              <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+                <Link
+                  to="/jobs"
+                  className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
+                >
+                  {t('featuredJobs.viewAll') || 'View All Jobs'}{' '}
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+                {controls}
+              </div>
+            </div>
+          )}
+        >
+          <h2 id="featured-jobs-heading" className="sr-only">
+            {t('featuredJobs.title') || 'Featured jobs'}
+          </h2>
 
-        <h2 id="featured-jobs-heading" className="sr-only">
-          Featured jobs
-        </h2>
-
-        {loading ? (
-          <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
+          {loading ? (
+            Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="h-56 animate-pulse rounded-card border border-gray-200 bg-white"
+                className="h-56 w-[300px] sm:w-[340px] md:w-[360px] shrink-0 animate-pulse rounded-card border border-gray-200 bg-white snap-start"
               />
-            ))}
-          </div>
-        ) : jobs.length === 0 ? (
-          <div className="mt-10 rounded-card border border-dashed border-gray-200 bg-white p-8 text-center">
-            <p className="text-sm text-gray-500">No open jobs available at the moment.</p>
-          </div>
-        ) : (
-          <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {jobs.map((job) => (
-              <JobCard key={job.id} job={job} savable />
-            ))}
-          </div>
-        )}
+            ))
+          ) : jobs.length === 0 ? (
+            <div className="w-full rounded-card border border-dashed border-gray-200 bg-white p-8 text-center">
+              <p className="text-sm text-gray-500">
+                {t('featuredJobs.empty') || 'No open jobs available at the moment.'}
+              </p>
+            </div>
+          ) : (
+            jobs.map((job) => (
+              <div
+                key={job.id}
+                className="w-[300px] sm:w-[340px] md:w-[360px] shrink-0 snap-start"
+              >
+                <JobCard job={job} savable className="h-full" />
+              </div>
+            ))
+          )}
+        </HorizontalScrollRow>
       </Container>
     </section>
   );

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  Award,
   Banknote,
   Briefcase,
   ClipboardList,
@@ -54,13 +55,20 @@ export default function FreelancerDashboardPage() {
         contractService.getMyContracts(),
       ]);
 
-      const proposals = (proposalsRes.data?.data ?? []).map(normalizeProposal);
-      const contracts = (contractsRes.data?.data ?? []).map(normalizeContract);
+      const rawProposals = Array.isArray(proposalsRes.data)
+        ? proposalsRes.data
+        : (proposalsRes.data?.data ?? []);
+      const rawContracts = Array.isArray(contractsRes.data)
+        ? contractsRes.data
+        : (contractsRes.data?.data ?? []);
+
+      const proposals = rawProposals.map(normalizeProposal);
+      const contracts = rawContracts.map(normalizeContract);
 
       setData({
         profile: normalizeFreelancer(profileRes.data),
         proposals,
-        proposalsTotal: proposalsRes.data?.meta?.total ?? proposals.length,
+        proposalsTotal: proposalsRes.meta?.total ?? proposalsRes.data?.meta?.total ?? proposals.length,
         contracts,
       });
 
@@ -111,6 +119,48 @@ export default function FreelancerDashboardPage() {
           profile.headline || 'Ready to find your next project? Browse open jobs to get started.'
         }
       />
+
+      {/* Mandatory Verification Banner */}
+      {!(user?.is_verified ?? user?.has_approved_credentials) && (
+        <Card className="border-amber-200 bg-gradient-to-r from-amber-50/80 to-orange-50/50 p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 shadow-xs">
+                <Award className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-ink-900">
+                  Mandatory Credential Verification
+                </h3>
+                <p className="mt-0.5 text-xs text-ink-700 leading-relaxed">
+                  Your credentials must be approved by an administrator before you can apply for jobs. Submit your certificates or verification documents to start bidding.
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-medium text-gray-500">
+                  <span className="text-emerald-700 font-semibold">1. Register ✅</span>
+                  <span>→</span>
+                  <span className={profile.headline ? 'text-emerald-700 font-semibold' : 'text-amber-700 font-semibold'}>
+                    2. Complete Profile {profile.headline ? '✅' : '⏳'}
+                  </span>
+                  <span>→</span>
+                  <span className="text-amber-800 font-semibold">3. Submit Credentials ⏳</span>
+                  <span>→</span>
+                  <span>4. Admin Approval</span>
+                  <span>→</span>
+                  <span>5. Apply for Jobs 🚀</span>
+                </div>
+              </div>
+            </div>
+            <Button
+              as={Link}
+              to="/freelancer/credentials"
+              size="sm"
+              className="shrink-0"
+            >
+              <Award className="h-4 w-4" aria-hidden="true" /> Manage Credentials
+            </Button>
+          </div>
+        </Card>
+      )}
 
       {/* Statistics — all real API data */}
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">

@@ -25,7 +25,10 @@ export default function FreelancerContractsPage() {
     setError(null);
     try {
       const res = await contractService.getMyContracts();
-      setContracts((res.data?.data ?? []).map(normalizeContract));
+      const rawContracts = Array.isArray(res.data)
+        ? res.data
+        : (res.data?.data ?? (Array.isArray(res) ? res : []));
+      setContracts(rawContracts.map(normalizeContract).filter(Boolean));
     } catch (err) {
       setError(getErrorMessage(err, 'Unable to load your contracts. Please try again.'));
     } finally {

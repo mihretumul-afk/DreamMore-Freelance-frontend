@@ -1,11 +1,15 @@
 import { AlertTriangle, RotateCcw } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Button from '../ui/Button';
+import { useI18n } from '../../i18n';
 
 /**
  * Error state with an optional retry button.
  */
-export default function ErrorState({ title = 'Something went wrong', description, onRetry, className }) {
+export default function ErrorState({ title, description, onRetry, className }) {
+  const { t } = useI18n();
+  const displayTitle = title ?? t('common.errorOccurred');
+
   return (
     <div
       role="alert"
@@ -17,11 +21,11 @@ export default function ErrorState({ title = 'Something went wrong', description
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-card">
         <AlertTriangle className="h-6 w-6 text-red-500" aria-hidden="true" />
       </div>
-      <h3 className="mt-4 text-base font-semibold text-ink-900">{title}</h3>
+      <h3 className="mt-4 text-base font-semibold text-ink-900">{displayTitle}</h3>
       {description && <p className="mt-1 max-w-sm text-sm text-gray-600">{description}</p>}
       {onRetry && (
         <Button variant="outline" size="sm" onClick={onRetry} className="mt-5">
-          <RotateCcw className="h-4 w-4" aria-hidden="true" /> Try again
+          <RotateCcw className="h-4 w-4" aria-hidden="true" /> {t('common.tryAgain')}
         </Button>
       )}
     </div>

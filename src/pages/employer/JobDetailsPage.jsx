@@ -19,10 +19,12 @@ import { normalizeJob } from '../../utils/jobMapper';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate, formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { useToast } from '../../hooks/useToast';
 
 export default function EmployerJobDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,12 +61,15 @@ export default function EmployerJobDetailsPage() {
       switch (actionType) {
         case 'close':
           await employerService.closeJob(id);
+          showToast('Job closed successfully.', 'success');
           break;
         case 'reopen':
           await employerService.reopenJob(id);
+          showToast('Job reopened successfully.', 'success');
           break;
         case 'delete':
           await employerService.deleteJob(id);
+          showToast('Job deleted successfully.', 'success');
           navigate('/employer/jobs', { replace: true });
           return;
         default:
@@ -72,12 +77,12 @@ export default function EmployerJobDetailsPage() {
       }
       setActionType(null);
       loadJob();
-    } catch {
-      // non-critical
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Action failed. Please try again.'), 'error');
     } finally {
       setActing(false);
     }
-  }, [actionType, id, loadJob, navigate]);
+  }, [actionType, id, loadJob, navigate, showToast]);
 
   if (loading) {
     return (

@@ -1,10 +1,11 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, BadgeCheck, ShieldCheck, Banknote, MapPin } from 'lucide-react';
+import { Search, BadgeCheck, ShieldCheck, Banknote, MapPin, Briefcase, Users, SearchX } from 'lucide-react';
 import Container from '../common/Container';
 import Button from '../ui/Button';
 import { useI18n } from '../../i18n';
 import { cn } from '../../utils/cn';
+import { searchService } from '../../services/searchService';
 
 const TRUST_BULLETS = [
   { icon: BadgeCheck, key: 'hero.verifiedTalent' },
@@ -24,11 +25,16 @@ const CATEGORY_PILLS = [
   { label: 'UI/UX Design', slug: 'ui-ux-design' },
 ];
 
+/** Debounce delay in milliseconds. */
+const DEBOUNCE_MS = 350;
+
+/** Minimum characters before a search is triggered. */
+const MIN_QUERY_LENGTH = 2;
+
 /**
  * HeroSection — transparent background so it can sit on top of a video
  * (VideoShowcase). Light/white text for contrast over dark footage.
- * Hire/work mode switch with real navigation, search bar, and category pills.
- * Spacing tightened to keep total height short.
+ * Global marketplace search with live results dropdown.
  */
 export default function HeroSection() {
   const { t } = useI18n();
@@ -36,23 +42,124 @@ export default function HeroSection() {
 
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState('hire'); // 'hire' | 'work'
+  const [results, setResults] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const debounceRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // ── Live search with debounce ──────────────────────────────────
+  const performSearch = useCallback(async (searchQuery) => {
+    const trimmed = searchQuery.trim();
+    if (trimmed.length < MIN_QUERY_LENGTH) {
+      setResults(null);
+      setDropdownOpen(false);
+      setHasSearched(false);
+      return;
+    }
+
+    setLoading(true);
+    setHasSearched(true);
+    try {
+      const response = await searchService.search(trimmed, { per_page: 5 });
+      if (response.success) {
+        setResults(response.data);
+        setDropdownOpen(true);
+      }
+    } catch {
+      // Silently fail — dropdown stays closed
+      setResults(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const handleInputChange = useCallback(
+    (e) => {
+      const value = e.target.value;
+      setQuery(value);
+
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+
+      debounceRef.current = setTimeout(() => {
+        performSearch(value);
+      }, DEBOUNCE_MS);
+    },
+    [performSearch],
+  );
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // ── Search ─────────────────────────────────────────────────────
-  const handleSearch = useCallback(
+  const handleSubmit = useCallback(
     (event) => {
       event.preventDefault();
-      const params = new URLSearchParams();
-      if (query.trim()) params.set('search', query.trim());
-      const qs = params.toString();
-      navigate(qs ? `/jobs?${qs}` : '/jobs');
+      setDropdownOpen(false);
+      const trimmed = query.trim();
+      if (!trimmed) {
+        navigate('/jobs');
+        return;
+      }
+      const params = new URLSearchParams({ search: trimmed });
+      navigate(`/jobs?${params.toString()}`);
     },
     [query, navigate],
   );
+
+  const handleResultClick = useCallback(
+    (type, id) => {
+      setDropdownOpen(false);
+      if (type === 'job') {
+        navigate(`/jobs/${id}`);
+      } else {
+        navigate(`/freelancers/${id}`);
+      }
+    },
+    [navigate],
+  );
+
+  const handleViewAllJobs = useCallback(() => {
+    setDropdownOpen(false);
+    const trimmed = query.trim();
+    const params = trimmed ? `?search=${encodeURIComponent(trimmed)}` : '';
+    navigate(`/jobs${params}`);
+  }, [query, navigate]);
+
+  const handleViewAllFreelancers = useCallback(() => {
+    setDropdownOpen(false);
+    const trimmed = query.trim();
+    const params = trimmed ? `?search=${encodeURIComponent(trimmed)}` : '';
+    navigate(`/freelancers${params}`);
+  }, [query, navigate]);
 
   // ── Mode navigation ────────────────────────────────────────────
   const handleModeChange = useCallback(
     (newMode) => {
       setMode(newMode);
+      setDropdownOpen(false);
       if (newMode === 'work') {
         navigate('/jobs');
       } else {
@@ -72,8 +179,15 @@ export default function HeroSection() {
   // ── Mode-aware copy ────────────────────────────────────────────
   const searchPlaceholder =
     mode === 'hire'
-      ? 'Search for talent, skills, or services...'
-      : 'Find jobs in web development, design, AI, video editing...';
+      ? t('hero.searchPlaceholderHire') || t('hero.searchPlaceholder')
+      : t('hero.searchPlaceholderWork') || t('hero.searchPlaceholder');
+
+  const jobs = results?.jobs ?? [];
+  const freelancers = results?.freelancers ?? [];
+  const jobsTotal = results?.jobs_total ?? 0;
+  const freelancersTotal = results?.freelancers_total ?? 0;
+  const hasAnyResults = jobs.length > 0 || freelancers.length > 0;
+  const showNoResults = hasSearched && !loading && results && !hasAnyResults;
 
   return (
     <section className="relative" aria-label="Hero">
@@ -130,49 +244,203 @@ export default function HeroSection() {
             </button>
           </div>
 
-          {/* ── Search Bar (stays solid white — keeps it usable/legible) ── */}
-          <form
-            onSubmit={handleSearch}
-            className="mx-auto mt-5 max-w-2xl animate-fade-up"
-            role="search"
+          {/* ── Search Bar with Live Dropdown ────────────────── */}
+          <div
+            className="mx-auto mt-5 max-w-2xl animate-fade-up relative"
+            ref={dropdownRef}
             style={{ animationDelay: '320ms' }}
           >
-            <div className="rounded-2xl border border-white/40 bg-white p-2 shadow-2xl transition-shadow duration-200 focus-within:shadow-2xl">
-              <div className="flex items-center gap-2">
-                <div className="flex flex-1 items-center gap-2 px-2">
-                  <Search className="h-5 w-5 shrink-0 text-gray-400" aria-hidden="true" />
-                  <input
-                    type="search"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder={searchPlaceholder}
-                    aria-label={t('hero.searchAria')}
-                    className="w-full bg-transparent py-2 text-sm text-ink-900 placeholder:text-gray-400 focus:outline-none"
-                  />
+            <form onSubmit={handleSubmit} role="search">
+              <div className="rounded-2xl border border-white/40 bg-white p-2 shadow-2xl transition-shadow duration-200 focus-within:shadow-2xl">
+                <div className="flex items-center gap-2">
+                  <div className="flex flex-1 items-center gap-2 px-2">
+                    <Search className="h-5 w-5 shrink-0 text-gray-400" aria-hidden="true" />
+                    <input
+                      ref={inputRef}
+                      type="search"
+                      value={query}
+                      onChange={handleInputChange}
+                      onFocus={() => {
+                        if (results && (hasAnyResults || showNoResults)) {
+                          setDropdownOpen(true);
+                        }
+                      }}
+                      placeholder={searchPlaceholder}
+                      aria-label={t('hero.searchAria')}
+                      aria-expanded={dropdownOpen}
+                      aria-controls="hero-search-results"
+                      aria-autocomplete="list"
+                      className="w-full bg-transparent py-2 text-sm text-ink-900 placeholder:text-gray-400 focus:outline-none"
+                    />
+                  </div>
+                  <Button type="submit" className="shrink-0">
+                    {t('hero.search')}
+                  </Button>
                 </div>
-                <Button type="submit" className="shrink-0">
-                  {t('hero.search')}
-                </Button>
               </div>
-            </div>
-            <p className="mt-2 text-xs text-white/70">{t('hero.searchHint')}</p>
-          </form>
+              <p className="mt-2 text-xs text-white/70">{t('hero.searchHint')}</p>
+            </form>
+
+            {/* ── Live Search Results Dropdown ──────────────── */}
+            {dropdownOpen && (
+              <div
+                id="hero-search-results"
+                role="listbox"
+                aria-label="Search results"
+                className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-2xl"
+              >
+                {loading && (
+                  <div className="flex items-center justify-center gap-2 p-6 text-sm text-gray-500">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
+                    {t('common.loading')}
+                  </div>
+                )}
+
+                {!loading && showNoResults && (
+                  <div className="flex flex-col items-center gap-2 p-8 text-center">
+                    <SearchX className="h-10 w-10 text-gray-300" aria-hidden="true" />
+                    <p className="text-sm font-medium text-gray-500">{t('common.noResults')}</p>
+                    <p className="text-xs text-gray-400">
+                      {t('hero.noResultsHint') || 'Try different keywords or browse all jobs and talent.'}
+                    </p>
+                  </div>
+                )}
+
+                {!loading && !showNoResults && hasAnyResults && (
+                  <div className="divide-y divide-gray-100">
+                    {/* Jobs Section */}
+                    {jobs.length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 px-4 py-2.5">
+                          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            <Briefcase className="h-3.5 w-3.5" aria-hidden="true" />
+                            {t('hero.resultJobs') || 'Jobs'}
+                            <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-bold text-gray-600">
+                              {jobsTotal}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleViewAllJobs}
+                            className="text-xs font-semibold text-brand-600 hover:text-brand-700"
+                          >
+                            {t('hero.viewAllJobs') || 'View all'}
+                          </button>
+                        </div>
+                        <div role="group" aria-label="Job results">
+                          {jobs.map((job) => (
+                            <button
+                              key={job.id}
+                              type="button"
+                              role="option"
+                              onClick={() => handleResultClick('job', job.id)}
+                              className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50"
+                            >
+                              <Briefcase className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" aria-hidden="true" />
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-medium text-ink-900">{job.title}</p>
+                                <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-400">
+                                  {job.category?.name && <span>{job.category.name}</span>}
+                                  {job.skills?.length > 0 && (
+                                    <span className="truncate">
+                                      {job.skills.slice(0, 3).map((s) => s.name).join(', ')}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              {job.max_budget > 0 && (
+                                <span className="shrink-0 text-xs font-medium text-gray-500">
+                                  {new Intl.NumberFormat('en-ET', { maximumFractionDigits: 0 }).format(job.max_budget)} ETB
+                                </span>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Freelancers Section */}
+                    {freelancers.length > 0 && (
+                      <div>
+                        <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 px-4 py-2.5">
+                          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            <Users className="h-3.5 w-3.5" aria-hidden="true" />
+                            {t('hero.resultTalent') || 'Talent'}
+                            <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[10px] font-bold text-gray-600">
+                              {freelancersTotal}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleViewAllFreelancers}
+                            className="text-xs font-semibold text-brand-600 hover:text-brand-700"
+                          >
+                            {t('hero.viewAllTalent') || 'View all'}
+                          </button>
+                        </div>
+                        <div role="group" aria-label="Freelancer results">
+                          {freelancers.map((freelancer) => (
+                            <button
+                              key={freelancer.id}
+                              type="button"
+                              role="option"
+                              onClick={() => handleResultClick('freelancer', freelancer.id)}
+                              className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50"
+                            >
+                              <div className="mt-0.5 h-8 w-8 shrink-0 rounded-full bg-brand-100 flex items-center justify-center text-xs font-bold text-brand-600">
+                                {(freelancer.user?.name ?? 'F').charAt(0)}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-medium text-ink-900">
+                                  {freelancer.user?.name ?? 'Freelancer'}
+                                </p>
+                                <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-400">
+                                  {freelancer.headline && (
+                                    <span className="truncate">{freelancer.headline}</span>
+                                  )}
+                                  {freelancer.skills?.length > 0 && !freelancer.headline && (
+                                    <span className="truncate">
+                                      {freelancer.skills.slice(0, 3).map((s) => s.name).join(', ')}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              {freelancer.hourly_rate > 0 && (
+                                <span className="shrink-0 text-xs font-medium text-gray-500">
+                                  {new Intl.NumberFormat('en-ET', { maximumFractionDigits: 0 }).format(freelancer.hourly_rate)} ETB/hr
+                                </span>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* ── Category Pills ────────────────────────────────── */}
           <div
             className="mt-5 flex animate-fade-up flex-wrap items-center justify-center gap-2"
             style={{ animationDelay: '400ms' }}
           >
-            {CATEGORY_PILLS.map((cat) => (
-              <button
-                key={cat.slug}
-                type="button"
-                onClick={() => handleCategoryClick(cat.slug)}
-                className="rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/20"
-              >
-                {cat.label}
-              </button>
-            ))}
+            {CATEGORY_PILLS.map((cat) => {
+              const catKey = `category.${cat.slug}.name`;
+              const translated = t(catKey);
+              const label = translated && translated !== catKey ? translated : cat.label;
+              return (
+                <button
+                  key={cat.slug}
+                  type="button"
+                  onClick={() => handleCategoryClick(cat.slug)}
+                  className="rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/20"
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Trust bullets */}

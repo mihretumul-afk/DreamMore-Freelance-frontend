@@ -53,6 +53,12 @@ export const contractService = {
     const response = await apiClient.post(`/contracts/${id}/cancel`);
     return response.data; // { success, message, data }
   },
+
+  /** Employer or Freelancer raises a dispute on a contract. */
+  disputeContract: async (id, data) => {
+    const response = await apiClient.post(`/contracts/${id}/dispute`, data);
+    return response.data; // { success, message, data }
+  },
 };
 
 export default contractService;

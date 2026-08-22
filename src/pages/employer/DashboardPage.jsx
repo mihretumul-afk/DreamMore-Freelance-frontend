@@ -54,13 +54,18 @@ export default function EmployerDashboardPage() {
         contractService.getMyContracts(),
       ]);
 
-      const jobs = (jobsRes.data?.data ?? []).map(normalizeJob);
-      const contracts = (contractsRes.data?.data ?? []).map(normalizeContract);
+      const rawJobs = Array.isArray(jobsRes.data) ? jobsRes.data : (jobsRes.data?.data ?? []);
+      const rawContracts = Array.isArray(contractsRes.data)
+        ? contractsRes.data
+        : (contractsRes.data?.data ?? []);
+
+      const jobs = rawJobs.map(normalizeJob);
+      const contracts = rawContracts.map(normalizeContract);
 
       setData({
         profile: normalizeEmployer(profileRes.data),
         jobs,
-        jobsTotal: jobsRes.data?.meta?.total ?? jobs.length,
+        jobsTotal: jobsRes.meta?.total ?? jobsRes.data?.meta?.total ?? jobs.length,
         contracts,
       });
 

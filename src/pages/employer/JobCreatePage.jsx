@@ -9,8 +9,10 @@ import Select from '../../components/ui/Select';
 import Textarea from '../../components/ui/Textarea';
 import { employerService } from '../../services/employerService';
 import { categoryService } from '../../services/categoryService';
+import { skillService } from '../../services/skillService';
 import { getErrorMessage, getFieldErrors } from '../../utils/errors';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { useToast } from '../../hooks/useToast';
 
 const BUDGET_TYPES = [
   { value: 'fixed', label: 'Fixed Price' },
@@ -41,15 +43,18 @@ const INITIAL_FORM = {
   location_type: 'remote',
   location: '',
   deadline: '',
-  skills: '',
+  selectedSkillIds: [],
 };
 
 export default function EmployerJobCreatePage() {
   usePageTitle('Post a Job');
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [skills, setSkills] = useState([]);
+  const [loadingSkills, setLoadingSkills] = useState(false);
   const [form, setForm] = useState(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
@@ -65,12 +70,39 @@ export default function EmployerJobCreatePage() {
       .finally(() => setLoadingCategories(false));
   }, []);
 
+  // Load skills when category changes
+  useEffect(() => {
+    if (!form.category_id) {
+      setSkills([]);
+      setForm((prev) => ({ ...prev, selectedSkillIds: [] }));
+      return;
+    }
+
+    setLoadingSkills(true);
+    skillService
+      .getSkills({ category_id: form.category_id })
+      .then((res) => {
+        if (res.success) setSkills(res.data ?? []);
+      })
+      .catch(() => setSkills([]))
+      .finally(() => setLoadingSkills(false));
+  }, [form.category_id]);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     if (fieldErrors[name]) {
       setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
     }
+  };
+
+  const handleSkillToggle = (skillId) => {
+    setForm((prev) => {
+      const ids = prev.selectedSkillIds.includes(skillId)
+        ? prev.selectedSkillIds.filter((id) => id !== skillId)
+        : [...prev.selectedSkillIds, skillId];
+      return { ...prev, selectedSkillIds: ids };
+    });
   };
 
   const handleSubmit = useCallback(async (event) => {
@@ -91,28 +123,31 @@ export default function EmployerJobCreatePage() {
       location_type: form.location_type,
       location: form.location.trim() || null,
       deadline: form.deadline || null,
-      skills: form.skills.trim()
-        ? form.skills.split(',').map((s) => s.trim()).filter(Boolean)
-        : [],
+      skills: form.selectedSkillIds,
     };
 
     try {
       const response = await employerService.createJob(payload);
       if (response.success && response.data) {
+        showToast('Job posted successfully!', 'success');
         navigate(`/employer/jobs/${response.data.id}`, { replace: true });
       } else {
+        showToast('Job posted successfully!', 'success');
         navigate('/employer/jobs', { replace: true });
       }
     } catch (error) {
       if (error?.response?.status === 422) {
         const errors = getFieldErrors(error);
         setFieldErrors(errors);
+        showToast(getErrorMessage(error, 'Unable to create job. Please check your input.'), 'error');
       } else {
-        setGeneralError(getErrorMessage(error, 'Unable to create job. Please try again.'));
+        const msg = getErrorMessage(error, 'Unable to create job. Please try again.');
+        setGeneralError(msg);
+        showToast(msg, 'error');
       }
       setSubmitting(false);
     }
-  }, [form, navigate]);
+  }, [form, navigate, showToast]);
 
   return (
     <div className="space-y-6">
@@ -162,7 +197,7 @@ export default function EmployerJobCreatePage() {
 
           {/* Category & Skills */}
           <Card>
-            <CardHeader title="Category & Skills" description="Help talent find your job by selecting the right category." />
+            <CardHeader title="Category & Skills" description="Help talent find your job by selecting the right category and skills." />
             <CardBody className="space-y-4">
               <Select
                 label="Category"
@@ -177,16 +212,51 @@ export default function EmployerJobCreatePage() {
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
               </Select>
-              <Input
-                label="Required skills"
-                name="skills"
-                placeholder="e.g. React, Laravel, Tailwind CSS (comma-separated)"
-                value={form.skills}
-                onChange={handleChange}
-                error={fieldErrors.skills}
-                hint="Separate skills with commas."
-                disabled={submitting}
-              />
+
+              {form.category_id && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-ink-800">
+                    Required skills
+                  </label>
+                  {loadingSkills ? (
+                    <p className="text-sm text-gray-500">Loading skills...</p>
+                  ) : skills.length === 0 ? (
+                    <p className="text-sm text-gray-500">No skills available for this category.</p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {skills.map((skill) => (
+                        <button
+                          key={skill.id}
+                          type="button"
+                          onClick={() => handleSkillToggle(skill.id)}
+                          disabled={submitting}
+                          className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                            form.selectedSkillIds.includes(skill.id)
+                              ? 'border-brand-500 bg-brand-50 text-brand-700'
+                              : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                          }`}
+                        >
+                          {skill.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {form.selectedSkillIds.length > 0 && (
+                    <p className="text-xs text-gray-500">
+                      {form.selectedSkillIds.length} skill{form.selectedSkillIds.length !== 1 ? 's' : ''} selected
+                    </p>
+                  )}
+                  {fieldErrors.skills && (
+                    <p role="alert" className="text-xs font-medium text-danger-600">
+                      {fieldErrors.skills}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {!form.category_id && (
+                <p className="text-sm text-gray-500">Select a category first to choose skills.</p>
+              )}
             </CardBody>
           </Card>
 

@@ -32,8 +32,11 @@ import { formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import apiClient from '../../api/client';
 
+import { useAuth } from '../../hooks/useAuth';
+
 export default function FreelancerProfilePage() {
   usePageTitle('My Profile');
+  const { refreshUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -114,11 +117,13 @@ export default function FreelancerProfilePage() {
               await apiClient.post('/avatar', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
               });
-              loadProfile();
+              await loadProfile();
+              if (refreshUser) await refreshUser();
             }}
             onRemove={async () => {
               await apiClient.delete('/avatar');
-              loadProfile();
+              await loadProfile();
+              if (refreshUser) await refreshUser();
             }}
           />
           <div className="min-w-0">

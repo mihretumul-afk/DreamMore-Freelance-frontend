@@ -9,6 +9,8 @@ import {
   XCircle,
   Clock,
   Upload,
+  Eye,
+  Download,
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
@@ -20,10 +22,12 @@ import Select from '../../components/ui/Select';
 import Textarea from '../../components/ui/Textarea';
 import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
+import DocumentPreview from '../../components/ui/DocumentPreview';
 import { credentialService } from '../../services/credentialService';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { useToast } from '../../hooks/useToast';
 
 const CREDENTIAL_TYPES = [
   { value: 'dream_more_certificate', label: 'Dream More Certificate' },
@@ -39,7 +43,19 @@ const STATUS_CONFIG = {
   rejected: { icon: XCircle, tone: 'danger', label: 'Rejected' },
 };
 
-
+/** Get MIME type from file name */
+function getMimeType(fileName) {
+  if (!fileName) return null;
+  const ext = fileName.split('.').pop().toLowerCase();
+  const map = {
+    pdf: 'application/pdf',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    png: 'image/png',
+    webp: 'image/webp',
+  };
+  return map[ext] || null;
+}
 
 const INITIAL_FORM = {
   title: '',
@@ -54,6 +70,7 @@ const INITIAL_FORM = {
 
 export default function CredentialsPage() {
   usePageTitle('My Credentials');
+  const { showToast } = useToast();
 
   const [credentials, setCredentials] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,6 +83,11 @@ export default function CredentialsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Document preview state
+  const [previewTarget, setPreviewTarget] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const loadCredentials = useCallback(async () => {
     setLoading(true);
@@ -131,13 +153,14 @@ export default function CredentialsPage() {
       if (form.document) formData.append('document', form.document);
 
       if (editingId) {
-        // For edit, document is optional
         if (!form.document) {
           formData.delete('document');
         }
         await credentialService.updateCredential(editingId, formData);
+        showToast('Credential updated successfully!', 'success');
       } else {
         await credentialService.createCredential(formData);
+        showToast('Credential submitted for verification.', 'success');
       }
       setShowUploadModal(false);
       resetForm();
@@ -145,6 +168,9 @@ export default function CredentialsPage() {
     } catch (err) {
       if (err?.response?.status === 422) {
         setFormErrors(err.response.data?.errors ?? {});
+        showToast(getErrorMessage(err, 'Unable to save credential. Please check your input.'), 'error');
+      } else {
+        showToast(getErrorMessage(err, 'Unable to save credential. Please try again.'), 'error');
       }
     } finally {
       setSubmitting(false);
@@ -156,18 +182,53 @@ export default function CredentialsPage() {
     setDeleting(true);
     try {
       await credentialService.deleteCredential(deleteTarget.id);
+      showToast('Credential deleted successfully.', 'success');
       setDeleteTarget(null);
       loadCredentials();
-    } catch {
-      // non-critical
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Unable to delete credential. Please try again.'), 'error');
     } finally {
       setDeleting(false);
     }
   };
 
+  /** Fetch the credential file and create a blob URL for preview. */
+  const handlePreview = useCallback(async (cred) => {
+    setPreviewLoading(true);
+    setPreviewTarget(cred);
+    try {
+      const response = await credentialService.downloadCredential(cred.id);
+      const mime = getMimeType(cred.file_original_name) || response.headers?.['content-type'] || 'application/pdf';
+      const blob = new Blob([response.data], { type: mime });
+      const url = window.URL.createObjectURL(blob);
+      setPreviewUrl(url);
+    } catch {
+      setPreviewUrl(null);
+    } finally {
+      setPreviewLoading(false);
+    }
+  }, []);
+
+  /** Download a credential file. */
+  const handleDownload = useCallback(async (cred) => {
+    try {
+      const response = await credentialService.downloadCredential(cred.id);
+      const mime = getMimeType(cred.file_original_name) || response.headers?.['content-type'] || 'application/octet-stream';
+      const blob = new Blob([response.data], { type: mime });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', cred.file_original_name || `credential-${cred.id}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+    } catch {
+      showToast('Unable to download file. Please try again.', 'error');
+    }
+  }, [showToast]);
+
   const getTypeLabel = (type) => CREDENTIAL_TYPES.find((t) => t.value === type)?.label ?? type;
-
-
 
   return (
     <div className="space-y-6">
@@ -246,6 +307,7 @@ export default function CredentialsPage() {
             const StatusInfo = STATUS_CONFIG[cred.status] ?? STATUS_CONFIG.pending;
             const canEdit = cred.status === 'pending';
             const canDelete = cred.status === 'pending';
+            const hasDocument = Boolean(cred.file_path);
 
             return (
               <Card key={cred.id} className="p-5">
@@ -312,7 +374,17 @@ export default function CredentialsPage() {
                       </p>
                     )}
                   </div>
-                  <div className="flex shrink-0 gap-2">
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    {hasDocument && (
+                      <>
+                        <Button variant="outline" size="xs" onClick={() => handlePreview(cred)}>
+                          <Eye className="h-3.5 w-3.5" aria-hidden="true" /> Preview
+                        </Button>
+                        <Button variant="outline" size="xs" onClick={() => handleDownload(cred)}>
+                          <Download className="h-3.5 w-3.5" aria-hidden="true" /> Download
+                        </Button>
+                      </>
+                    )}
                     {canEdit && (
                       <Button variant="outline" size="xs" onClick={() => openEdit(cred)}>
                         <Pencil className="h-3.5 w-3.5" aria-hidden="true" /> Edit
@@ -422,7 +494,7 @@ export default function CredentialsPage() {
             )}
           </div>
 
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-4">
             <Button type="button" variant="outline" onClick={() => { setShowUploadModal(false); resetForm(); }}>
               Cancel
             </Button>
@@ -450,6 +522,21 @@ export default function CredentialsPage() {
           </Button>
         </div>
       </Modal>
+
+      {/* Document Preview Modal */}
+      <DocumentPreview
+        open={Boolean(previewTarget)}
+        onClose={() => {
+          if (previewUrl?.startsWith('blob:')) window.URL.revokeObjectURL(previewUrl);
+          setPreviewTarget(null);
+          setPreviewUrl(null);
+        }}
+        fileName={previewTarget?.file_original_name}
+        fileType={getMimeType(previewTarget?.file_original_name)}
+        downloadUrl={previewUrl}
+        loading={previewLoading}
+        onDownload={previewTarget ? () => handleDownload(previewTarget) : undefined}
+      />
     </div>
   );
 }

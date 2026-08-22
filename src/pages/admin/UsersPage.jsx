@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Users, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Users, Filter, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
 import Card, { CardBody } from '../../components/ui/Card';
@@ -10,6 +10,8 @@ import Select from '../../components/ui/Select';
 import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
 import { adminService } from '../../services/adminService';
+import { useAuth } from '../../hooks/useAuth';
+import { useToast } from '../../hooks/useToast';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
@@ -35,6 +37,8 @@ const ROLE_BADGE_TONE = {
 
 export default function AdminUsersPage() {
   usePageTitle('Manage Users — Admin');
+  const { user: currentUser } = useAuth();
+  const { showToast } = useToast();
 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,6 +54,10 @@ export default function AdminUsersPage() {
   // Toggle modal
   const [toggleTarget, setToggleTarget] = useState(null);
   const [toggling, setToggling] = useState(false);
+
+  // Delete modal
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
@@ -86,12 +94,28 @@ export default function AdminUsersPage() {
     setToggling(true);
     try {
       await adminService.toggleUserStatus(toggleTarget.id, !toggleTarget.is_active);
+      showToast(`User ${toggleTarget.is_active !== false ? 'deactivated' : 'activated'} successfully.`, 'success');
       setToggleTarget(null);
       loadUsers();
-    } catch {
-      // Error is non-critical; user can retry
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Unable to change user status.'), 'error');
     } finally {
       setToggling(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await adminService.deleteUser(deleteTarget.id);
+      showToast(`User ${deleteTarget.name} deleted successfully.`, 'success');
+      setDeleteTarget(null);
+      loadUsers();
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Unable to delete user.'), 'error');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -182,55 +206,70 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-gray-50/50">
-                    <td className="px-5 py-3">
-                      <Link
-                        to={`/admin/users/${u.id}`}
-                        className="text-sm font-bold text-ink-900 hover:text-brand-600"
-                      >
-                        {u.name}
-                      </Link>
-                      <p className="text-xs text-gray-500">{u.email}</p>
-                    </td>
-                    <td className="px-5 py-3">
-                      <Badge tone={ROLE_BADGE_TONE[u.role] || 'neutral'} size="xs">
-                        {u.role}
-                      </Badge>
-                    </td>
-                    <td className="px-5 py-3">
-                      <Badge
-                        tone={u.is_active !== false ? 'success' : 'danger'}
-                        size="xs"
-                        dot
-                      >
-                        {u.is_active !== false ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </td>
-                    <td className="hidden px-5 py-3 text-xs text-gray-500 md:table-cell">
-                      {formatDate(u.created_at ?? u.createdAt)}
-                    </td>
-                    <td className="px-5 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          as={Link}
+                {users.map((u) => {
+                  const isSelf = currentUser?.id === u.id;
+                  return (
+                    <tr key={u.id} className="hover:bg-gray-50/50">
+                      <td className="px-5 py-3">
+                        <Link
                           to={`/admin/users/${u.id}`}
-                          variant="ghost"
-                          size="xs"
+                          className="text-sm font-bold text-ink-900 hover:text-brand-600"
                         >
-                          View
-                        </Button>
-                        <Button
-                          variant={u.is_active !== false ? 'danger' : 'success'}
+                          {u.name}
+                        </Link>
+                        <p className="text-xs text-gray-500">{u.email}</p>
+                      </td>
+                      <td className="px-5 py-3">
+                        <Badge tone={ROLE_BADGE_TONE[u.role] || 'neutral'} size="xs">
+                          {u.role}
+                        </Badge>
+                      </td>
+                      <td className="px-5 py-3">
+                        <Badge
+                          tone={u.is_active !== false ? 'success' : 'danger'}
                           size="xs"
-                          onClick={() => setToggleTarget(u)}
+                          dot
                         >
-                          {u.is_active !== false ? 'Deactivate' : 'Activate'}
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          {u.is_active !== false ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </td>
+                      <td className="hidden px-5 py-3 text-xs text-gray-500 md:table-cell">
+                        {formatDate(u.created_at ?? u.createdAt)}
+                      </td>
+                      <td className="px-5 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            as={Link}
+                            to={`/admin/users/${u.id}`}
+                            variant="ghost"
+                            size="xs"
+                          >
+                            View
+                          </Button>
+                          {!isSelf && (
+                            <>
+                              <Button
+                                variant={u.is_active !== false ? 'outline' : 'success'}
+                                size="xs"
+                                onClick={() => setToggleTarget(u)}
+                              >
+                                {u.is_active !== false ? 'Deactivate' : 'Activate'}
+                              </Button>
+                              <Button
+                                variant="danger"
+                                size="xs"
+                                onClick={() => setDeleteTarget(u)}
+                                title="Delete user"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" /> Delete
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -287,6 +326,29 @@ export default function AdminUsersPage() {
             onClick={handleToggle}
           >
             {toggleTarget?.is_active !== false ? 'Deactivate' : 'Activate'}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Confirm delete user modal */}
+      <Modal
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        title="Delete User"
+        description={`Are you sure you want to permanently delete "${deleteTarget?.name}" (${deleteTarget?.email})? This action cannot be undone.`}
+        size="sm"
+      >
+        <div className="flex justify-end gap-3">
+          <Button variant="outline" size="sm" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            loading={deleting}
+            onClick={handleDelete}
+          >
+            Delete User
           </Button>
         </div>
       </Modal>

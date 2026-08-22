@@ -9,6 +9,8 @@ import Input from '../../components/ui/Input';
 import Select from '../../components/ui/Select';
 import Textarea from '../../components/ui/Textarea';
 import FreelancerProfileSkeleton from '../../components/freelancers/FreelancerProfileSkeleton';
+import PortfolioManager from '../../components/freelancers/PortfolioManager';
+import VerificationCard from '../../components/common/VerificationCard';
 import { freelancerService } from '../../services/freelancerService';
 import { skillService } from '../../services/skillService';
 import {
@@ -19,6 +21,7 @@ import {
 import { getErrorMessage, getFieldErrors } from '../../utils/errors';
 import { isHttpUrl } from '../../utils/validate';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { useToast } from '../../hooks/useToast';
 
 /** Backend error field name → form state key. */
 const ERROR_FIELD_MAP = {
@@ -199,6 +202,7 @@ function SkillSearch({ existingSkillIds, onAdd, disabled }) {
 export default function FreelancerProfileEditPage() {
   usePageTitle('Edit Profile');
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -303,6 +307,7 @@ export default function FreelancerProfileEditPage() {
     setSubmitting(true);
     try {
       await freelancerService.updateMyProfile(freelancerFormToPayload(form));
+      showToast('Profile updated successfully!', 'success');
       navigate('/freelancer/profile', { replace: true });
     } catch (error) {
       const errors = getFieldErrors(error);
@@ -313,11 +318,11 @@ export default function FreelancerProfileEditPage() {
       });
       setFieldErrors(mapped);
       const hasFieldErrors = Object.keys(mapped).length > 0;
-      setGeneralError(
-        hasFieldErrors
-          ? null
-          : getErrorMessage(error, 'Unable to save your profile. Please try again.'),
-      );
+      const msg = hasFieldErrors
+        ? null
+        : getErrorMessage(error, 'Unable to save your profile. Please try again.');
+      setGeneralError(msg);
+      if (msg) showToast(msg, 'error');
       setSubmitting(false);
     }
   };
@@ -579,6 +584,12 @@ export default function FreelancerProfileEditPage() {
               </div>
             </CardBody>
           </Card>
+
+          {/* Verification */}
+          <VerificationCard userRole="freelancer" />
+
+          {/* Portfolio & Projects */}
+          <PortfolioManager />
         </div>
 
         {/* Sidebar actions */}

@@ -39,39 +39,39 @@ export const INFO_NAV_LINKS = [];
 
 /** Sidebar navigation for the freelancer dashboard. */
 export const FREELANCER_NAV_LINKS = [
-  { label: 'Dashboard', to: '/freelancer/dashboard', icon: LayoutDashboard, end: true },
-  { label: 'My Profile', to: '/freelancer/profile', icon: User, end: true },
-  { label: 'Find Jobs', to: '/freelancer/jobs', icon: Briefcase, end: true },
-  { label: 'Saved Jobs', to: '/freelancer/saved-jobs', icon: Bookmark, end: true },
-  { label: 'Credentials', to: '/freelancer/credentials', icon: Award, end: true },
-  { label: 'Proposals', to: '/freelancer/proposals', icon: FileText, end: false },
-  { label: 'Contracts', to: '/freelancer/contracts', icon: Handshake, end: true },
-  { label: 'Messages', to: '/freelancer/messages', icon: MessageSquare, end: true },
-  { label: 'Notifications', to: '/freelancer/notifications', icon: Bell, end: true },
+  { key: 'nav.dashboard', label: 'Dashboard', to: '/freelancer/dashboard', icon: LayoutDashboard, end: true },
+  { key: 'nav.myProfile', label: 'My Profile', to: '/freelancer/profile', icon: User, end: true },
+  { key: 'nav.findJobs', label: 'Find Jobs', to: '/freelancer/jobs', icon: Briefcase, end: true },
+  { key: 'nav.savedJobs', label: 'Saved Jobs', to: '/freelancer/saved-jobs', icon: Bookmark, end: true },
+  { key: 'nav.credentials', label: 'Credentials', to: '/freelancer/credentials', icon: Award, end: true },
+  { key: 'nav.proposals', label: 'Proposals', to: '/freelancer/proposals', icon: FileText, end: false },
+  { key: 'nav.contracts', label: 'Contracts', to: '/freelancer/contracts', icon: Handshake, end: true },
+  { key: 'nav.messages', label: 'Messages', to: '/freelancer/messages', icon: MessageSquare, end: true },
+  { key: 'nav.notifications', label: 'Notifications', to: '/freelancer/notifications', icon: Bell, end: true },
 ];
 
 /** Sidebar navigation for the employer dashboard. */
 export const EMPLOYER_NAV_LINKS = [
-  { label: 'Dashboard', to: '/employer/dashboard', icon: LayoutDashboard, end: true },
-  { label: 'Company Profile', to: '/employer/profile', icon: Building2, end: true },
-  { label: 'My Jobs', to: '/employer/jobs', icon: ClipboardList, end: false },
-  { label: 'Post a Job', to: '/employer/jobs/create', icon: PlusCircle, end: true },
-  { label: 'Saved Talent', to: '/employer/saved-freelancers', icon: Bookmark, end: true },
-  { label: 'Contracts', to: '/employer/contracts', icon: Handshake, end: true },
-  { label: 'Messages', to: '/employer/messages', icon: MessageSquare, end: true },
-  { label: 'Notifications', to: '/employer/notifications', icon: Bell, end: true },
+  { key: 'nav.dashboard', label: 'Dashboard', to: '/employer/dashboard', icon: LayoutDashboard, end: true },
+  { key: 'nav.companyProfile', label: 'Company Profile', to: '/employer/profile', icon: Building2, end: true },
+  { key: 'nav.myJobs', label: 'My Jobs', to: '/employer/jobs', icon: ClipboardList, end: false },
+  { key: 'nav.postJob', label: 'Post a Job', to: '/employer/jobs/create', icon: PlusCircle, end: true },
+  { key: 'nav.savedTalent', label: 'Saved Talent', to: '/employer/saved-freelancers', icon: Bookmark, end: true },
+  { key: 'nav.contracts', label: 'Contracts', to: '/employer/contracts', icon: Handshake, end: true },
+  { key: 'nav.messages', label: 'Messages', to: '/employer/messages', icon: MessageSquare, end: true },
+  { key: 'nav.notifications', label: 'Notifications', to: '/employer/notifications', icon: Bell, end: true },
 ];
 
 /** Sidebar navigation for the admin dashboard. */
 export const ADMIN_NAV_LINKS = [
-  { label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard, end: true },
-  { label: 'Users', to: '/admin/users', icon: Users, end: false },
-  { label: 'Verifications', to: '/admin/verifications', icon: ShieldCheck, end: true },
-  { label: 'Jobs', to: '/admin/jobs', icon: BriefcaseBusiness, end: true },
-  { label: 'Reports', to: '/admin/reports', icon: Flag, end: true },
-  { label: 'Categories', to: '/admin/categories', icon: FolderTree, end: true },
-  { label: 'Skills', to: '/admin/skills', icon: Wrench, end: true },
-  { label: 'Settings', to: '/admin/settings', icon: Settings, end: true },
+  { key: 'nav.dashboard', label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard, end: true },
+  { key: 'nav.users', label: 'Users', to: '/admin/users', icon: Users, end: false },
+  { key: 'nav.verifications', label: 'Verifications', to: '/admin/verifications', icon: ShieldCheck, end: true },
+  { key: 'nav.jobs', label: 'Jobs', to: '/admin/jobs', icon: BriefcaseBusiness, end: true },
+  { key: 'nav.reports', label: 'Reports', to: '/admin/reports', icon: Flag, end: true },
+  { key: 'nav.categories', label: 'Categories', to: '/admin/categories', icon: FolderTree, end: true },
+  { key: 'nav.skills', label: 'Skills', to: '/admin/skills', icon: Wrench, end: true },
+  { key: 'nav.settings', label: 'Settings', to: '/admin/settings', icon: Settings, end: true },
 ];
 
 /**

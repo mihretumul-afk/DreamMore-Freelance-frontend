@@ -6,8 +6,9 @@ import { timeAgo } from './format';
  * Confirmed API fields:
  *   id, job_id, freelancer_id, cover_letter, bid_amount, currency,
  *   estimated_duration, status, job {id,title,slug},
- *   freelancer {id,name,avatar}, contract {id,status} | null,
- *   created_at, updated_at
+ *   freelancer {id,name,avatar,headline,rating,review_count,verification_status,skills},
+ *   portfolio_items [{id,title,description,project_url,image_url}],
+ *   contract {id,status} | null, created_at, updated_at
  */
 export function normalizeProposal(proposal) {
   if (!proposal) return null;
@@ -28,8 +29,24 @@ export function normalizeProposal(proposal) {
       : null,
     jobTitle: proposal.job?.title,
     freelancer: proposal.freelancer
-      ? { id: proposal.freelancer.id, name: proposal.freelancer.name, avatar: proposal.freelancer.avatar }
+      ? {
+          id: proposal.freelancer.id,
+          name: proposal.freelancer.name,
+          avatar: proposal.freelancer.avatar,
+          headline: proposal.freelancer.headline,
+          rating: proposal.freelancer.rating ?? 0,
+          reviewCount: proposal.freelancer.review_count ?? 0,
+          verificationStatus: proposal.freelancer.verification_status ?? 'unverified',
+          skills: proposal.freelancer.skills ?? [],
+        }
       : null,
+    portfolioItems: (proposal.portfolio_items || []).map((item) => ({
+      id: item.id,
+      title: item.title,
+      description: item.description,
+      projectUrl: item.project_url,
+      imageUrl: item.image_url,
+    })),
     contract: proposal.contract ? { id: proposal.contract.id, status: proposal.contract.status } : null,
 
     createdAt: proposal.created_at,
@@ -39,15 +56,19 @@ export function normalizeProposal(proposal) {
 }
 
 /**
- * Map proposal form state into the backend payload (ProposalRequest rules:
- * cover_letter required ≤5000, bid_amount numeric 1–99999999.99, currency
- * optional size:3, estimated_duration required ≤255).
+ * Map proposal form state into the backend payload.
  */
 export function proposalFormToPayload(form) {
-  return {
+  const payload = {
     cover_letter: form.coverLetter.trim(),
     bid_amount: Number(form.bidAmount),
     currency: (form.currency || '').trim().toUpperCase() || 'ETB',
     estimated_duration: form.estimatedDuration.trim(),
   };
+
+  if (Array.isArray(form.portfolioItemIds) && form.portfolioItemIds.length > 0) {
+    payload.portfolio_item_ids = form.portfolioItemIds;
+  }
+
+  return payload;
 }

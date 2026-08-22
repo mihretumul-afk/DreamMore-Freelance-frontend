@@ -74,6 +74,7 @@ export default function MilestoneList({
                 <MilestoneCard
                   milestone={milestone}
                   role={role}
+                  contractId={contract.id}
                   contractActive={contractActive}
                   busy={
                     busyAction === milestone.id ||

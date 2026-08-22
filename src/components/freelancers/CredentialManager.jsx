@@ -352,7 +352,7 @@ export default function CredentialManager() {
             <p className="mt-1 text-xs text-gray-400">JPG, PNG, WEBP, or PDF. Max 10MB.</p>
           </div>
 
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-4">
             <Button variant="outline" onClick={() => setShowUpload(false)} disabled={uploading}>
               Cancel
             </Button>

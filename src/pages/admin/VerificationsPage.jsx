@@ -13,6 +13,7 @@ import { adminService } from '../../services/adminService';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { useToast } from '../../hooks/useToast';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'All statuses' },
@@ -49,6 +50,7 @@ function getMimeType(fileName) {
 
 export default function AdminVerificationsPage() {
   usePageTitle('Verifications — Admin');
+  const { showToast } = useToast();
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -97,22 +99,26 @@ export default function AdminVerificationsPage() {
       if (isCredential) {
         if (actionType === 'approve') {
           await adminService.approveCredential(actionTarget.id);
+          showToast('Credential approved successfully.', 'success');
         } else {
           await adminService.rejectCredential(actionTarget.id, rejectReason);
+          showToast('Credential rejected.', 'success');
         }
       } else {
         if (actionType === 'approve') {
           await adminService.approveVerification(actionTarget.id);
+          showToast('Verification approved.', 'success');
         } else {
           await adminService.rejectVerification(actionTarget.id, rejectReason);
+          showToast('Verification rejected.', 'success');
         }
       }
       setActionTarget(null);
       setActionType(null);
       setRejectReason('');
       loadVerifications();
-    } catch {
-      // non-critical
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Action failed. Please try again.'), 'error');
     } finally {
       setProcessing(false);
     }
@@ -121,14 +127,14 @@ export default function AdminVerificationsPage() {
   /** Fetch the credential file and create a blob URL for preview. */
   const handlePreview = useCallback(async (credential) => {
     setPreviewLoading(true);
+    setPreviewTarget(credential);
     try {
       const response = await adminService.downloadCredential(credential.id);
-      const blob = new Blob([response.data]);
+      const mime = getMimeType(credential.file_original_name) || response.headers?.['content-type'] || 'application/pdf';
+      const blob = new Blob([response.data], { type: mime });
       const url = window.URL.createObjectURL(blob);
-      setPreviewTarget(credential);
       setPreviewUrl(url);
     } catch {
-      setPreviewTarget(credential);
       setPreviewUrl(null);
     } finally {
       setPreviewLoading(false);
@@ -139,7 +145,8 @@ export default function AdminVerificationsPage() {
   const handleDownload = useCallback(async (credential) => {
     try {
       const response = await adminService.downloadCredential(credential.id);
-      const blob = new Blob([response.data]);
+      const mime = getMimeType(credential.file_original_name) || response.headers?.['content-type'] || 'application/octet-stream';
+      const blob = new Blob([response.data], { type: mime });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -147,11 +154,11 @@ export default function AdminVerificationsPage() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      window.URL.revokeObjectURL(url);
+      setTimeout(() => window.URL.revokeObjectURL(url), 1000);
     } catch {
-      // non-critical
+      showToast('Unable to download credential file. Please try again.', 'error');
     }
-  }, []);
+  }, [showToast]);
 
   return (
     <div className="space-y-6">

@@ -4,6 +4,7 @@ vi.mock('../../api/client', () => ({
   default: {
     get: vi.fn(),
     put: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
@@ -146,6 +147,23 @@ describe('notificationService', () => {
       await notificationService.markAsRead('abc-123');
 
       expect(apiClient.put).toHaveBeenCalledWith('/notifications/abc-123/read');
+    });
+
+    it('deleteNotification accepts numeric ID', async () => {
+      apiClient.delete.mockResolvedValue({ data: { success: true } });
+
+      const result = await notificationService.deleteNotification(10);
+
+      expect(apiClient.delete).toHaveBeenCalledWith('/notifications/10');
+      expect(result).toEqual({ success: true });
+    });
+
+    it('deleteNotification accepts string ID', async () => {
+      apiClient.delete.mockResolvedValue({ data: { success: true } });
+
+      await notificationService.deleteNotification('notif-99');
+
+      expect(apiClient.delete).toHaveBeenCalledWith('/notifications/notif-99');
     });
   });
 });

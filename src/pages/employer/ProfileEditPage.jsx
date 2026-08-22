@@ -8,6 +8,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Textarea from '../../components/ui/Textarea';
 import EmployerProfileSkeleton from '../../components/employers/EmployerProfileSkeleton';
+import VerificationCard from '../../components/common/VerificationCard';
 import { employerService } from '../../services/employerService';
 import {
   normalizeEmployer,
@@ -18,6 +19,7 @@ import { getErrorMessage, getFieldErrors } from '../../utils/errors';
 import { isHttpUrl } from '../../utils/validate';
 import { useAuth } from '../../hooks/useAuth';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { useToast } from '../../hooks/useToast';
 
 /** Backend error field name → form state key. */
 const ERROR_FIELD_MAP = {
@@ -35,6 +37,7 @@ export default function EmployerProfileEditPage() {
   usePageTitle('Edit Company Profile');
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
+  const { showToast } = useToast();
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -97,6 +100,7 @@ export default function EmployerProfileEditPage() {
     setSubmitting(true);
     try {
       await employerService.updateMyProfile(employerFormToPayload(form));
+      showToast('Company profile updated successfully!', 'success');
       // phone/bio live on the user record — re-sync the auth session.
       try {
         await refreshUser();
@@ -113,11 +117,11 @@ export default function EmployerProfileEditPage() {
       });
       setFieldErrors(mapped);
       const hasFieldErrors = Object.keys(mapped).length > 0;
-      setGeneralError(
-        hasFieldErrors
-          ? null
-          : getErrorMessage(error, 'Unable to save your company profile. Please try again.'),
-      );
+      const msg = hasFieldErrors
+        ? null
+        : getErrorMessage(error, 'Unable to save your company profile. Please try again.');
+      setGeneralError(msg);
+      if (msg) showToast(msg, 'error');
       setSubmitting(false);
     }
   };
@@ -270,6 +274,9 @@ export default function EmployerProfileEditPage() {
               />
             </CardBody>
           </Card>
+
+          {/* Verification */}
+          <VerificationCard userRole="employer" />
         </div>
 
         {/* Sidebar actions */}
