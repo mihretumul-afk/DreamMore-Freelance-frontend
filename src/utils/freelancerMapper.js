@@ -24,6 +24,11 @@ export function normalizeFreelancer(profile) {
     id: profile.id,
     userId: profile.user_id,
 
+    // Approval status
+    approvalStatus: profile.approval_status ?? 'pending',
+    approvedAt: profile.approved_at,
+    rejectionReason: profile.rejection_reason,
+
     // User
     name: profile.user?.name,
     email: profile.user?.email,

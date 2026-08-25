@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Save } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Save, Settings, ShieldCheck } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
+import EmptyState from '../../components/common/EmptyState';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -8,47 +10,72 @@ import Textarea from '../../components/ui/Textarea';
 import Select from '../../components/ui/Select';
 import Badge from '../../components/ui/Badge';
 import { adminService } from '../../services/adminService';
-import { getErrorMessage } from '../../utils/errors';
+import { getErrorMessage, getFieldErrors } from '../../utils/errors';
+import { useToast } from '../../hooks/useToast';
+import { usePlatform } from '../../hooks/usePlatform';
 import { usePageTitle } from '../../hooks/usePageTitle';
+
+/**
+ * Flatten grouped settings from the backend into a single form object.
+ * Backend returns: { general: { ... }, payments: { ... }, access: { ... } }
+ */
+function flattenSettings(grouped) {
+  if (!grouped) return {};
+  return {
+    platform_name:        grouped.general?.platform_name ?? '',
+    platform_description: grouped.general?.platform_description ?? '',
+    support_email:        grouped.general?.support_email ?? '',
+    default_currency:     grouped.payments?.default_currency ?? 'ETB',
+    min_proposal_amount:  grouped.payments?.min_proposal_amount ?? '',
+    max_proposal_amount:  grouped.payments?.max_proposal_amount ?? '',
+    registration_open:    String(grouped.access?.registration_open ?? 'true'),
+    maintenance_mode:     String(grouped.access?.maintenance_mode ?? 'false'),
+  };
+}
+
+const INITIAL_FORM = {
+  platform_name: '',
+  platform_description: '',
+  support_email: '',
+  default_currency: 'ETB',
+  min_proposal_amount: '',
+  max_proposal_amount: '',
+  registration_open: 'true',
+  maintenance_mode: 'false',
+};
 
 export default function AdminSettingsPage() {
   usePageTitle('Platform Settings — Admin');
+  const { showToast } = useToast();
+  const { refresh: refreshPlatformSettings } = usePlatform();
 
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [savedBadge, setSavedBadge] = useState(false);
 
-  const [form, setForm] = useState({
-    platform_name: '',
-    platform_description: '',
-    support_email: '',
-    default_currency: 'ETB',
-    min_proposal_amount: '',
-    max_proposal_amount: '',
-    registration_open: 'true',
-    maintenance_mode: 'false',
-  });
+  const [form, setForm] = useState(INITIAL_FORM);
+  const savedFormRef = useRef(INITIAL_FORM);
 
+  // Dirty check — compare current form to saved snapshot
+  const isDirty = useMemo(
+    () => JSON.stringify(form) !== JSON.stringify(savedFormRef.current),
+    [form],
+  );
+
+  // ── Load ──────────────────────────────────────────────────────────────
   const loadSettings = useCallback(async () => {
     setLoading(true);
     setError(null);
-    setSuccess(false);
     try {
       const response = await adminService.getSettings();
       const data = response.data ?? response;
-      setSettings(data);
-      setForm({
-        platform_name: data.platform_name ?? data.platformName ?? '',
-        platform_description: data.platform_description ?? data.platformDescription ?? '',
-        support_email: data.support_email ?? data.supportEmail ?? '',
-        default_currency: data.default_currency ?? data.defaultCurrency ?? 'ETB',
-        min_proposal_amount: data.min_proposal_amount ?? data.minProposalAmount ?? '',
-        max_proposal_amount: data.max_proposal_amount ?? data.maxProposalAmount ?? '',
-        registration_open: String(data.registration_open ?? data.registrationOpen ?? 'true'),
-        maintenance_mode: String(data.maintenance_mode ?? data.maintenanceMode ?? 'false'),
-      });
+      const flat = flattenSettings(data);
+      setForm(flat);
+      savedFormRef.current = flat;
+      setFieldErrors({});
     } catch (err) {
       setError(getErrorMessage(err, 'Unable to load settings.'));
     } finally {
@@ -60,26 +87,57 @@ export default function AdminSettingsPage() {
     loadSettings();
   }, [loadSettings]);
 
+  // ── Save ──────────────────────────────────────────────────────────────
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
-    setSuccess(false);
+    setFieldErrors({});
     try {
-      await adminService.updateSettings(form);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      const response = await adminService.updateSettings(form);
+      const data = response.data ?? response;
+      const flat = flattenSettings(data);
+      setForm(flat);
+      savedFormRef.current = flat;
+      setFieldErrors({});
+      setSavedBadge(true);
+      showToast('Settings saved successfully.', 'success');
+      // Refresh platform settings across the app
+      refreshPlatformSettings();
+      setTimeout(() => setSavedBadge(false), 3000);
     } catch (err) {
-      setError(getErrorMessage(err, 'Unable to save settings.'));
+      if (err?.response?.status === 422) {
+        setFieldErrors(getFieldErrors(err));
+        showToast('Please fix the validation errors.', 'error');
+      } else {
+        showToast(getErrorMessage(err, 'Unable to save settings.'), 'error');
+      }
     } finally {
       setSaving(false);
     }
   };
 
+  // ── Handlers ──────────────────────────────────────────────────────────
+  const update = (key) => (e) => {
+    const value = e.target.value;
+    setForm((prev) => ({ ...prev, [key]: value }));
+    // Clear field error on change
+    if (fieldErrors[key]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
+  };
+
+  // ── Loading skeleton ──────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="space-y-6">
         <div className="h-8 w-48 animate-pulse rounded bg-gray-100" />
-        <div className="h-96 animate-pulse rounded-card border border-gray-200 bg-white" />
+        <div className="h-64 animate-pulse rounded-card border border-gray-200 bg-white" />
+        <div className="h-48 animate-pulse rounded-card border border-gray-200 bg-white" />
+        <div className="h-48 animate-pulse rounded-card border border-gray-200 bg-white" />
       </div>
     );
   }
@@ -88,8 +146,10 @@ export default function AdminSettingsPage() {
     return <ErrorState title="Unable to load settings" description={error} onRetry={loadSettings} />;
   }
 
+  // ── Render ────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight text-ink-900">Platform Settings</h1>
         <p className="text-sm text-gray-500">
@@ -98,32 +158,37 @@ export default function AdminSettingsPage() {
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
-        {/* General */}
+        {/* ── General ────────────────────────────────────────────────── */}
         <Card>
           <CardHeader title="General" description="Basic platform configuration." />
           <CardBody className="space-y-4">
             <Input
               label="Platform name"
               value={form.platform_name}
-              onChange={(e) => setForm({ ...form, platform_name: e.target.value })}
+              onChange={update('platform_name')}
+              error={fieldErrors.platform_name}
+              required
             />
             <Textarea
               label="Platform description"
               value={form.platform_description}
-              onChange={(e) => setForm({ ...form, platform_description: e.target.value })}
+              onChange={update('platform_description')}
+              error={fieldErrors.platform_description}
               rows={3}
             />
             <Input
               label="Support email"
               type="email"
               value={form.support_email}
-              onChange={(e) => setForm({ ...form, support_email: e.target.value })}
+              onChange={update('support_email')}
+              error={fieldErrors.support_email}
             />
             <div className="w-full sm:w-48">
               <Select
                 label="Default currency"
                 value={form.default_currency}
-                onChange={(e) => setForm({ ...form, default_currency: e.target.value })}
+                onChange={update('default_currency')}
+                error={fieldErrors.default_currency}
               >
                 <option value="ETB">ETB (Ethiopian Birr)</option>
                 <option value="USD">USD (US Dollar)</option>
@@ -132,7 +197,7 @@ export default function AdminSettingsPage() {
           </CardBody>
         </Card>
 
-        {/* Proposal limits */}
+        {/* ── Proposal Limits ────────────────────────────────────────── */}
         <Card>
           <CardHeader title="Proposal Limits" description="Control proposal amount boundaries." />
           <CardBody className="space-y-4">
@@ -141,21 +206,23 @@ export default function AdminSettingsPage() {
                 label="Minimum proposal amount"
                 type="number"
                 value={form.min_proposal_amount}
-                onChange={(e) => setForm({ ...form, min_proposal_amount: e.target.value })}
+                onChange={update('min_proposal_amount')}
+                error={fieldErrors.min_proposal_amount}
                 hint="Leave empty for no minimum"
               />
               <Input
                 label="Maximum proposal amount"
                 type="number"
                 value={form.max_proposal_amount}
-                onChange={(e) => setForm({ ...form, max_proposal_amount: e.target.value })}
+                onChange={update('max_proposal_amount')}
+                error={fieldErrors.max_proposal_amount}
                 hint="Leave empty for no maximum"
               />
             </div>
           </CardBody>
         </Card>
 
-        {/* Access control */}
+        {/* ── Access Control ─────────────────────────────────────────── */}
         <Card>
           <CardHeader title="Access Control" description="Control registration and maintenance." />
           <CardBody className="space-y-4">
@@ -166,7 +233,8 @@ export default function AdminSettingsPage() {
               </div>
               <Select
                 value={form.registration_open}
-                onChange={(e) => setForm({ ...form, registration_open: e.target.value })}
+                onChange={update('registration_open')}
+                error={fieldErrors.registration_open}
                 className="w-32"
               >
                 <option value="true">Open</option>
@@ -180,7 +248,8 @@ export default function AdminSettingsPage() {
               </div>
               <Select
                 value={form.maintenance_mode}
-                onChange={(e) => setForm({ ...form, maintenance_mode: e.target.value })}
+                onChange={update('maintenance_mode')}
+                error={fieldErrors.maintenance_mode}
                 className="w-32"
               >
                 <option value="false">Off</option>
@@ -190,14 +259,44 @@ export default function AdminSettingsPage() {
           </CardBody>
         </Card>
 
-        {/* Save */}
+        {/* ── Account & Security ─────────────────────────────────────── */}
+        <Card>
+          <CardHeader
+            title="Account & Security"
+            description="Manage your admin account email and password."
+          />
+          <CardBody>
+            <Link
+              to="/admin/settings/security"
+              className="flex items-center justify-between gap-4 rounded-lg border border-gray-200 p-4 transition-colors hover:border-brand-300 hover:bg-brand-50/30 cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50">
+                  <ShieldCheck className="h-5 w-5 text-brand-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-ink-900">Account & Security</p>
+                  <p className="text-xs text-gray-500">Change your admin email address or password.</p>
+                </div>
+              </div>
+              <span className="text-sm text-brand-600 font-medium">Manage →</span>
+            </Link>
+          </CardBody>
+        </Card>
+
+        {/* ── Save Bar ───────────────────────────────────────────────── */}
         <div className="flex items-center gap-3">
-          <Button type="submit" loading={saving}>
+          <Button type="submit" loading={saving} disabled={!isDirty}>
             <Save className="h-4 w-4" /> Save Settings
           </Button>
-          {success && (
+          {savedBadge && (
             <Badge tone="success" size="md">
               Settings saved successfully
+            </Badge>
+          )}
+          {isDirty && !savedBadge && (
+            <Badge tone="warning" size="md">
+              Unsaved changes
             </Badge>
           )}
         </div>

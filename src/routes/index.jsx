@@ -4,6 +4,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import PublicLayout from '../layouts/PublicLayout';
 import AuthLayout from '../layouts/AuthLayout';
 import DashboardLayout from '../layouts/DashboardLayout';
+import MaintenanceRoute from './MaintenanceRoute';
 import ProtectedRoute from './ProtectedRoute';
 import RoleRoute from './RoleRoute';
 import { PageLoader } from '../components/common/Loading';
@@ -58,6 +59,18 @@ const AdminReportsPage = lazy(() => import('../pages/admin/ReportsPage'));
 const AdminCategoriesPage = lazy(() => import('../pages/admin/CategoriesPage'));
 const AdminSkillsPage = lazy(() => import('../pages/admin/SkillsPage'));
 const AdminSettingsPage = lazy(() => import('../pages/admin/SettingsPage'));
+const AdminSecurityPage = lazy(() => import('../pages/admin/AdminSecurityPage'));
+const AdminFreelancerApprovalPage = lazy(() => import('../pages/admin/FreelancerApprovalPage'));
+// Stage 2 — RBAC + advanced admin pages
+const AdministratorsPage = lazy(() => import('../pages/admin/AdministratorsPage'));
+const AdminDetailPage = lazy(() => import('../pages/admin/AdminDetailPage'));
+const RolesPage = lazy(() => import('../pages/admin/RolesPage'));
+const RoleFormPage = lazy(() => import('../pages/admin/RoleFormPage'));
+const AuditLogsPage = lazy(() => import('../pages/admin/AuditLogsPage'));
+const PaymentsPage = lazy(() => import('../pages/admin/PaymentsPage'));
+const MilestonesAdminPage = lazy(() => import('../pages/admin/MilestonesAdminPage'));
+const TransactionsPage = lazy(() => import('../pages/admin/TransactionsPage'));
+const MaintenancePage = lazy(() => import('../pages/public/MaintenancePage'));
 
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
 
@@ -67,26 +80,38 @@ const lazyPage = (page) => (
 );
 
 export const router = createBrowserRouter([
-  // ---- Public marketplace ----
-  {
-    element: <PublicLayout />,
-    children: [
-      { index: true, element: lazyPage(<LandingPage />) },
-      { path: 'jobs', element: lazyPage(<JobsPage />) },
-      { path: 'jobs/:id', element: lazyPage(<JobDetailsPage />) },
-      { path: 'freelancers', element: lazyPage(<FreelancersPage />) },
-      { path: 'freelancers/:id', element: lazyPage(<FreelancerDetailsPage />) },
-      { path: 'categories', element: lazyPage(<CategoriesPage />) },
-    ],
-  },
-
-  // ---- Authentication ----
+  // ---- Authentication (ALWAYS accessible, even during maintenance) ----
+  // The admin must be able to reach the login page to disable maintenance mode.
   {
     element: <AuthLayout />,
     children: [
       { path: 'login', element: lazyPage(<LoginPage />) },
       { path: 'register', element: lazyPage(<RegisterPage />) },
       { path: 'forgot-password', element: lazyPage(<ForgotPasswordPage />) },
+    ],
+  },
+
+  // ---- Maintenance page (always accessible) ----
+  {
+    path: 'maintenance',
+    element: lazyPage(<MaintenancePage />),
+  },
+
+  // ---- Public marketplace (maintenance-aware) ----
+  {
+    element: <MaintenanceRoute />,
+    children: [
+      {
+        element: <PublicLayout />,
+        children: [
+          { index: true, element: lazyPage(<LandingPage />) },
+          { path: 'jobs', element: lazyPage(<JobsPage />) },
+          { path: 'jobs/:id', element: lazyPage(<JobDetailsPage />) },
+          { path: 'freelancers', element: lazyPage(<FreelancersPage />) },
+          { path: 'freelancers/:id', element: lazyPage(<FreelancerDetailsPage />) },
+          { path: 'categories', element: lazyPage(<CategoriesPage />) },
+        ],
+      },
     ],
   },
 
@@ -111,7 +136,20 @@ export const router = createBrowserRouter([
           { path: 'reports', element: lazyPage(<AdminReportsPage />) },
           { path: 'categories', element: lazyPage(<AdminCategoriesPage />) },
           { path: 'skills', element: lazyPage(<AdminSkillsPage />) },
+          { path: 'freelancers', element: lazyPage(<AdminFreelancerApprovalPage />) },
           { path: 'settings', element: lazyPage(<AdminSettingsPage />) },
+          { path: 'settings/security', element: lazyPage(<AdminSecurityPage />) },
+          // Stage 2 — RBAC routes
+          { path: 'administrators', element: lazyPage(<AdministratorsPage />) },
+          { path: 'administrators/:id', element: lazyPage(<AdminDetailPage />) },
+          { path: 'roles', element: lazyPage(<RolesPage />) },
+          { path: 'roles/create', element: lazyPage(<RoleFormPage />) },
+          { path: 'roles/:id', element: lazyPage(<RoleFormPage />) },
+          { path: 'roles/:id/edit', element: lazyPage(<RoleFormPage />) },
+          { path: 'audit-logs', element: lazyPage(<AuditLogsPage />) },
+          { path: 'payments', element: lazyPage(<PaymentsPage />) },
+          { path: 'milestones', element: lazyPage(<MilestonesAdminPage />) },
+          { path: 'transactions', element: lazyPage(<TransactionsPage />) },
         ],
       },
     ],

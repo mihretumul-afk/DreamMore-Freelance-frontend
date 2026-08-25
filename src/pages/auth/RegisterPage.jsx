@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, Lock } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -8,6 +8,7 @@ import Select from '../../components/ui/Select';
 import Textarea from '../../components/ui/Textarea';
 import { PageLoader } from '../../components/common/Loading';
 import { useAuth } from '../../hooks/useAuth';
+import { usePlatform } from '../../hooks/usePlatform';
 import { useI18n } from '../../i18n';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { ROLES } from '../../constants/app';
@@ -20,6 +21,7 @@ const FIELD_KEYS = ['name', 'email', 'password', 'role', 'phone', 'bio'];
 export default function RegisterPage() {
   usePageTitle('Create Account');
   const { user, loading, register } = useAuth();
+  const { settings } = usePlatform();
   const { t } = useI18n();
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -40,6 +42,28 @@ export default function RegisterPage() {
   // Already signed in — send the visitor to their dashboard.
   if (user) {
     return <Navigate to={getDashboardPath(user.role)} replace />;
+  }
+
+  // Registration is closed
+  if (settings.registration_open === false) {
+    return (
+      <Card>
+        <div className="px-6 pb-6 pt-8 sm:px-8 text-center">
+          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-warning-100">
+            <Lock className="h-5 w-5 text-warning-600" aria-hidden="true" />
+          </div>
+          <h1 className="mt-5 text-2xl font-bold tracking-tight text-ink-900">
+            Registration Closed
+          </h1>
+          <p className="mt-2 text-sm text-gray-500">
+            New account registration is currently closed. Please try again later or contact support.
+          </p>
+          <Button as={Link} to="/login" className="mt-6">
+            Sign In Instead
+          </Button>
+        </div>
+      </Card>
+    );
   }
 
   const handleChange = (event) => {

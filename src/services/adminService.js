@@ -14,6 +14,12 @@ export const adminService = {
     return response.data;
   },
 
+  /** Alias used by AdminLayout to poll badge counts. */
+  getDashboardStats: async () => {
+    const response = await apiClient.get('/admin/dashboard');
+    return response.data;
+  },
+
   // ── Users ────────────────────────────────────────────────────────────
   /** GET /admin/users?page=&search=&role=&status= — paginated user list. */
   getUsers: async (params = {}) => {
@@ -193,6 +199,31 @@ export const adminService = {
     return response.data;
   },
 
+  // ── Freelancer Approval ─────────────────────────────────────────────
+  /** GET /admin/freelancers?status=&search= — list freelancers with approval status. */
+  getFreelancers: async (params = {}) => {
+    const response = await apiClient.get('/admin/freelancers', { params });
+    return response.data;
+  },
+
+  /** GET /admin/freelancers/:id — single freelancer detail. */
+  getFreelancerById: async (id) => {
+    const response = await apiClient.get(`/admin/freelancers/${id}`);
+    return response.data;
+  },
+
+  /** PUT /admin/freelancers/:id/approve — approve a freelancer. */
+  approveFreelancer: async (id) => {
+    const response = await apiClient.put(`/admin/freelancers/${id}/approve`);
+    return response.data;
+  },
+
+  /** PUT /admin/freelancers/:id/reject — reject a freelancer. */
+  rejectFreelancer: async (id, reason = '') => {
+    const response = await apiClient.put(`/admin/freelancers/${id}/reject`, { reason });
+    return response.data;
+  },
+
   // ── Settings ─────────────────────────────────────────────────────────
   /** GET /admin/settings — fetch platform settings. */
   getSettings: async () => {
@@ -203,6 +234,25 @@ export const adminService = {
   /** PUT /admin/settings — update platform settings. */
   updateSettings: async (payload) => {
     const response = await apiClient.put('/admin/settings', payload);
+    return response.data;
+  },
+
+  // ── Account Security ──────────────────────────────────────────────
+  /** GET /admin/account/security — fetch current admin account info. */
+  getAccountSecurity: async () => {
+    const response = await apiClient.get('/admin/account/security');
+    return response.data;
+  },
+
+  /** PUT /admin/account/email — update admin email (requires current password). */
+  updateAdminEmail: async (payload) => {
+    const response = await apiClient.put('/admin/account/email', payload);
+    return response.data;
+  },
+
+  /** PUT /admin/account/password — update admin password. */
+  updateAdminPassword: async (payload) => {
+    const response = await apiClient.put('/admin/account/password', payload);
     return response.data;
   },
 };

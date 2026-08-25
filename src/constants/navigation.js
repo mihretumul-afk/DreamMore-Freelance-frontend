@@ -10,6 +10,7 @@ import {
   PlusCircle,
   ClipboardList,
   Users,
+  UserCheck,
   ShieldCheck,
   BriefcaseBusiness,
   Flag,
@@ -18,6 +19,13 @@ import {
   Settings,
   Bookmark,
   Award,
+  Shield,
+  Key,
+  ScrollText,
+  CreditCard,
+  Milestone,
+  ArrowLeftRight,
+  UserCog,
 } from 'lucide-react';
 
 /**
@@ -62,17 +70,112 @@ export const EMPLOYER_NAV_LINKS = [
   { key: 'nav.notifications', label: 'Notifications', to: '/employer/notifications', icon: Bell, end: true },
 ];
 
-/** Sidebar navigation for the admin dashboard. */
+/**
+ * Admin sidebar navigation — each item carries a `permission` guard key.
+ * The AdminLayout filters this list using useAdminPermissions().can().
+ * Items without a `permission` key are visible to all admins (Dashboard).
+ *
+ * `badgeKey` maps to a field from the dashboard stats object for live counts.
+ * `group` visually separates sections in the sidebar.
+ */
 export const ADMIN_NAV_LINKS = [
-  { key: 'nav.dashboard', label: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard, end: true },
-  { key: 'nav.users', label: 'Users', to: '/admin/users', icon: Users, end: false },
-  { key: 'nav.verifications', label: 'Verifications', to: '/admin/verifications', icon: ShieldCheck, end: true },
-  { key: 'nav.jobs', label: 'Jobs', to: '/admin/jobs', icon: BriefcaseBusiness, end: true },
-  { key: 'nav.reports', label: 'Reports', to: '/admin/reports', icon: Flag, end: true },
-  { key: 'nav.categories', label: 'Categories', to: '/admin/categories', icon: FolderTree, end: true },
-  { key: 'nav.skills', label: 'Skills', to: '/admin/skills', icon: Wrench, end: true },
-  { key: 'nav.settings', label: 'Settings', to: '/admin/settings', icon: Settings, end: true },
+  // ── Overview ──────────────────────────────────────────────────────────
+  {
+    key: 'nav.dashboard', label: 'Dashboard',
+    to: '/admin/dashboard', icon: LayoutDashboard, end: true,
+    group: 'overview',
+  },
+
+  // ── People ────────────────────────────────────────────────────────────
+  {
+    key: 'nav.users', label: 'Users',
+    to: '/admin/users', icon: Users, end: false,
+    permission: 'users.view', group: 'people',
+  },
+  {
+    key: 'nav.verifications', label: 'Verifications',
+    to: '/admin/verifications', icon: ShieldCheck, end: true,
+    permission: 'users.verify', group: 'people',
+    badgeKey: 'pending_verifications',
+  },
+
+  // ── Marketplace ───────────────────────────────────────────────────────
+  {
+    key: 'nav.jobs', label: 'Jobs',
+    to: '/admin/jobs', icon: BriefcaseBusiness, end: true,
+    permission: 'jobs.view', group: 'marketplace',
+  },
+
+  // ── Finance ───────────────────────────────────────────────────────────
+  {
+    key: 'nav.payments', label: 'Payments',
+    to: '/admin/payments', icon: CreditCard, end: true,
+    permission: 'payments.view', group: 'finance',
+  },
+  {
+    key: 'nav.milestones', label: 'Milestones',
+    to: '/admin/milestones', icon: Milestone, end: true,
+    permission: 'milestones.view', group: 'finance',
+  },
+  {
+    key: 'nav.transactions', label: 'Transactions',
+    to: '/admin/transactions', icon: ArrowLeftRight, end: true,
+    permission: 'transactions.view', group: 'finance',
+  },
+
+  // ── Moderation ────────────────────────────────────────────────────────
+  {
+    key: 'nav.reports', label: 'Reports',
+    to: '/admin/reports', icon: Flag, end: true,
+    permission: 'disputes.view', group: 'moderation',
+    badgeKey: 'pending_reports',
+  },
+  {
+    key: 'nav.categories', label: 'Categories',
+    to: '/admin/categories', icon: FolderTree, end: true,
+    permission: 'jobs.view', group: 'moderation',
+  },
+  {
+    key: 'nav.skills', label: 'Skills',
+    to: '/admin/skills', icon: Wrench, end: true,
+    permission: 'jobs.view', group: 'moderation',
+  },
+
+  // ── Administration ────────────────────────────────────────────────────
+  {
+    key: 'nav.administrators', label: 'Administrators',
+    to: '/admin/administrators', icon: UserCog, end: false,
+    permission: 'admins.view', group: 'admin',
+  },
+  {
+    key: 'nav.roles', label: 'Roles',
+    to: '/admin/roles', icon: Shield, end: false,
+    permission: 'roles.view', group: 'admin',
+  },
+  {
+    key: 'nav.auditLogs', label: 'Audit Logs',
+    to: '/admin/audit-logs', icon: ScrollText, end: true,
+    permission: 'audit_logs.view', group: 'admin',
+  },
+
+  // ── System ────────────────────────────────────────────────────────────
+  {
+    key: 'nav.settings', label: 'Settings',
+    to: '/admin/settings', icon: Settings, end: true,
+    permission: 'settings.view', group: 'system',
+  },
 ];
+
+/** Group metadata for sidebar section labels */
+export const ADMIN_NAV_GROUPS = {
+  overview:     { label: null },           // no label for the first group
+  people:       { label: 'People' },
+  marketplace:  { label: 'Marketplace' },
+  finance:      { label: 'Finance' },
+  moderation:   { label: 'Moderation' },
+  admin:        { label: 'Administration' },
+  system:       { label: 'System' },
+};
 
 /**
  * Footer link columns — i18n key based (labels live in the locale

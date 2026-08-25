@@ -13,6 +13,56 @@ export function formatETB(amount) {
 }
 
 /**
+ * Format a number as currency using the platform's default currency.
+ *
+ * @param {number|string} amount - The amount to format
+ * @param {string} currency - Currency code (e.g., 'ETB', 'USD')
+ * @param {object} options - Intl.NumberFormat options
+ * @returns {string} Formatted currency string
+ */
+export function formatCurrency(amount, currency = 'ETB', options = {}) {
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+
+  if (isNaN(numAmount)) {
+    return `${currency} 0.00`;
+  }
+
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    ...options,
+  });
+
+  return formatter.format(numAmount);
+}
+
+/**
+ * Format a number as compact currency (e.g., "$1.2K", "ETB 500").
+ *
+ * @param {number|string} amount - The amount to format
+ * @param {string} currency - Currency code
+ * @returns {string} Compact formatted currency string
+ */
+export function formatCurrencyCompact(amount, currency = 'ETB') {
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+
+  if (isNaN(numAmount)) {
+    return `${currency} 0`;
+  }
+
+  if (numAmount >= 1000000) {
+    return `${currency} ${(numAmount / 1000000).toFixed(1)}M`;
+  }
+  if (numAmount >= 1000) {
+    return `${currency} ${(numAmount / 1000).toFixed(1)}K`;
+  }
+
+  return `${currency} ${numAmount}`;
+}
+
+/**
  * Format an ISO date string for display.
  * @param {string|null|undefined} value
  * @returns {string}
@@ -55,4 +105,20 @@ export function timeAgo(value) {
 
   const years = Math.floor(months / 12);
   return `${years} year${years === 1 ? '' : 's'} ago`;
+}
+
+/**
+ * Format a number with commas (e.g., 1,234,567).
+ *
+ * @param {number|string} num - The number to format
+ * @returns {string} Formatted number string
+ */
+export function formatNumber(num) {
+  const numValue = typeof num === 'string' ? parseFloat(num) : num;
+
+  if (isNaN(numValue)) {
+    return '0';
+  }
+
+  return new Intl.NumberFormat('en-US').format(numValue);
 }

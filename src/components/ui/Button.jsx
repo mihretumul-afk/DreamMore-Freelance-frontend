@@ -2,7 +2,7 @@ import { Loader2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-button font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-60';
+  'inline-flex items-center justify-center gap-2 rounded-button font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-60 disabled:cursor-not-allowed';
 
 const variants = {
   primary: 'bg-brand-500 text-white hover:bg-brand-600 active:bg-brand-700',

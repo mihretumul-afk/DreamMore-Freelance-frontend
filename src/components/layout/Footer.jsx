@@ -3,9 +3,11 @@ import Container from '../common/Container';
 import Logo from '../common/Logo';
 import { FOOTER_COLUMNS } from '../../constants/navigation';
 import { useI18n } from '../../i18n';
+import { usePlatform } from '../../hooks/usePlatform';
 
 export default function Footer() {
   const { t } = useI18n();
+  const { settings } = usePlatform();
 
   return (
     <footer className="border-t border-white/10 bg-ink-950 text-slate-300">
@@ -17,7 +19,7 @@ export default function Footer() {
               <Logo variant="light" />
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-400">
-              {t('footer.description')}
+              {settings.platform_description || t('footer.description')}
             </p>
           </div>
 
@@ -45,7 +47,7 @@ export default function Footer() {
 
         <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 sm:flex-row">
           <p className="text-xs text-slate-500">
-            © {new Date().getFullYear()} Dream More AppWorks. {t('footer.rights')}
+            © {new Date().getFullYear()} {settings.platform_name || 'Dream More AppWorks'}. {t('footer.rights')}
           </p>
           <p className="text-xs text-slate-500">{t('footer.madeWith')}</p>
         </div>

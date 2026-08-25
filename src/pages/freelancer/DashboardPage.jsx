@@ -5,6 +5,7 @@ import {
   Banknote,
   Briefcase,
   ClipboardList,
+  Clock,
   FileText,
   FolderOpen,
   Handshake,
@@ -12,6 +13,7 @@ import {
   Pencil,
   Send,
   Star,
+  XCircle,
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
@@ -120,8 +122,44 @@ export default function FreelancerDashboardPage() {
         }
       />
 
+      {/* Approval Status Banner */}
+      {profile.approvalStatus === 'pending' && (
+        <Card className="border-amber-200 bg-gradient-to-r from-amber-50/80 to-orange-50/50 p-5">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 shadow-xs">
+              <Clock className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-ink-900">
+                Account Pending Approval
+              </h3>
+              <p className="mt-0.5 text-xs text-ink-700 leading-relaxed">
+                Your freelancer account is awaiting admin approval. Once approved, you will be visible on the marketplace and can submit proposals. You can still edit your profile and submit credentials while waiting.
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
+      {profile.approvalStatus === 'rejected' && (
+        <Card className="border-red-200 bg-gradient-to-r from-red-50/80 to-orange-50/50 p-5">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-700 shadow-xs">
+              <XCircle className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-ink-900">
+                Account Application Rejected
+              </h3>
+              <p className="mt-0.5 text-xs text-ink-700 leading-relaxed">
+                Your freelancer application was rejected.{profile.rejectionReason ? ` Reason: ${profile.rejectionReason}` : ''} Please update your profile and submit credentials again.
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Mandatory Verification Banner */}
-      {!(user?.is_verified ?? user?.has_approved_credentials) && (
+      {profile.approvalStatus === 'approved' && !(user?.is_verified ?? user?.has_approved_credentials) && (
         <Card className="border-amber-200 bg-gradient-to-r from-amber-50/80 to-orange-50/50 p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">

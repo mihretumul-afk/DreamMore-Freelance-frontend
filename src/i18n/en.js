@@ -280,6 +280,12 @@ export const en = {
   'nav.skills': 'Skills',
   'nav.settings': 'Settings',
   'nav.admin': 'Admin',
+  'nav.administrators': 'Administrators',
+  'nav.roles': 'Roles',
+  'nav.auditLogs': 'Audit Logs',
+  'nav.payments': 'Payments',
+  'nav.milestones': 'Milestones',
+  'nav.transactions': 'Transactions',
   'nav.allJobs': 'All Jobs',
   'nav.allTalent': 'All Talent',
 

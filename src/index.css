@@ -146,6 +146,22 @@
     outline-offset: 2px;
   }
 
+  /* Ensure all interactive controls show the pointer cursor */
+  button:not(:disabled):not([aria-disabled='true']),
+  a[href],
+  [role='button'],
+  [role='menuitem'],
+  [role='option'],
+  [role='tab'] {
+    cursor: pointer;
+  }
+
+  /* Disabled controls show not-allowed cursor */
+  button:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
   /* Respect users who prefer reduced motion: decorative animations and
      transitions collapse to a single frame; scrolling stays instant. */
   @media (prefers-reduced-motion: reduce) {

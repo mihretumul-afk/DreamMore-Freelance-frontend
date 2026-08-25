@@ -19,18 +19,14 @@ export default function CtaSection() {
               {t('cta.title')}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-gray-500">{t('cta.description')}</p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button as={Link} to="/register" size="lg" className="w-full sm:w-auto">
-                {t('cta.createAccount')}
-              </Button>
+            <div className="mt-8 flex justify-center">
               <Button
                 as={Link}
-                to="/freelancers"
-                variant="outline"
+                to="/register"
                 size="lg"
-                className="w-full sm:w-auto"
+                className="w-full bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 sm:w-auto"
               >
-                {t('cta.findTalent')}
+                Join DreamMore
               </Button>
             </div>
           </div>

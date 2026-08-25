@@ -277,6 +277,12 @@ export const am = {
   'nav.skills': 'ክህሎቶች',
   'nav.settings': 'ቅንብሮች',
   'nav.admin': 'አስተዳዳሪ',
+  'nav.administrators': 'አስተዳዳሪዎች',
+  'nav.roles': 'ሚናዎች',
+  'nav.auditLogs': 'የግልጽ ሎግ',
+  'nav.payments': 'ክፍያዎች',
+  'nav.milestones': 'ማይልስቶኖች',
+  'nav.transactions': 'ግንኙነቶች',
   'nav.allJobs': 'ሁሉም ስራዎች',
   'nav.allTalent': 'ሁሉም ባለሙያዎች',
 

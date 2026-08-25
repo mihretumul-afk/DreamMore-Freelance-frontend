@@ -18,7 +18,7 @@ export function Card({ variant = 'default', interactive = false, as, className, 
         'rounded-card',
         variants[variant],
         interactive &&
-          'transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover',
+          'cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover',
         className,
       )}
       {...props}
