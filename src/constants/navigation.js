@@ -56,6 +56,7 @@ export const FREELANCER_NAV_LINKS = [
   { key: 'nav.contracts', label: 'Contracts', to: '/freelancer/contracts', icon: Handshake, end: true },
   { key: 'nav.messages', label: 'Messages', to: '/freelancer/messages', icon: MessageSquare, end: true },
   { key: 'nav.notifications', label: 'Notifications', to: '/freelancer/notifications', icon: Bell, end: true },
+  { key: 'nav.payments', label: 'Payments', to: '/freelancer/payments', icon: CreditCard, end: true },
 ];
 
 /** Sidebar navigation for the employer dashboard. */
@@ -68,6 +69,7 @@ export const EMPLOYER_NAV_LINKS = [
   { key: 'nav.contracts', label: 'Contracts', to: '/employer/contracts', icon: Handshake, end: true },
   { key: 'nav.messages', label: 'Messages', to: '/employer/messages', icon: MessageSquare, end: true },
   { key: 'nav.notifications', label: 'Notifications', to: '/employer/notifications', icon: Bell, end: true },
+  { key: 'nav.payments', label: 'Payments', to: '/employer/payments', icon: CreditCard, end: true },
 ];
 
 /**

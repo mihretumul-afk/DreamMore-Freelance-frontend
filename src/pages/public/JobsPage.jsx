@@ -164,11 +164,27 @@ export default function JobsPage() {
   );
 
   const applyTextFilters = () => {
-    updateParams({
-      search: searchInput.trim(),
-      location: locationInput.trim(),
-      min_budget: minBudget,
-      max_budget: maxBudget,
+    // Commit ALL current filter values atomically — text drafts + already-set
+    // dropdown values — so the Apply button always reflects the complete state.
+    setSearchParams((prev) => {
+      const next = new URLSearchParams();
+      // Carry over dropdown/select values already committed to the URL.
+      const selectKeys = [
+        'category_id', 'skill_id', 'budget_type',
+        'experience_level', 'location_type', 'sort',
+      ];
+      selectKeys.forEach((key) => {
+        const v = prev.get(key);
+        if (v) next.set(key, v);
+      });
+      // Flush text input drafts.
+      if (searchInput.trim()) next.set('search', searchInput.trim());
+      if (locationInput.trim()) next.set('location', locationInput.trim());
+      if (minBudget) next.set('min_budget', minBudget);
+      if (maxBudget) next.set('max_budget', maxBudget);
+      // Always reset to page 1.
+      next.delete('page');
+      return next;
     });
     setFiltersOpen(false);
   };

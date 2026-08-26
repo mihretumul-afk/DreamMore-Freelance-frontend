@@ -4,6 +4,7 @@ import {
   Award,
   Banknote,
   Briefcase,
+  CheckCircle2,
   ClipboardList,
   Clock,
   FileText,
@@ -13,19 +14,17 @@ import {
   Pencil,
   Send,
   Star,
+  TrendingUp,
   XCircle,
+  Zap,
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
-import PageHeader from '../../components/marketplace/PageHeader';
 import Avatar from '../../components/marketplace/Avatar';
 import RatingDisplay from '../../components/marketplace/RatingDisplay';
 import StatusBadge from '../../components/marketplace/StatusBadge';
-import Card, { CardHeader, CardBody } from '../../components/ui/Card';
+import Card, { CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import StatCard from '../../components/dashboard/StatCard';
-import QuickActions from '../../components/dashboard/QuickActions';
-import DashboardSkeleton from '../../components/dashboard/DashboardSkeleton';
 import { freelancerService } from '../../services/freelancerService';
 import { proposalService } from '../../services/proposalService';
 import { contractService } from '../../services/contractService';
@@ -37,9 +36,86 @@ import { getErrorMessage } from '../../utils/errors';
 import { formatETB } from '../../utils/format';
 import { useAuth } from '../../hooks/useAuth';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { cn } from '../../utils/cn';
 
+// ── Skeleton loader ──────────────────────────────────────────────────────────
+function Skeleton() {
+  return (
+    <div className="animate-pulse space-y-6">
+      <div className="h-40 rounded-2xl bg-gray-200" />
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        {[...Array(4)].map((_, i) => <div key={i} className="h-28 rounded-2xl bg-gray-200" />)}
+      </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {[...Array(3)].map((_, i) => <div key={i} className="h-64 rounded-2xl bg-gray-200" />)}
+      </div>
+    </div>
+  );
+}
+
+// ── Stat card ────────────────────────────────────────────────────────────────
+function StatCard({ icon: Icon, label, value, hint, color = 'brand' }) {
+  const colors = {
+    brand:   { bg: 'bg-brand-50',   icon: 'text-brand-600',   border: 'border-brand-100' },
+    emerald: { bg: 'bg-emerald-50', icon: 'text-emerald-600', border: 'border-emerald-100' },
+    violet:  { bg: 'bg-violet-50',  icon: 'text-violet-600',  border: 'border-violet-100' },
+    amber:   { bg: 'bg-amber-50',   icon: 'text-amber-600',   border: 'border-amber-100' },
+  };
+  const c = colors[color] ?? colors.brand;
+
+  return (
+    <div className={cn('rounded-2xl border bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-lg', c.border)}>
+      <div className={cn('mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl', c.bg)}>
+        <Icon className={cn('h-5 w-5', c.icon)} aria-hidden="true" />
+      </div>
+      <p className="text-2xl font-extrabold tracking-tight text-ink-900">{value ?? '—'}</p>
+      <p className="mt-0.5 text-sm font-medium text-gray-500">{label}</p>
+      {hint && <p className="mt-1 text-xs text-gray-400">{hint}</p>}
+    </div>
+  );
+}
+
+// ── Quick action card ─────────────────────────────────────────────────────────
+function QuickAction({ icon: Icon, label, description, to, color = 'brand' }) {
+  const colors = {
+    brand:   'bg-brand-500 hover:bg-brand-600',
+    emerald: 'bg-emerald-500 hover:bg-emerald-600',
+    violet:  'bg-violet-500 hover:bg-violet-600',
+    amber:   'bg-amber-500 hover:bg-amber-600',
+  };
+  return (
+    <Link
+      to={to}
+      className="group flex flex-col items-center gap-2 rounded-2xl border border-gray-100 bg-white p-5 text-center transition-all hover:-translate-y-1 hover:shadow-lg"
+    >
+      <div className={cn('flex h-11 w-11 items-center justify-center rounded-2xl text-white transition-transform group-hover:scale-110', colors[color] ?? colors.brand)}>
+        <Icon className="h-5 w-5" aria-hidden="true" />
+      </div>
+      <div>
+        <p className="text-sm font-bold text-ink-900">{label}</p>
+        <p className="mt-0.5 text-xs text-gray-400">{description}</p>
+      </div>
+    </Link>
+  );
+}
+
+// ── Section header ────────────────────────────────────────────────────────────
+function SectionHeader({ title, viewAllTo }) {
+  return (
+    <div className="mb-4 flex items-center justify-between">
+      <h2 className="text-base font-bold text-ink-900">{title}</h2>
+      {viewAllTo && (
+        <Link to={viewAllTo} className="text-xs font-semibold text-brand-600 hover:text-brand-700">
+          View all →
+        </Link>
+      )}
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 export default function FreelancerDashboardPage() {
-  usePageTitle('Freelancer Dashboard');
+  usePageTitle('Dashboard');
   const { user } = useAuth();
 
   const [data, setData] = useState(null);
@@ -74,12 +150,9 @@ export default function FreelancerDashboardPage() {
         contracts,
       });
 
-      // Load recommendations (non-blocking — failures are silent).
       recommendationService
         .getRecommendedJobs({ per_page: 5 })
-        .then((res) => {
-          if (res.success) setRecommendations(res.data ?? []);
-        })
+        .then((res) => { if (res.success) setRecommendations(res.data ?? []); })
         .catch(() => {});
     } catch (err) {
       setError(getErrorMessage(err, 'Unable to load your dashboard. Please try again.'));
@@ -88,431 +161,311 @@ export default function FreelancerDashboardPage() {
     }
   }, []);
 
-  useEffect(() => {
-    loadDashboard();
-  }, [loadDashboard]);
+  useEffect(() => { loadDashboard(); }, [loadDashboard]);
 
-  if (loading) return <DashboardSkeleton />;
-
+  if (loading) return <Skeleton />;
   if (error || !data) {
     return (
-      <ErrorState
-        title="Unable to load your dashboard"
-        description={error}
-        onRetry={loadDashboard}
-      />
+      <ErrorState title="Unable to load your dashboard" description={error} onRetry={loadDashboard} />
     );
   }
 
   const { profile, proposals, proposalsTotal, contracts } = data;
   const firstName = (user?.name || profile?.name || 'there').split(' ')[0];
-  const activeContracts = contracts.filter(
-    (contract) => contract.status === 'active' || contract.status === 'paused',
-  );
+  const activeContracts = contracts.filter((c) => c.status === 'active' || c.status === 'paused');
   const recentProposals = proposals.slice(0, 5);
   const recentContracts = contracts.slice(0, 5);
 
+  const now = new Date();
+  const hour = now.getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
   return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="Dashboard"
-        title={`Welcome back, ${firstName}`}
-        description={
-          profile.headline || 'Ready to find your next project? Browse open jobs to get started.'
-        }
-      />
+    <div className="space-y-7">
 
-      {/* Approval Status Banner */}
-      {profile.approvalStatus === 'pending' && (
-        <Card className="border-amber-200 bg-gradient-to-r from-amber-50/80 to-orange-50/50 p-5">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 shadow-xs">
-              <Clock className="h-5 w-5" aria-hidden="true" />
+      {/* ── Welcome hero banner ───────────────────────────────────────── */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1a2340] via-[#1e2d50] to-[#2a3d6e] px-6 py-7 text-white shadow-xl">
+        {/* decorative circles */}
+        <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-brand-500/10" />
+        <div className="pointer-events-none absolute -bottom-8 right-20 h-32 w-32 rounded-full bg-violet-500/10" />
+
+        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl border-2 border-white/20 bg-white/10 shadow-lg">
+              {profile.avatar
+                ? <img src={profile.avatar} alt={profile.name} className="h-full w-full object-cover" />
+                : (
+                  <div className="flex h-full w-full items-center justify-center text-xl font-extrabold text-white">
+                    {(profile.name || firstName).charAt(0).toUpperCase()}
+                  </div>
+                )
+              }
             </div>
             <div>
-              <h3 className="text-sm font-bold text-ink-900">
-                Account Pending Approval
-              </h3>
-              <p className="mt-0.5 text-xs text-ink-700 leading-relaxed">
-                Your freelancer account is awaiting admin approval. Once approved, you will be visible on the marketplace and can submit proposals. You can still edit your profile and submit credentials while waiting.
+              <p className="text-sm font-medium text-slate-300">{greeting} 👋</p>
+              <h1 className="text-2xl font-extrabold tracking-tight">{firstName}</h1>
+              <p className="mt-0.5 text-sm text-slate-300 line-clamp-1">
+                {profile.headline || 'Freelancer on DreamMore'}
               </p>
             </div>
           </div>
-        </Card>
-      )}
-      {profile.approvalStatus === 'rejected' && (
-        <Card className="border-red-200 bg-gradient-to-r from-red-50/80 to-orange-50/50 p-5">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-700 shadow-xs">
-              <XCircle className="h-5 w-5" aria-hidden="true" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-ink-900">
-                Account Application Rejected
-              </h3>
-              <p className="mt-0.5 text-xs text-ink-700 leading-relaxed">
-                Your freelancer application was rejected.{profile.rejectionReason ? ` Reason: ${profile.rejectionReason}` : ''} Please update your profile and submit credentials again.
-              </p>
-            </div>
-          </div>
-        </Card>
-      )}
 
-      {/* Mandatory Verification Banner */}
-      {profile.approvalStatus === 'approved' && !(user?.is_verified ?? user?.has_approved_credentials) && (
-        <Card className="border-amber-200 bg-gradient-to-r from-amber-50/80 to-orange-50/50 p-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 shadow-xs">
-                <Award className="h-5 w-5" aria-hidden="true" />
+          <div className="flex shrink-0 flex-wrap items-center gap-3">
+            {profile.rating > 0 && (
+              <div className="flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-sm">
+                <Star className="h-4 w-4 text-amber-400" />
+                <span className="font-bold">{profile.rating.toFixed(1)}</span>
               </div>
+            )}
+            <Link
+              to="/freelancer/jobs"
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-brand-600 hover:shadow-lg active:scale-95"
+            >
+              <Briefcase className="h-4 w-4" />
+              Find Jobs
+            </Link>
+          </div>
+        </div>
+
+        {/* Credential / approval banners inside the hero */}
+        {profile.approvalStatus === 'pending' && (
+          <div className="mt-5 flex items-center gap-2.5 rounded-xl border border-amber-400/30 bg-amber-500/15 px-4 py-3">
+            <Clock className="h-4 w-4 shrink-0 text-amber-300" />
+            <p className="text-sm text-amber-200">
+              <span className="font-bold">Pending approval —</span>{' '}
+              Submit your credentials to get verified by an admin before applying.
+            </p>
+          </div>
+        )}
+        {profile.approvalStatus === 'rejected' && (
+          <div className="mt-5 flex items-center gap-2.5 rounded-xl border border-red-400/30 bg-red-500/15 px-4 py-3">
+            <XCircle className="h-4 w-4 shrink-0 text-red-300" />
+            <p className="text-sm text-red-200">
+              <span className="font-bold">Application rejected.</span>{' '}
+              {profile.rejectionReason ? `Reason: ${profile.rejectionReason}. ` : ''}
+              Please update your profile and resubmit credentials.
+            </p>
+          </div>
+        )}
+        {profile.approvalStatus === 'approved' && !(user?.is_verified ?? user?.has_approved_credentials) && (
+          <div className="mt-5 flex flex-col gap-4 rounded-xl border border-amber-400/30 bg-amber-500/15 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-2.5">
+              <Award className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
               <div>
-                <h3 className="text-sm font-bold text-ink-900">
-                  Mandatory Credential Verification
-                </h3>
-                <p className="mt-0.5 text-xs text-ink-700 leading-relaxed">
-                  Your credentials must be approved by an administrator before you can apply for jobs. Submit your certificates or verification documents to start bidding.
+                <p className="text-sm font-bold text-amber-200">Credential verification required</p>
+                <p className="mt-0.5 text-xs text-amber-300">
+                  Submit your certificates so an admin can approve you to start applying for jobs.
                 </p>
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-medium text-gray-500">
-                  <span className="text-emerald-700 font-semibold">1. Register ✅</span>
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-amber-300/80">
+                  <span className="font-semibold text-emerald-400">✅ Registered</span>
                   <span>→</span>
-                  <span className={profile.headline ? 'text-emerald-700 font-semibold' : 'text-amber-700 font-semibold'}>
-                    2. Complete Profile {profile.headline ? '✅' : '⏳'}
+                  <span className={profile.headline ? 'font-semibold text-emerald-400' : 'font-semibold text-amber-300'}>
+                    {profile.headline ? '✅' : '⏳'} Profile
                   </span>
                   <span>→</span>
-                  <span className="text-amber-800 font-semibold">3. Submit Credentials ⏳</span>
+                  <span className="font-semibold text-amber-300">⏳ Credentials</span>
                   <span>→</span>
-                  <span>4. Admin Approval</span>
+                  <span>Admin Approval</span>
                   <span>→</span>
-                  <span>5. Apply for Jobs 🚀</span>
+                  <span>🚀 Apply!</span>
                 </div>
               </div>
             </div>
-            <Button
-              as={Link}
+            <Link
               to="/freelancer/credentials"
-              size="sm"
-              className="shrink-0"
+              className="shrink-0 rounded-xl bg-amber-500 px-3.5 py-2 text-xs font-bold text-white transition hover:bg-amber-600"
             >
-              <Award className="h-4 w-4" aria-hidden="true" /> Manage Credentials
-            </Button>
+              Submit Credentials
+            </Link>
           </div>
-        </Card>
-      )}
+        )}
+      </div>
 
-      {/* Statistics — all real API data */}
+      {/* ── Stat cards ───────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         <StatCard
           icon={Send}
-          label="Proposals"
+          label="Proposals sent"
           value={proposalsTotal}
-          hint="Submitted to jobs"
+          hint="Total submitted"
+          color="brand"
         />
         <StatCard
           icon={Handshake}
           label="Active contracts"
           value={activeContracts.length}
           hint="Active or paused"
+          color="violet"
         />
         <StatCard
           icon={ClipboardList}
           label="Jobs completed"
           value={profile.completedJobsCount}
           hint="Across all contracts"
+          color="amber"
         />
         <StatCard
           icon={Banknote}
           label="Total earnings"
           value={formatETB(profile.totalEarnings)}
-          tone="emerald"
-          hint="Confirmed by your profile"
+          hint="Confirmed earnings"
+          color="emerald"
         />
       </div>
 
-      {/* Quick actions — existing routes only */}
-      <QuickActions
-        className="xl:grid-cols-4"
-        items={[
-          {
-            label: 'Find Jobs',
-            description: 'Browse open opportunities',
-            to: '/freelancer/jobs',
-            icon: Briefcase,
-          },
-          {
-            label: 'My Proposals',
-            description: 'Track your submissions',
-            to: '/freelancer/proposals',
-            icon: FileText,
-          },
-          {
-            label: 'Contracts',
-            description: 'View active agreements',
-            to: '/freelancer/contracts',
-            icon: Handshake,
-          },
-          {
-            label: 'Edit Profile',
-            description: 'Update your public profile',
-            to: '/freelancer/profile/edit',
-            icon: Pencil,
-          },
-        ]}
-      />
+      {/* ── Quick actions ─────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <QuickAction icon={Briefcase}   label="Find Jobs"      description="Browse openings"       to="/freelancer/jobs"          color="brand"   />
+        <QuickAction icon={FileText}    label="My Proposals"   description="Track submissions"     to="/freelancer/proposals"     color="violet"  />
+        <QuickAction icon={Handshake}   label="Contracts"      description="Active agreements"     to="/freelancer/contracts"     color="emerald" />
+        <QuickAction icon={Pencil}      label="Edit Profile"   description="Update public page"    to="/freelancer/profile/edit"  color="amber"   />
+      </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px] lg:items-start">
-        {/* Main column */}
-        <div className="min-w-0 space-y-6">
-          {/* Recommended jobs */}
-          <Card>
-            <CardHeader
-              title="Recommended for you"
-              description="Jobs matched to your skills, experience, and saved interests."
-              action={
-                recommendations.length > 0 ? (
-                  <Link
-                    to="/freelancer/jobs"
-                    className="text-sm font-semibold text-brand-600 hover:text-brand-700"
-                  >
-                    View all
-                  </Link>
-                ) : undefined
-              }
-            />
-            <CardBody>
-              {recommendations.length > 0 ? (
-                <ul className="divide-y divide-gray-100">
-                  {recommendations.map((rec) => (
-                    <li key={rec.job?.id ?? rec.job?.slug} className="py-3">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="min-w-0">
-                          <Link
-                            to={`/jobs/${rec.job?.id}`}
-                            className="block truncate text-sm font-bold text-ink-900 transition-colors hover:text-brand-600"
-                          >
-                            {rec.job?.title}
-                          </Link>
-                          <p className="mt-0.5 text-xs text-gray-500">
-                            {rec.reason}
-                          </p>
-                        </div>
-                        <Button as={Link} to={`/jobs/${rec.job?.id}`} variant="outline" size="xs">
-                          View
-                        </Button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <EmptyState
-                  icon={Briefcase}
-                  title="No recommendations yet"
-                  description="Complete your profile and save jobs to get personalized recommendations."
-                  action={
-                    <Button as={Link} to="/freelancer/jobs" variant="outline" size="sm">
-                      <Briefcase className="h-4 w-4" aria-hidden="true" /> Browse jobs
-                    </Button>
-                  }
-                />
-              )}
-            </CardBody>
-          </Card>
+      {/* ── Main 3-column bento ──────────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
-          {/* Recent proposals */}
-          <Card>
-            <CardHeader
-              title="Recent proposals"
-              description="Your latest submissions, straight from the API."
-              action={
-                proposalsTotal > 0 ? (
+        {/* Recommended jobs */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+          <SectionHeader title="Recommended for you" viewAllTo="/freelancer/jobs" />
+          {recommendations.length > 0 ? (
+            <ul className="divide-y divide-gray-50">
+              {recommendations.slice(0, 5).map((rec) => (
+                <li key={rec.job?.id} className="py-3 first:pt-0 last:pb-0">
                   <Link
-                    to="/freelancer/proposals"
-                    className="text-sm font-semibold text-brand-600 hover:text-brand-700"
+                    to={`/jobs/${rec.job?.id}`}
+                    className="block text-sm font-semibold text-ink-900 transition-colors hover:text-brand-600 line-clamp-1"
                   >
-                    View all
+                    {rec.job?.title}
                   </Link>
-                ) : undefined
-              }
-            />
-            <CardBody>
-              {recentProposals.length > 0 ? (
-                <ul className="divide-y divide-gray-100">
-                  {recentProposals.map((proposal) => (
-                    <li key={proposal.id} className="flex items-center justify-between gap-4 py-3">
-                      <div className="min-w-0">
-                        <Link
-                          to={`/freelancer/proposals/${proposal.id}`}
-                          className="block truncate text-sm font-bold text-ink-900 transition-colors hover:text-brand-600"
-                        >
-                          {proposal.jobTitle ?? `Proposal #${proposal.id}`}
-                        </Link>
-                        <p className="mt-0.5 text-xs text-gray-500">
-                          {formatETB(proposal.bidAmount)}
-                          {proposal.createdAtLabel ? ` · ${proposal.createdAtLabel}` : ''}
-                        </p>
-                      </div>
-                      <StatusBadge status={proposal.status} size="xs" />
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <EmptyState
-                  icon={Send}
-                  title="You haven't submitted any proposals yet"
-                  description="When you apply to jobs, your proposals will appear here."
-                  action={
-                    <Button as={Link} to="/freelancer/jobs" variant="outline" size="sm">
-                      <Briefcase className="h-4 w-4" aria-hidden="true" /> Find jobs
-                    </Button>
-                  }
-                />
-              )}
-            </CardBody>
-          </Card>
-
-          {/* Recent contracts */}
-          <Card>
-            <CardHeader
-              title="Recent contracts"
-              description="Your latest agreements, straight from the API."
-              action={
-                contracts.length > 0 ? (
-                  <Link
-                    to="/freelancer/contracts"
-                    className="text-sm font-semibold text-brand-600 hover:text-brand-700"
-                  >
-                    View all
-                  </Link>
-                ) : undefined
-              }
-            />
-            <CardBody>
-              {recentContracts.length > 0 ? (
-                <ul className="divide-y divide-gray-100">
-                  {recentContracts.map((contract) => (
-                    <li key={contract.id} className="py-3">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="min-w-0">
-                          <Link
-                            to={`/freelancer/contracts/${contract.id}`}
-                            className="block truncate text-sm font-bold text-ink-900 transition-colors hover:text-brand-600"
-                          >
-                            {contract.title}
-                          </Link>
-                          <p className="mt-0.5 text-xs text-gray-500">
-                            {formatETB(contract.totalAmount)}
-                            {contract.createdAtLabel ? ` · ${contract.createdAtLabel}` : ''}
-                          </p>
-                        </div>
-                        <StatusBadge status={contract.status} size="xs" />
-                      </div>
-                      {contract.summary?.progressPercent != null && (
-                        <div className="mt-2 flex items-center gap-2">
-                          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
-                            <div
-                              className="h-full rounded-full bg-brand-500"
-                              style={{ width: `${Math.min(100, Math.max(0, contract.summary.progressPercent))}%` }}
-                            />
-                          </div>
-                          <span className="text-[11px] font-medium text-gray-500">
-                            {contract.summary.progressPercent}%
-                          </span>
-                        </div>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <EmptyState
-                  icon={Handshake}
-                  title="No contracts yet"
-                  description="Once an employer accepts your proposal, the contract will appear here."
-                  action={
-                    <Button as={Link} to="/freelancer/jobs" variant="outline" size="sm">
-                      <Briefcase className="h-4 w-4" aria-hidden="true" /> Find jobs
-                    </Button>
-                  }
-                />
-              )}
-            </CardBody>
-          </Card>
+                  <p className="mt-0.5 text-xs text-gray-400 line-clamp-1">{rec.reason}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState
+              icon={Briefcase}
+              title="No recommendations"
+              description="Complete your profile to get personalized job matches."
+              className="py-8" />
+          )}
         </div>
 
-        {/* Sidebar */}
-        <aside className="space-y-6 lg:sticky lg:top-24">
-          {/* Profile summary */}
-          <Card>
-            <CardHeader title="Profile summary" />
-            <CardBody>
-              <div className="flex items-center gap-3">
-                <Avatar name={profile.name} src={profile.avatar} size="lg" variant="brand" />
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-ink-900">
-                    {profile.name ?? 'Freelancer'}
-                  </p>
-                  <p className="truncate text-xs text-gray-500">
-                    {profile.headline || 'No headline set'}
-                  </p>
-                </div>
-              </div>
-              <dl className="mt-4 space-y-3 border-t border-gray-100 pt-4 text-sm">
-                <div className="flex items-center justify-between gap-4">
-                  <dt className="text-gray-500">Availability</dt>
-                  <dd>
-                    <StatusBadge status={profile.availability} />
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <dt className="text-gray-500">Hourly rate</dt>
-                  <dd className="font-semibold text-ink-900">
-                    {profile.hourlyRate != null && profile.hourlyRate > 0
-                      ? `${formatETB(profile.hourlyRate)}/hr`
-                      : 'Not set'}
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between gap-4">
-                  <dt className="text-gray-500">Rating</dt>
-                  <dd>
-                    {profile.rating > 0 ? (
-                      <RatingDisplay rating={profile.rating} showValue />
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-xs text-gray-400">
-                        <Star className="h-3.5 w-3.5" aria-hidden="true" /> No ratings yet
-                      </span>
-                    )}
-                  </dd>
-                </div>
-                {profile.location && (
-                  <div className="flex items-center justify-between gap-4">
-                    <dt className="flex items-center gap-1.5 text-gray-500">
-                      <MapPin className="h-4 w-4" aria-hidden="true" /> Location
-                    </dt>
-                    <dd className="truncate text-right font-medium text-ink-900">
-                      {profile.location}
-                    </dd>
+        {/* Recent proposals */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+          <SectionHeader title="Recent proposals" viewAllTo={proposalsTotal > 0 ? '/freelancer/proposals' : undefined} />
+          {recentProposals.length > 0 ? (
+            <ul className="divide-y divide-gray-50">
+              {recentProposals.map((proposal) => (
+                <li key={proposal.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                  <div className="min-w-0">
+                    <Link
+                      to={`/freelancer/proposals/${proposal.id}`}
+                      className="block text-sm font-semibold text-ink-900 hover:text-brand-600 line-clamp-1"
+                    >
+                      {proposal.jobTitle ?? `Proposal #${proposal.id}`}
+                    </Link>
+                    <p className="mt-0.5 text-xs text-gray-400">
+                      {formatETB(proposal.bidAmount)}
+                      {proposal.createdAtLabel ? ` · ${proposal.createdAtLabel}` : ''}
+                    </p>
                   </div>
-                )}
-                <div className="flex items-center justify-between gap-4">
-                  <dt className="flex items-center gap-1.5 text-gray-500">
-                    <FolderOpen className="h-4 w-4" aria-hidden="true" /> Skills
-                  </dt>
-                  <dd className="text-right font-medium text-ink-900">
-                    {profile.skills.length}
-                  </dd>
-                </div>
-              </dl>
-            </CardBody>
-            <div className="space-y-2 border-t border-gray-100 px-5 py-4">
-              <Button as={Link} to="/freelancer/profile" variant="outline" size="sm" className="w-full">
-                View Profile
-              </Button>
-              <Button as={Link} to="/freelancer/profile/edit" size="sm" className="w-full">
-                <Pencil className="h-4 w-4" aria-hidden="true" /> Edit Profile
-              </Button>
-            </div>
-          </Card>
-        </aside>
+                  <StatusBadge status={proposal.status} size="xs" />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState
+              icon={Send}
+              title="No proposals yet"
+              description="Apply to jobs to see your proposals here."
+              className="py-8" />
+          )}
+        </div>
+
+        {/* Active contracts */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+          <SectionHeader title="Contracts" viewAllTo={contracts.length > 0 ? '/freelancer/contracts' : undefined} />
+          {recentContracts.length > 0 ? (
+            <ul className="divide-y divide-gray-50">
+              {recentContracts.map((contract) => (
+                <li key={contract.id} className="py-3 first:pt-0 last:pb-0">
+                  <div className="flex items-center justify-between gap-3">
+                    <Link
+                      to={`/freelancer/contracts/${contract.id}`}
+                      className="min-w-0 text-sm font-semibold text-ink-900 hover:text-brand-600 line-clamp-1"
+                    >
+                      {contract.title}
+                    </Link>
+                    <StatusBadge status={contract.status} size="xs" />
+                  </div>
+                  <p className="mt-0.5 text-xs text-gray-400">
+                    {formatETB(contract.totalAmount)}
+                    {contract.createdAtLabel ? ` · ${contract.createdAtLabel}` : ''}
+                  </p>
+                  {contract.summary?.progressPercent != null && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
+                        <div
+                          className="h-full rounded-full bg-brand-500 transition-all"
+                          style={{ width: `${Math.min(100, Math.max(0, contract.summary.progressPercent))}%` }}
+                        />
+                      </div>
+                      <span className="text-[11px] font-semibold text-gray-400">
+                        {contract.summary.progressPercent}%
+                      </span>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <EmptyState
+              icon={Handshake}
+              title="No contracts yet"
+              description="Once an employer accepts your proposal, it appears here."
+              className="py-8" />
+          )}
+        </div>
       </div>
+
+      {/* ── Profile summary strip ─────────────────────────────────────── */}
+      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <Avatar name={profile.name} src={profile.avatar} size="lg" variant="brand" />
+            <div>
+              <p className="font-bold text-ink-900">{profile.name ?? 'Freelancer'}</p>
+              <p className="text-sm text-gray-500">{profile.headline || 'No headline set'}</p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-gray-400">
+                {profile.location && (
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5" />{profile.location}
+                  </span>
+                )}
+                <span className="inline-flex items-center gap-1">
+                  <FolderOpen className="h-3.5 w-3.5" />{profile.skills.length} skills
+                </span>
+                {profile.rating > 0 && (
+                  <span className="inline-flex items-center gap-1">
+                    <Star className="h-3.5 w-3.5 text-amber-400" />
+                    {profile.rating.toFixed(1)}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex shrink-0 gap-2">
+            <Button as={Link} to="/freelancer/profile" variant="outline" size="sm">
+              View Profile
+            </Button>
+            <Button as={Link} to="/freelancer/profile/edit" size="sm">
+              <Pencil className="h-3.5 w-3.5" /> Edit
+            </Button>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }
+

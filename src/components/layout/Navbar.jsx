@@ -14,9 +14,9 @@ import { getNavPaths, ROLE_LABELS } from '../../utils/auth';
 import { cn } from '../../utils/cn';
 
 // ────────────────────────────────────────────────────────────────────
-// Category Dropdown (always dark theme)
+// Category Dropdown (supports light / dark variant)
 // ────────────────────────────────────────────────────────────────────
-function CategoryDropdown({ label, toPrefix }) {
+function CategoryDropdown({ label, toPrefix, variant = 'dark' }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -96,7 +96,12 @@ function CategoryDropdown({ label, toPrefix }) {
         }}
         aria-haspopup="true"
         aria-expanded={open}
-        className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-white/5 hover:text-white"
+        className={cn(
+          'flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+          variant === 'light'
+            ? 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+            : 'text-slate-300 hover:bg-white/5 hover:text-white',
+        )}
       >
         {label}
         <ChevronDown
@@ -255,22 +260,36 @@ export default function Navbar() {
     if (!mobileTalentOpen) loadMobileCategories('talent');
   };
 
-  // ── Desktop link styles (always dark) ──
+  // ── Landing page detection ──
+  const isLanding = location.pathname === '/';
+
+  // ── Desktop link styles ──
   const authLinkClass = ({ isActive }) =>
     cn(
       'rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-      isActive ? 'bg-white/10 text-white' : 'text-slate-300 hover:bg-white/5 hover:text-white',
+      isLanding
+        ? isActive
+          ? 'bg-slate-100 text-slate-900'
+          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+        : isActive
+          ? 'bg-white/10 text-white'
+          : 'text-slate-300 hover:bg-white/5 hover:text-white',
     );
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-ink-950">
+    <header className={cn(
+      'sticky top-0 z-50 border-b',
+      isLanding
+        ? 'border-slate-200 bg-white'
+        : 'border-white/10 bg-ink-950',
+    )}>
       <nav
         aria-label={t('nav.main')}
         className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 lg:px-8"
       >
         {/* Brand */}
         <Link to="/" aria-label={t('nav.home')} className="shrink-0">
-          <Logo variant="light" />
+          <Logo variant={isLanding ? 'dark' : 'light'} />
         </Link>
 
         {/* Desktop links */}
@@ -286,15 +305,15 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <CategoryDropdown label={t('nav.findJobs')} toPrefix="/jobs" />
-              <CategoryDropdown label={t('nav.findTalent')} toPrefix="/freelancers" />
+              <CategoryDropdown label={t('nav.findJobs')} toPrefix="/jobs" variant={isLanding ? 'light' : 'dark'} />
+              <CategoryDropdown label={t('nav.findTalent')} toPrefix="/freelancers" variant={isLanding ? 'light' : 'dark'} />
             </>
           )}
         </div>
 
         {/* Desktop right side */}
         <div className="hidden items-center gap-2 md:flex">
-          <LanguageSelector variant="dark" />
+          <LanguageSelector variant={isLanding ? 'light' : 'dark'} />
           {user ? (
             <>
               <NotificationBell />
@@ -302,7 +321,7 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Button as={Link} to="/login" variant="nav" size="sm">
+              <Button as={Link} to="/login" variant={isLanding ? 'outline' : 'nav'} size="sm">
                 {t('nav.signIn')}
               </Button>
               <Button as={Link} to="/register" size="sm">
@@ -317,7 +336,12 @@ export default function Navbar() {
           {user && <NotificationBell />}
           <button
             type="button"
-            className="rounded-lg p-2 text-slate-200 transition-colors hover:bg-white/10 hover:text-white"
+            className={cn(
+              'rounded-lg p-2 transition-colors',
+              isLanding
+                ? 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                : 'text-slate-200 hover:bg-white/10 hover:text-white',
+            )}
             aria-label={menuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"

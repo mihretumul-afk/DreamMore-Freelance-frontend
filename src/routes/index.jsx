@@ -70,6 +70,9 @@ const AuditLogsPage = lazy(() => import('../pages/admin/AuditLogsPage'));
 const PaymentsPage = lazy(() => import('../pages/admin/PaymentsPage'));
 const MilestonesAdminPage = lazy(() => import('../pages/admin/MilestonesAdminPage'));
 const TransactionsPage = lazy(() => import('../pages/admin/TransactionsPage'));
+// Stage 1 Payment — user-facing
+const PaymentCenterPage = lazy(() => import('../pages/shared/PaymentCenterPage'));
+const PaymentMethodsPage = lazy(() => import('../pages/shared/PaymentMethodsPage'));
 const MaintenancePage = lazy(() => import('../pages/public/MaintenancePage'));
 
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
@@ -180,6 +183,8 @@ export const router = createBrowserRouter([
           { path: 'credentials', element: lazyPage(<FreelancerCredentialsPage />) },
           { path: 'messages', element: lazyPage(<FreelancerMessagesPage />) },
           { path: 'notifications', element: lazyPage(<FreelancerNotificationsPage />) },
+          { path: 'payments', element: lazyPage(<PaymentCenterPage />) },
+          { path: 'payment-methods', element: lazyPage(<PaymentMethodsPage />) },
         ],
       },
       {
@@ -204,6 +209,8 @@ export const router = createBrowserRouter([
           { path: 'saved-freelancers', element: lazyPage(<EmployerSavedFreelancersPage />) },
           { path: 'messages', element: lazyPage(<EmployerMessagesPage />) },
           { path: 'notifications', element: lazyPage(<EmployerNotificationsPage />) },
+          { path: 'payments', element: lazyPage(<PaymentCenterPage />) },
+          { path: 'payment-methods', element: lazyPage(<PaymentMethodsPage />) },
         ],
       },
     ],

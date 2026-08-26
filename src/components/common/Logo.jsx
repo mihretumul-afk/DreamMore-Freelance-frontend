@@ -1,14 +1,15 @@
 import { cn } from '../../utils/cn';
 
 /**
- * Dream More brand mark — an inline SVG "D+M" monogram with an upward arrow.
- * Colors come from the design tokens (brand orange + ink), so the logo always
- * matches the current palette and stays crisp at any size.
+ * Dream More brand mark — precisely matching the official DreamMore logo:
+ *  • Orange thick open D-arc (no left closing bar)
+ *  • Dark navy M: two vertical leg bars + inverted-V chevron connecting their tops
+ *  • Small ↗ arrow with L-shaped head at top-right, overlapping the D arc
  */
 export function LogoMark({ className, ...props }) {
   return (
     <svg
-      viewBox="0 0 56 44"
+      viewBox="0 0 110 110"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
@@ -16,26 +17,61 @@ export function LogoMark({ className, ...props }) {
       className={cn('h-9 w-auto', className)}
       {...props}
     >
-      {/* Left stem (shared D / M leg) */}
-      <rect x="4" y="8" width="6" height="28" rx="3" fill="var(--color-ink-900)" />
-      {/* Orange D bowl */}
-      <path d="M10 8h9c8.284 0 15 6.716 15 15s-6.716 15-15 15h-9V8z" fill="var(--color-brand-500)" />
-      {/* M fold */}
+      {/*
+        ── ORANGE D ARC ──
+        Open D: thick stroked path starting top-left, arcing right, ending bottom-left.
+        No vertical left bar — the ends are just rounded stroke caps.
+      */}
       <path
-        d="M14 14l10 16 9-16"
-        stroke="var(--color-ink-900)"
-        strokeWidth="4"
+        d="M22 12 H52 C80 12 95 30 95 55 C95 80 80 98 52 98 H22"
+        stroke="#E8712C"
+        strokeWidth="13"
+        fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* Right stem */}
-      <rect x="42" y="8" width="6" height="22" rx="3" fill="var(--color-ink-900)" />
-      {/* Upward arrow */}
-      <path d="M45 2v7" stroke="var(--color-ink-900)" strokeWidth="4" strokeLinecap="round" />
+
+      {/*
+        ── DARK NAVY M SHAPE ──
+        Composed of three parts:
+        1. Left vertical bar (rect)
+        2. Right vertical bar (rect)
+        3. Inverted V chevron connecting the tops of both bars (points downward in center)
+        All in dark navy #3D4464
+      */}
+      {/* Left vertical bar */}
+      <rect x="22" y="22" width="12" height="68" fill="#3D4464" />
+      {/* Right vertical bar */}
+      <rect x="76" y="22" width="12" height="68" fill="#3D4464" />
+      {/* Inverted-V chevron: from top-left bar → deep center valley → top-right bar */}
       <path
-        d="M41 5.5 45 2l4 3.5"
-        stroke="var(--color-ink-900)"
-        strokeWidth="4"
+        d="M22 22 L55 62 L88 22"
+        stroke="#3D4464"
+        strokeWidth="12"
+        fill="none"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+      />
+
+      {/*
+        ── UPWARD-RIGHT ARROW (↗) ──
+        Diagonal shaft from lower-left to upper-right, with an L-shaped corner head.
+        Positioned at the top-right, overlapping the orange D arc.
+      */}
+      {/* Diagonal shaft */}
+      <line
+        x1="84" y1="30"
+        x2="104" y2="10"
+        stroke="#3D4464"
+        strokeWidth="5"
+        strokeLinecap="round"
+      />
+      {/* L-shaped arrowhead: top edge (horizontal) + right edge (vertical) */}
+      <polyline
+        points="90,10 104,10 104,24"
+        stroke="#3D4464"
+        strokeWidth="5"
+        fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -44,8 +80,8 @@ export function LogoMark({ className, ...props }) {
 }
 
 /**
- * Full logo: mark + "DreamMore" wordmark with the "Right work at right time"
- * tagline. `variant="light"` renders for dark surfaces (navbar, footer).
+ * Full logo: mark + "DreamMore" wordmark with "Right work at right time" tagline.
+ * variant="light" renders for dark surfaces (navbar, footer).
  */
 export default function Logo({ variant = 'dark', tagline = true, className, markClassName }) {
   const light = variant === 'light';
@@ -56,7 +92,7 @@ export default function Logo({ variant = 'dark', tagline = true, className, mark
         <span
           className={cn(
             'block text-lg font-extrabold tracking-tight',
-            light ? 'text-white' : 'text-ink-900',
+            light ? 'text-white' : 'text-[#3D4464]',
           )}
         >
           DreamMore
@@ -64,8 +100,8 @@ export default function Logo({ variant = 'dark', tagline = true, className, mark
         {tagline && (
           <span
             className={cn(
-              'mt-0.5 block text-[9px] font-semibold uppercase tracking-[0.14em]',
-              light ? 'text-brand-400' : 'text-brand-600',
+              'mt-0.5 block text-[9px] font-normal tracking-wide',
+              light ? 'text-slate-300' : 'text-slate-500',
             )}
           >
             Right work at right time
