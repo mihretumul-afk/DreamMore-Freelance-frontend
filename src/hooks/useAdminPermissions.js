@@ -30,9 +30,7 @@ export function useAdminPermissions() {
       setAdminRoleSlugs([]);
       setLoading(false);
       return;
-    }
-
-    try {
+    }      try {
       // If the auth response already embeds admin detail, use it.
       if (user.all_permissions && Array.isArray(user.all_permissions)) {
         setPermissions(user.all_permissions);
@@ -49,10 +47,10 @@ export function useAdminPermissions() {
       const slugs = (detail.admin_roles || []).map((r) => r.slug).filter(Boolean);
       setAdminRoleSlugs(slugs);
     } catch {
-      // On failure (e.g. bootstrap admin with no sub-roles), treat as full access.
-      // Backend enforces real auth; this is UI-only fallback.
-      setPermissions(['*']);
-      setAdminRoleSlugs(['super_admin']);
+      // On failure, deny all permissions. The backend enforces real auth.
+      // Never grant full access on error — that would be a security hole.
+      setPermissions([]);
+      setAdminRoleSlugs([]);
     } finally {
       setLoading(false);
     }
@@ -69,10 +67,8 @@ export function useAdminPermissions() {
   const isSuperAdmin = useMemo(
     () =>
       adminRoleSlugs.includes('super_admin') ||
-      permissions.includes('*') ||
-      // Backend bootstrap: admin with zero sub-roles → treated as super admin
-      (adminRoleSlugs.length === 0 && user?.role === 'admin' && !loading),
-    [adminRoleSlugs, permissions, user, loading],
+      permissions.includes('*'),
+    [adminRoleSlugs, permissions],
   );
 
   /**

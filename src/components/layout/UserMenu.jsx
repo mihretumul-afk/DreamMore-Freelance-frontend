@@ -28,7 +28,7 @@ export default function UserMenu() {
   const triggerRef = useRef(null);
   const panelRef = useRef(null);
 
-  const { dashboardPath, profilePath } = getNavPaths(user?.role);
+  const { dashboardPath, profilePath } = getNavPaths(user?.role, user);
 
   // Close the menu when navigating away.
   useEffect(() => {

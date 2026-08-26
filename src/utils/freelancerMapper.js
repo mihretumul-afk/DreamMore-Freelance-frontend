@@ -24,8 +24,8 @@ export function normalizeFreelancer(profile) {
     id: profile.id,
     userId: profile.user_id,
 
-    // Approval status
-    approvalStatus: profile.approval_status ?? 'pending',
+    // Approval status — null means the backend didn't send a status (treat as unknown/approved)
+    approvalStatus: profile.approval_status ?? null,
     approvedAt: profile.approved_at,
     rejectionReason: profile.rejection_reason,
 

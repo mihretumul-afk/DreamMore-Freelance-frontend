@@ -17,7 +17,7 @@ export default function RoleRoute({ roles, children }) {
   if (loading) return <PageLoader label="Checking session…" />;
   if (!user) return <Navigate to="/login" replace />;
   if (!roles.includes(user.role)) {
-    return <Navigate to={getDashboardPath(user.role)} replace />;
+    return <Navigate to={getDashboardPath(user.role, user)} replace />;
   }
   return children;
 }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Flag, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Flag, ChevronLeft, ChevronRight, CreditCard, RotateCcw, Lock } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
 import Card, { CardBody } from '../../components/ui/Card';
@@ -11,6 +11,7 @@ import Textarea from '../../components/ui/Textarea';
 import { adminService } from '../../services/adminService';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate } from '../../utils/format';
+import { cn } from '../../utils/cn';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
 const STATUS_OPTIONS = [
@@ -39,6 +40,7 @@ export default function AdminReportsPage() {
 
   const [resolveTarget, setResolveTarget] = useState(null);
   const [resolution, setResolution] = useState('');
+  const [paymentAction, setPaymentAction] = useState('hold');
   const [processing, setProcessing] = useState(false);
 
   const loadReports = useCallback(async () => {
@@ -66,9 +68,10 @@ export default function AdminReportsPage() {
     if (!resolveTarget) return;
     setProcessing(true);
     try {
-      await adminService.resolveReport(resolveTarget.id, resolution);
+      await adminService.resolveReport(resolveTarget.id, resolution, paymentAction);
       setResolveTarget(null);
       setResolution('');
+      setPaymentAction('hold');
       loadReports();
     } catch {
       // non-critical
@@ -206,12 +209,12 @@ export default function AdminReportsPage() {
       {/* Resolve modal */}
       <Modal
         open={Boolean(resolveTarget)}
-        onClose={() => { setResolveTarget(null); setResolution(''); }}
+        onClose={() => { setResolveTarget(null); setResolution(''); setPaymentAction('hold'); }}
         title="Resolve Report"
-        description={`Provide a resolution note for this report.`}
-        size="sm"
+        description="Provide a resolution and payment decision for this report."
+        size="md"
       >
-        <div className="mb-4">
+        <div className="space-y-4">
           <Textarea
             label="Resolution notes (optional)"
             placeholder="Describe the action taken or resolution applied."
@@ -219,19 +222,60 @@ export default function AdminReportsPage() {
             onChange={(e) => setResolution(e.target.value)}
             rows={3}
           />
-        </div>
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" size="sm" onClick={() => { setResolveTarget(null); setResolution(''); }}>
-            Cancel
-          </Button>
-          <Button
-            variant="success"
-            size="sm"
-            loading={processing}
-            onClick={handleResolve}
-          >
-            Mark Resolved
-          </Button>
+
+          {/* Payment action for contract disputes */}
+          {resolveTarget?.target_type === 'contract' && (
+            <div>
+              <label className="mb-2 block text-sm font-medium text-ink-900">
+                Payment Decision
+              </label>
+              <p className="mb-3 text-xs text-gray-500">
+                Decide what happens to the escrow funds held for this contract's milestones.
+              </p>
+              <div className="grid grid-cols-1 gap-2">
+                {[
+                  { value: 'hold', label: 'Hold Funds', desc: 'Keep funds in escrow until further action', icon: Lock, color: 'gray' },
+                  { value: 'release', label: 'Release to Freelancer', desc: 'Release escrow funds to the freelancer', icon: CreditCard, color: 'success' },
+                  { value: 'refund', label: 'Refund to Employer', desc: 'Return funds to the employer', icon: RotateCcw, color: 'warning' },
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setPaymentAction(opt.value)}
+                    className={cn(
+                      'flex items-center gap-3 rounded-xl border p-3 text-left transition-colors cursor-pointer',
+                      paymentAction === opt.value
+                        ? `border-${opt.color === 'success' ? 'success' : opt.color === 'warning' ? 'warning' : 'brand'}-400 bg-${opt.color === 'success' ? 'success' : opt.color === 'warning' ? 'warning' : 'brand'}-50`
+                        : 'border-gray-200 bg-white hover:border-gray-300',
+                    )}
+                  >
+                    <opt.icon className={cn(
+                      'h-5 w-5 shrink-0',
+                      paymentAction === opt.value ? 'text-brand-600' : 'text-gray-400',
+                    )} />
+                    <div>
+                      <p className="text-sm font-semibold text-ink-900">{opt.label}</p>
+                      <p className="text-xs text-gray-500">{opt.desc}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="outline" size="sm" onClick={() => { setResolveTarget(null); setResolution(''); setPaymentAction('hold'); }}>
+              Cancel
+            </Button>
+            <Button
+              variant="success"
+              size="sm"
+              loading={processing}
+              onClick={handleResolve}
+            >
+              Mark Resolved
+            </Button>
+          </div>
         </div>
       </Modal>
     </div>

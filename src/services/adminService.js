@@ -136,9 +136,10 @@ export const adminService = {
   },
 
   /** PUT /admin/reports/:id/resolve — mark a report as resolved. */
-  resolveReport: async (id, resolution = '') => {
+  resolveReport: async (id, resolution = '', paymentAction = 'hold') => {
     const response = await apiClient.put(`/admin/reports/${id}/resolve`, {
       resolution,
+      payment_action: paymentAction,
     });
     return response.data;
   },

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
   Ban,
@@ -23,16 +23,20 @@ import MilestoneList from '../../components/contracts/MilestoneList';
 import MilestoneForm from '../../components/contracts/MilestoneForm';
 import RequestRevisionModal from '../../components/contracts/RequestRevisionModal';
 import ConfirmActionModal from '../../components/proposals/ConfirmActionModal';
+import FundMilestoneModal from '../../components/payments/FundMilestoneModal';
+import RequestRefundModal from '../../components/payments/RequestRefundModal';
 import ReviewForm from '../../components/ui/ReviewForm';
 import ReviewList from '../../components/ui/ReviewList';
 import { contractService } from '../../services/contractService';
 import { milestoneService } from '../../services/milestoneService';
+import paymentService from '../../services/paymentService';
 import { reviewService } from '../../services/reviewService';
 import { normalizeContract } from '../../utils/contractMapper';
 import { milestoneFormToPayload } from '../../utils/milestoneMapper';
 import { getErrorMessage, getFieldErrors } from '../../utils/errors';
 import { formatDate, formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { useToast } from '../../hooks/useToast';
 
 const CONTRACT_DIALOGS = {
   pause: {
@@ -84,6 +88,7 @@ const MILESTONE_DIALOGS = {
 export default function EmployerContractDetailsPage() {
   usePageTitle('Contract Details');
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [contract, setContract] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -115,6 +120,20 @@ export default function EmployerContractDetailsPage() {
   const [contractReviews, setContractReviews] = useState([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
+
+  // Payment modals
+  const [fundMilestone, setFundMilestone] = useState(null);
+  const [fundSubmitting, setFundSubmitting] = useState(false);
+  const [fundError, setFundError] = useState(null);
+  const [releaseMilestone, setReleaseMilestone] = useState(null);
+  const [releaseSubmitting, setReleaseSubmitting] = useState(false);
+  const [releaseError, setReleaseError] = useState(null);
+  const [refundMilestone, setRefundMilestone] = useState(null);
+  const [refundSubmitting, setRefundSubmitting] = useState(false);
+  const [refundError, setRefundError] = useState(null);
+  const [paymentMethods, setPaymentMethods] = useState([]);
+
+  const { showToast } = useToast();
 
   const loadContract = useCallback(
     async (silent = false) => {
@@ -263,6 +282,67 @@ export default function EmployerContractDetailsPage() {
     setFormGeneralError(null);
   };
 
+  // ── Payment Actions ──────────────────────────────────────────────
+
+  const handleFundMilestone = async () => {
+    if (!fundMilestone) return;
+    setFundSubmitting(true);
+    setFundError(null);
+    try {
+      const defaultMethod = paymentMethods.find(m => m.is_default) || paymentMethods[0];
+      const payload = defaultMethod ? { payment_method_id: defaultMethod.id } : {};
+      const res = await paymentService.fundMilestone(contract.id, fundMilestone.id, payload);
+      setNotice(res.message || 'Milestone funded successfully.');
+      setFundMilestone(null);
+      await loadContract(true);
+    } catch (err) {
+      setFundError(getErrorMessage(err, 'Unable to fund milestone. Please try again.'));
+    } finally {
+      setFundSubmitting(false);
+    }
+  };
+
+  const handleReleaseMilestone = async () => {
+    if (!releaseMilestone) return;
+    setReleaseSubmitting(true);
+    setReleaseError(null);
+    try {
+      const res = await paymentService.releaseMilestone(contract.id, releaseMilestone.id);
+      setNotice(res.message || 'Payment released to freelancer.');
+      setReleaseMilestone(null);
+      await loadContract(true);
+    } catch (err) {
+      setReleaseError(getErrorMessage(err, 'Unable to release payment. Please try again.'));
+    } finally {
+      setReleaseSubmitting(false);
+    }
+  };
+
+  const handleRefundRequest = async (payload) => {
+    if (!refundMilestone) return;
+    setRefundSubmitting(true);
+    setRefundError(null);
+    try {
+      const res = await paymentService.requestMilestoneRefund(contract.id, refundMilestone.id, payload);
+      setNotice(res.message || 'Refund request submitted.');
+      setRefundMilestone(null);
+      await loadContract(true);
+    } catch (err) {
+      setRefundError(getErrorMessage(err, 'Unable to submit refund request. Please try again.'));
+    } finally {
+      setRefundSubmitting(false);
+    }
+  };
+
+  // Load payment methods when needed
+  useEffect(() => {
+    if (fundMilestone) {
+      paymentService.getPaymentMethods()
+        .then(res => setPaymentMethods(res.data ?? res ?? []))
+        .catch(() => setPaymentMethods([]));
+    }
+  }, [fundMilestone]);
+
   const handleFormSubmit = async (form) => {
     setFormSubmitting(true);
     setFormFieldErrors({});
@@ -386,6 +466,14 @@ export default function EmployerContractDetailsPage() {
             onMilestoneAction={(milestone, kind) => {
               if (kind === 'edit') {
                 openEditForm(milestone);
+              } else if (kind === 'fund') {
+                navigate(`/employer/contracts/${contract.id}/milestones/${milestone.id}/checkout`);
+              } else if (kind === 'release') {
+                setReleaseMilestone(milestone);
+                setReleaseError(null);
+              } else if (kind === 'refund') {
+                setRefundMilestone(milestone);
+                setRefundError(null);
               } else {
                 openMilestoneAction(milestone, kind);
               }
@@ -591,6 +679,41 @@ export default function EmployerContractDetailsPage() {
           />
         )}
       </Modal>
+
+      {/* Fund Milestone Modal */}
+      <FundMilestoneModal
+        open={Boolean(fundMilestone)}
+        onClose={() => { setFundMilestone(null); setFundError(null); }}
+        milestone={fundMilestone}
+        paymentMethod={paymentMethods.find(m => m.is_default) || paymentMethods[0]}
+        submitting={fundSubmitting}
+        error={fundError}
+        onConfirm={handleFundMilestone}
+      />
+
+      {/* Release Payment Confirmation */}
+      <ConfirmActionModal
+        open={Boolean(releaseMilestone)}
+        onClose={() => { setReleaseMilestone(null); setReleaseError(null); }}
+        title="Release payment to freelancer?"
+        description={releaseMilestone ? `Approve and release ${formatETB(releaseMilestone.amount)} to the freelancer for milestone \"${releaseMilestone.title}\". This action cannot be undone.` : ''}
+        confirmLabel="Release Payment"
+        tone="success"
+        busy={releaseSubmitting}
+        error={releaseError}
+        onConfirm={handleReleaseMilestone}
+      />
+
+      {/* Request Refund Modal */}
+      <RequestRefundModal
+        open={Boolean(refundMilestone)}
+        onClose={() => { setRefundMilestone(null); setRefundError(null); }}
+        milestone={refundMilestone}
+        payment={refundMilestone ? { amount: refundMilestone.amount, reference: fundMilestone?.payment?.reference } : null}
+        submitting={refundSubmitting}
+        error={refundError}
+        onConfirm={handleRefundRequest}
+      />
     </div>
   );
 }

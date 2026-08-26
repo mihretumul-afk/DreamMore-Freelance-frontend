@@ -163,22 +163,22 @@ export default function PaymentCenterPage() {
       {balanceLoading ? <BalanceSkeleton /> : balanceError ? (
         <ErrorState title="Balance unavailable" description={balanceError} onRetry={loadBalance} />
       ) : balance ? (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <StatCard
-            icon={Wallet}
-            label="Available Balance"
-            value={formatCurrency(balance.available_balance ?? 0, currency)}
-            hint="Ready to use"
-            tone="emerald"
-          />
-          <StatCard
-            icon={Clock}
-            label="Pending"
-            value={formatCurrency(balance.pending_in ?? 0, currency)}
-            hint="Awaiting processing"
-            tone="brand"
-          />
-          {isFreelancer ? (
+        isFreelancer ? (
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <StatCard
+              icon={Clock}
+              label="Pending Earnings"
+              value={formatCurrency(balance.pending_earnings ?? 0, currency)}
+              hint="In escrow, awaiting release"
+              tone="brand"
+            />
+            <StatCard
+              icon={Wallet}
+              label="Available Earnings"
+              value={formatCurrency(balance.available_earnings ?? 0, currency)}
+              hint="Ready to withdraw"
+              tone="emerald"
+            />
             <StatCard
               icon={TrendingUp}
               label="Total Earned"
@@ -186,7 +186,29 @@ export default function PaymentCenterPage() {
               hint="All time"
               tone="emerald"
             />
-          ) : (
+            <StatCard
+              icon={TrendingDown}
+              label="Withdrawn"
+              value={formatCurrency(balance.withdrawn ?? 0, currency)}
+              hint="Total withdrawn"
+            />
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <StatCard
+              icon={Wallet}
+              label="Available Balance"
+              value={formatCurrency(balance.available_balance ?? 0, currency)}
+              hint="Ready to use"
+              tone="emerald"
+            />
+            <StatCard
+              icon={Clock}
+              label="Held in Escrow"
+              value={formatCurrency(balance.total_held_in_escrow ?? 0, currency)}
+              hint="Funded, not yet released"
+              tone="brand"
+            />
             <StatCard
               icon={TrendingDown}
               label="Total Spent"
@@ -194,14 +216,14 @@ export default function PaymentCenterPage() {
               hint="All time"
               tone="brand"
             />
-          )}
-          <StatCard
-            icon={isFreelancer ? TrendingDown : TrendingUp}
-            label={isFreelancer ? 'Total Spent' : 'Total Received'}
-            value={formatCurrency(isFreelancer ? (balance.total_spent ?? 0) : (balance.total_earned ?? 0), currency)}
-            hint="Platform fees included"
-          />
-        </div>
+            <StatCard
+              icon={TrendingUp}
+              label="Total Refunded"
+              value={formatCurrency(balance.total_refunded ?? 0, currency)}
+              hint="All time"
+            />
+          </div>
+        )
       ) : null}
 
       {/* ── Transactions ─────────────────────────────────────────────── */}

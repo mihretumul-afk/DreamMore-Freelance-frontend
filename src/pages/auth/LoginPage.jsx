@@ -33,7 +33,7 @@ export default function LoginPage() {
 
   // Already signed in — send the visitor to their destination.
   if (user) {
-    return <Navigate to={from ?? getDashboardPath(user.role)} replace />;
+    return <Navigate to={from ?? getDashboardPath(user.role, user)} replace />;
   }
 
   const handleSubmit = async (event) => {
@@ -52,7 +52,7 @@ export default function LoginPage() {
       });
       // On success the provider has stored the session; go to the page the
       // visitor came from (set by ProtectedRoute) or their role dashboard.
-      navigate(from ?? getDashboardPath(authedUser.role), { replace: true });
+      navigate(from ?? getDashboardPath(authedUser.role, authedUser), { replace: true });
     } catch (error) {
       const errors = getFieldErrors(error);
       // Backend puts bad credentials under `email`, missing/weak input under

@@ -34,7 +34,8 @@ export default function JobProposalPanel({ job, onProposalSubmitted }) {
   const [submitted, setSubmitted] = useState(null); // normalized proposal after success
 
   const isFreelancer = user?.role === ROLES.FREELANCER;
-  const isApproved = user?.is_verified ?? user?.has_approved_credentials ?? false;
+  // Must match EnsureVerifiedFreelancer middleware: profile approved + credentials approved.
+  const isApproved = user?.is_fully_approved ?? false;
   const verificationStatus = user?.verification_status ?? (isApproved ? 'approved' : 'unverified');
 
   // Find any proposal the freelancer already has for this job.

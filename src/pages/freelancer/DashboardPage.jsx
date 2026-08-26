@@ -227,58 +227,82 @@ export default function FreelancerDashboardPage() {
           </div>
         </div>
 
-        {/* Credential / approval banners inside the hero */}
-        {profile.approvalStatus === 'pending' && (
-          <div className="mt-5 flex items-center gap-2.5 rounded-xl border border-amber-400/30 bg-amber-500/15 px-4 py-3">
-            <Clock className="h-4 w-4 shrink-0 text-amber-300" />
-            <p className="text-sm text-amber-200">
-              <span className="font-bold">Pending approval —</span>{' '}
-              Submit your credentials to get verified by an admin before applying.
-            </p>
-          </div>
-        )}
-        {profile.approvalStatus === 'rejected' && (
-          <div className="mt-5 flex items-center gap-2.5 rounded-xl border border-red-400/30 bg-red-500/15 px-4 py-3">
-            <XCircle className="h-4 w-4 shrink-0 text-red-300" />
-            <p className="text-sm text-red-200">
-              <span className="font-bold">Application rejected.</span>{' '}
-              {profile.rejectionReason ? `Reason: ${profile.rejectionReason}. ` : ''}
-              Please update your profile and resubmit credentials.
-            </p>
-          </div>
-        )}
-        {profile.approvalStatus === 'approved' && !(user?.is_verified ?? user?.has_approved_credentials) && (
-          <div className="mt-5 flex flex-col gap-4 rounded-xl border border-amber-400/30 bg-amber-500/15 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-2.5">
-              <Award className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
-              <div>
-                <p className="text-sm font-bold text-amber-200">Credential verification required</p>
-                <p className="mt-0.5 text-xs text-amber-300">
-                  Submit your certificates so an admin can approve you to start applying for jobs.
+        {/* ── Approval / credential status banners ──────────────── */}
+        {(() => {
+          // Primary truth: use is_fully_approved which matches the backend's
+          // EnsureVerifiedFreelancer dual-check (profile approved + credentials approved).
+          const isFullyApproved = user?.is_fully_approved ?? false;
+
+          // Verification status for showing specific pending/rejected banners.
+          const verificationStatus =
+            (isFullyApproved ? 'approved' : null) ||
+            user?.verification_status ||           // 'pending' | 'rejected' | 'unverified'
+            profile.approvalStatus;               // fallback from profile API
+
+          // If approved by any signal → show nothing
+          if (verificationStatus === 'approved' || isFullyApproved) return null;
+
+          // Pending review
+          if (verificationStatus === 'pending') {
+            return (
+              <div className="mt-5 flex items-center gap-2.5 rounded-xl border border-amber-400/30 bg-amber-500/15 px-4 py-3">
+                <Clock className="h-4 w-4 shrink-0 text-amber-300" />
+                <p className="text-sm text-amber-200">
+                  <span className="font-bold">Under review —</span>{' '}
+                  Your credentials have been submitted and are awaiting admin approval. You&apos;ll be notified once reviewed.
                 </p>
-                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-amber-300/80">
-                  <span className="font-semibold text-emerald-400">✅ Registered</span>
-                  <span>→</span>
-                  <span className={profile.headline ? 'font-semibold text-emerald-400' : 'font-semibold text-amber-300'}>
-                    {profile.headline ? '✅' : '⏳'} Profile
-                  </span>
-                  <span>→</span>
-                  <span className="font-semibold text-amber-300">⏳ Credentials</span>
-                  <span>→</span>
-                  <span>Admin Approval</span>
-                  <span>→</span>
-                  <span>🚀 Apply!</span>
+              </div>
+            );
+          }
+
+          // Rejected
+          if (verificationStatus === 'rejected') {
+            return (
+              <div className="mt-5 flex items-center gap-2.5 rounded-xl border border-red-400/30 bg-red-500/15 px-4 py-3">
+                <XCircle className="h-4 w-4 shrink-0 text-red-300" />
+                <p className="text-sm text-red-200">
+                  <span className="font-bold">Credentials rejected.</span>{' '}
+                  {profile.rejectionReason ? `Reason: ${profile.rejectionReason}. ` : ''}
+                  Please update and resubmit your credentials.
+                </p>
+              </div>
+            );
+          }
+
+          // Not yet submitted (unverified / null)
+          return (
+            <div className="mt-5 flex flex-col gap-4 rounded-xl border border-amber-400/30 bg-amber-500/15 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-2.5">
+                <Award className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
+                <div>
+                  <p className="text-sm font-bold text-amber-200">Credential verification required</p>
+                  <p className="mt-0.5 text-xs text-amber-300">
+                    Submit your certificates so an admin can approve you to start applying for jobs.
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-amber-300/80">
+                    <span className="font-semibold text-emerald-400">✅ Registered</span>
+                    <span>→</span>
+                    <span className={profile.headline ? 'font-semibold text-emerald-400' : 'font-semibold text-amber-300'}>
+                      {profile.headline ? '✅' : '⏳'} Profile
+                    </span>
+                    <span>→</span>
+                    <span className="font-semibold text-amber-300">⏳ Credentials</span>
+                    <span>→</span>
+                    <span>Admin Approval</span>
+                    <span>→</span>
+                    <span>🚀 Apply!</span>
+                  </div>
                 </div>
               </div>
+              <Link
+                to="/freelancer/credentials"
+                className="shrink-0 rounded-xl bg-amber-500 px-3.5 py-2 text-xs font-bold text-white transition hover:bg-amber-600"
+              >
+                Submit Credentials
+              </Link>
             </div>
-            <Link
-              to="/freelancer/credentials"
-              className="shrink-0 rounded-xl bg-amber-500 px-3.5 py-2 text-xs font-bold text-white transition hover:bg-amber-600"
-            >
-              Submit Credentials
-            </Link>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* ── Stat cards ───────────────────────────────────────────────── */}

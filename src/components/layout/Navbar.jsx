@@ -185,7 +185,7 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { dashboardPath, profilePath } = getNavPaths(user?.role);
+  const { dashboardPath, profilePath } = getNavPaths(user?.role, user);
 
   // Close mobile drawer on navigation
   useEffect(() => {

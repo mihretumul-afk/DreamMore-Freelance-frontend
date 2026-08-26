@@ -152,6 +152,17 @@ export function AuthProvider({ children }) {
     return freshUser;
   }, []);
 
+  // Approval can happen in another admin session while this app remains open.
+  // Refresh on focus so permission-dependent UI uses current server state.
+  useEffect(() => {
+    const onFocus = () => {
+      if (hasToken()) refreshUser().catch(() => {});
+    };
+
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [refreshUser]);
+
   const value = useMemo(
     () => ({ user, token, loading, login, register, logout, refreshUser }),
     [user, token, loading, login, register, logout, refreshUser],

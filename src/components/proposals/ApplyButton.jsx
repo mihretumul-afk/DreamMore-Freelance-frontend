@@ -53,7 +53,8 @@ export default function ApplyButton({ job, size = 'sm', className = '', onApplie
   const [existing, setExisting] = useState(undefined); // undefined = not checked yet
 
   const isFreelancer = user?.role === ROLES.FREELANCER;
-  const isApproved = user?.is_verified ?? user?.has_approved_credentials ?? false;
+  // Must match EnsureVerifiedFreelancer middleware: profile approved + credentials approved.
+  const isApproved = user?.is_fully_approved ?? false;
   const verificationStatus = user?.verification_status ?? (isApproved ? 'approved' : 'unverified');
 
   // Check if the freelancer already has a proposal for this job.

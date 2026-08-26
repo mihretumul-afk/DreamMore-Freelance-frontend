@@ -41,7 +41,7 @@ export default function RegisterPage() {
 
   // Already signed in — send the visitor to their dashboard.
   if (user) {
-    return <Navigate to={getDashboardPath(user.role)} replace />;
+    return <Navigate to={getDashboardPath(user.role, user)} replace />;
   }
 
   // Registration is closed
@@ -95,7 +95,7 @@ export default function RegisterPage() {
     try {
       const newUser = await register(payload);
       // Session stored by the provider — go straight to the role dashboard.
-      navigate(getDashboardPath(newUser.role), { replace: true });
+      navigate(getDashboardPath(newUser.role, newUser), { replace: true });
     } catch (error) {
       const errors = getFieldErrors(error);
       const known = {};

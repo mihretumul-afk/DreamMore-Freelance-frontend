@@ -7,6 +7,7 @@ import DashboardLayout from '../layouts/DashboardLayout';
 import MaintenanceRoute from './MaintenanceRoute';
 import ProtectedRoute from './ProtectedRoute';
 import RoleRoute from './RoleRoute';
+import AdminRedirect from './AdminRedirect';
 import { PageLoader } from '../components/common/Loading';
 import { ROLES } from '../constants/app';
 
@@ -34,6 +35,7 @@ const FreelancerMessagesPage = lazy(() => import('../pages/freelancer/MessagesPa
 const FreelancerNotificationsPage = lazy(() => import('../pages/freelancer/NotificationsPage'));
 const FreelancerSavedJobsPage = lazy(() => import('../pages/freelancer/SavedJobsPage'));
 const FreelancerCredentialsPage = lazy(() => import('../pages/freelancer/CredentialsPage'));
+const FreelancerWithdrawalsPage = lazy(() => import('../pages/freelancer/WithdrawalsPage'));
 
 const EmployerDashboardPage = lazy(() => import('../pages/employer/DashboardPage'));
 const EmployerProfilePage = lazy(() => import('../pages/employer/ProfilePage'));
@@ -45,12 +47,17 @@ const EmployerJobEditPage = lazy(() => import('../pages/employer/JobEditPage'));
 const EmployerJobProposalsPage = lazy(() => import('../pages/employer/JobProposalsPage'));
 const EmployerContractsPage = lazy(() => import('../pages/employer/ContractsPage'));
 const EmployerContractDetailsPage = lazy(() => import('../pages/employer/ContractDetailsPage'));
+const EmployerCheckoutPage = lazy(() => import('../pages/employer/CheckoutPage'));
 const EmployerMessagesPage = lazy(() => import('../pages/employer/MessagesPage'));
 const EmployerNotificationsPage = lazy(() => import('../pages/employer/NotificationsPage'));
 const EmployerSavedFreelancersPage = lazy(() => import('../pages/employer/SavedFreelancersPage'));
 
 const AdminLayout = lazy(() => import('../layouts/AdminLayout'));
 const AdminDashboardPage = lazy(() => import('../pages/admin/DashboardPage'));
+const SupportDashboard = lazy(() => import('../pages/admin/SupportDashboard'));
+const FinanceDashboard = lazy(() => import('../pages/admin/FinanceDashboard'));
+const DisputeDashboard = lazy(() => import('../pages/admin/DisputeDashboard'));
+const VerificationDashboard = lazy(() => import('../pages/admin/VerificationDashboard'));
 const AdminUsersPage = lazy(() => import('../pages/admin/UsersPage'));
 const AdminUserDetailPage = lazy(() => import('../pages/admin/UserDetailPage'));
 const AdminVerificationsPage = lazy(() => import('../pages/admin/VerificationsPage'));
@@ -130,8 +137,12 @@ export const router = createBrowserRouter([
           </RoleRoute>
         ),
         children: [
-          { index: true, element: <Navigate to="dashboard" replace /> },
+          { index: true, element: <AdminRedirect /> },
           { path: 'dashboard', element: lazyPage(<AdminDashboardPage />) },
+          { path: 'support/dashboard', element: lazyPage(<SupportDashboard />) },
+          { path: 'finance/dashboard', element: lazyPage(<FinanceDashboard />) },
+          { path: 'disputes/dashboard', element: lazyPage(<DisputeDashboard />) },
+          { path: 'verification/dashboard', element: lazyPage(<VerificationDashboard />) },
           { path: 'users', element: lazyPage(<AdminUsersPage />) },
           { path: 'users/:id', element: lazyPage(<AdminUserDetailPage />) },
           { path: 'verifications', element: lazyPage(<AdminVerificationsPage />) },
@@ -185,6 +196,7 @@ export const router = createBrowserRouter([
           { path: 'notifications', element: lazyPage(<FreelancerNotificationsPage />) },
           { path: 'payments', element: lazyPage(<PaymentCenterPage />) },
           { path: 'payment-methods', element: lazyPage(<PaymentMethodsPage />) },
+          { path: 'withdrawals', element: lazyPage(<FreelancerWithdrawalsPage />) },
         ],
       },
       {
@@ -206,6 +218,7 @@ export const router = createBrowserRouter([
           { path: 'jobs/:id/proposals', element: lazyPage(<EmployerJobProposalsPage />) },
           { path: 'contracts', element: lazyPage(<EmployerContractsPage />) },
           { path: 'contracts/:id', element: lazyPage(<EmployerContractDetailsPage />) },
+          { path: 'contracts/:contractId/milestones/:milestoneId/checkout', element: lazyPage(<EmployerCheckoutPage />) },
           { path: 'saved-freelancers', element: lazyPage(<EmployerSavedFreelancersPage />) },
           { path: 'messages', element: lazyPage(<EmployerMessagesPage />) },
           { path: 'notifications', element: lazyPage(<EmployerNotificationsPage />) },

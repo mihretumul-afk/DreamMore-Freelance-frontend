@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, LogOut, Menu, X } from 'lucide-react';
-import Logo from '../components/common/Logo';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { LogOut, Menu, X } from 'lucide-react';
+import Navbar from '../components/layout/Navbar';
 import { useAuth } from '../hooks/useAuth';
 import { useAdminPermissions } from '../hooks/useAdminPermissions';
 import { useI18n } from '../i18n';
@@ -9,29 +9,32 @@ import { adminService } from '../services/adminService';
 import { ADMIN_NAV_LINKS, ADMIN_NAV_GROUPS } from '../constants/navigation';
 import { cn } from '../utils/cn';
 
-const COLLAPSED_KEY = 'appworks_admin_sidebar_collapsed';
-
 /**
  * AdminLayout — permission-aware shell for the admin section.
  *
- * Desktop  : Fixed dark sidebar (collapsible) with grouped + labelled nav sections.
- * Mobile   : Slide-out drawer triggered by hamburger in sticky top bar.
- * Matches the DashboardLayout visual style with a red admin identity accent.
+ * Visually identical to DashboardLayout (white/cloud sidebar, same Navbar).
+ *
+ * Desktop  : Fixed white sidebar (w-16 icon-only by default, w-64 on hover).
+ *            Expands when cursor enters, collapses when cursor leaves.
+ * Mobile   : Slide-out drawer triggered by hamburger button below Navbar.
+ * Navbar   : Reuses the existing <Navbar /> component — logo → /, bell,
+ *            language selector, and user menu are all provided by it.
+ *
+ * RBAC     : Permission checks are untouched — only items the logged-in admin
+ *            is authorised to see are rendered (via useAdminPermissions).
  */
 export default function AdminLayout() {
   const { logout, user } = useAuth();
-  const { can, isSuperAdmin, loading: permLoading } = useAdminPermissions();
+  const { can, isSuperAdmin, adminRoleSlugs, loading: permLoading } = useAdminPermissions();
   const { t } = useI18n();
   const navigate = useNavigate();
 
   const [stats, setStats] = useState(null);
-  const [collapsed, setCollapsed] = useState(
-    () => localStorage.getItem(COLLAPSED_KEY) === 'true',
-  );
+  const [hovered, setHovered] = useState(false);   // hover-to-expand on desktop
   const [mobileOpen, setMobileOpen] = useState(false);
   const drawerRef = useRef(null);
 
-  // ── Stats polling ─────────────────────────────────────────────────────
+  // ── Stats polling (badge counts) ─────────────────────────────────────
   const fetchStats = useCallback(async () => {
     try {
       const res = await adminService.getDashboardStats();
@@ -47,7 +50,7 @@ export default function AdminLayout() {
     return () => clearInterval(interval);
   }, [fetchStats]);
 
-  // ── Mobile drawer ─────────────────────────────────────────────────────
+  // ── Mobile drawer: Escape + scroll lock ──────────────────────────────
   useEffect(() => {
     if (!mobileOpen) return;
     const onKey = (e) => { if (e.key === 'Escape') setMobileOpen(false); };
@@ -60,19 +63,11 @@ export default function AdminLayout() {
     };
   }, [mobileOpen]);
 
-  const toggleCollapsed = () => {
-    setCollapsed((prev) => {
-      localStorage.setItem(COLLAPSED_KEY, String(!prev));
-      return !prev;
-    });
-  };
-
   const handleLogout = async () => {
     await logout();
     navigate('/');
   };
 
-  const firstName = (user?.name || 'Admin').split(' ')[0];
   const initials = (user?.name || 'A')
     .split(' ')
     .map((w) => w[0])
@@ -94,7 +89,8 @@ export default function AdminLayout() {
     return acc;
   }, {});
 
-  const renderNavLink = (item, onNavigate) => {
+  // ── Nav link renderer ─────────────────────────────────────────────────
+  const renderNavLink = (item, showLabel, onNavigate) => {
     const Icon = item.icon;
     const badgeCount = item.badgeKey ? (stats?.[item.badgeKey] ?? 0) : 0;
     return (
@@ -103,58 +99,56 @@ export default function AdminLayout() {
         to={item.to}
         end={item.end}
         onClick={onNavigate}
-        title={collapsed ? (item.key ? t(item.key) : item.label) : undefined}
+        title={!showLabel ? (item.key ? t(item.key) : item.label) : undefined}
         className={({ isActive }) =>
           cn(
-            'group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150',
+            'group relative flex items-center rounded-xl text-sm font-medium transition-all duration-150',
+            showLabel ? 'gap-3 px-3 py-2.5' : 'justify-center px-0 py-2.5',
             isActive
-              ? 'bg-white/10 text-white before:absolute before:left-0 before:top-2 before:h-[calc(100%-1rem)] before:w-0.5 before:rounded-r before:bg-red-400'
-              : 'text-slate-400 hover:bg-white/5 hover:text-white',
-            collapsed && 'justify-center px-2',
+              ? 'bg-red-50 text-red-700 before:absolute before:left-0 before:top-2 before:h-[calc(100%-1rem)] before:w-0.5 before:rounded-r before:bg-red-500'
+              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900',
           )
         }
       >
-        <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
-        {!collapsed && (
-          <span className="flex-1 truncate">{item.key ? t(item.key) : item.label}</span>
-        )}
-        {badgeCount > 0 && (
-          <span
-            aria-label={`${badgeCount} pending`}
-            className={cn(
-              'flex h-4 min-w-4 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold text-white',
-              collapsed && 'absolute right-1 top-1 h-3 min-w-3 text-[8px]',
+        {({ isActive }) => (
+          <>
+            <Icon
+              className={cn(
+                'h-[18px] w-[18px] shrink-0 transition-colors',
+                isActive ? 'text-red-600' : 'text-gray-400 group-hover:text-gray-700',
+              )}
+              aria-hidden="true"
+            />
+            {showLabel && (
+              <span className="flex-1 truncate">
+                {item.key ? t(item.key) : item.label}
+              </span>
             )}
-          >
-            {badgeCount > 99 ? '99+' : badgeCount}
-          </span>
+            {badgeCount > 0 && (
+              <span
+                aria-label={`${badgeCount} pending`}
+                className={cn(
+                  'flex items-center justify-center rounded-full bg-amber-500 font-bold text-white',
+                  showLabel
+                    ? 'h-4 min-w-4 px-1 text-[10px]'
+                    : 'absolute right-0.5 top-0.5 h-3 min-w-3 text-[7px]',
+                )}
+              >
+                {badgeCount > 99 ? '99+' : badgeCount}
+              </span>
+            )}
+          </>
         )}
       </NavLink>
     );
   };
 
-  const SidebarInner = ({ onNavigate }) => (
-    <div className="flex h-full flex-col">
-      {/* Brand + role badge */}
-      <div
-        className={cn(
-          'flex items-center px-4 py-5',
-          collapsed ? 'flex-col gap-2' : 'gap-3',
-        )}
-      >
-        <Link to="/admin/dashboard" className="shrink-0">
-          <Logo variant="light" tagline={false} markClassName="h-8 w-auto" />
-        </Link>
-        {!collapsed && (
-          <span className="rounded-full bg-red-500/20 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-red-400">
-            Admin
-          </span>
-        )}
-      </div>
-
+  // ── Grouped sidebar content (shared desktop + mobile) ─────────────────
+  const SidebarContent = ({ showLabel, onNavigate }) => (
+    <div className="flex h-full flex-col py-4">
       {/* Grouped nav */}
       <nav
-        className="flex-1 overflow-y-auto px-3 pb-4 space-y-4"
+        className={cn('flex-1 space-y-4 overflow-y-auto', showLabel ? 'px-3' : 'px-2')}
         aria-label="Admin navigation"
       >
         {Object.entries(ADMIN_NAV_GROUPS).map(([groupKey, groupMeta]) => {
@@ -162,163 +156,147 @@ export default function AdminLayout() {
           if (!items?.length) return null;
           return (
             <div key={groupKey}>
-              {groupMeta.label && !collapsed && (
-                <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+              {/* Group label — only when expanded */}
+              {groupMeta.label && showLabel && (
+                <p className="mb-1 px-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">
                   {groupMeta.label}
                 </p>
               )}
-              {collapsed && groupMeta.label && (
-                <div className="my-1 border-t border-white/10" />
+              {/* Divider when icon-only */}
+              {groupMeta.label && !showLabel && (
+                <div className="my-1 border-t border-gray-100" />
               )}
               <div className="space-y-0.5">
-                {items.map((item) => renderNavLink(item, onNavigate))}
+                {items.map((item) => renderNavLink(item, showLabel, onNavigate))}
               </div>
             </div>
           );
         })}
       </nav>
 
-      {/* User footer */}
-      <div className="border-t border-white/10 p-3">
-        <div
-          className={cn(
-            'mb-1 flex items-center gap-3 rounded-xl px-2 py-2',
-            collapsed && 'justify-center',
-          )}
-        >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-            {initials}
-          </div>
-          {!collapsed && (
+      {/* User + logout at bottom */}
+      <div className={cn('border-t border-gray-100 pt-3', showLabel ? 'px-3' : 'px-2')}>
+        {showLabel && (
+          <div className="mb-2 flex items-center gap-2.5 rounded-xl px-2 py-1.5">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+              {initials}
+            </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-white">{user?.name}</p>
-              <p className="truncate text-[11px] text-slate-400">
-                {isSuperAdmin ? 'Super Admin' : 'Admin'}
+              <p className="truncate text-xs font-semibold text-gray-800">{user?.name}</p>
+              <p className="truncate text-[10px] text-gray-400">
+                {(() => {
+                  if (isSuperAdmin) return 'Super Admin';
+                  const slugs = adminRoleSlugs || [];
+                  if (slugs.includes('support_admin')) return 'Support Admin';
+                  if (slugs.includes('finance_admin')) return 'Finance Admin';
+                  if (slugs.includes('dispute_admin')) return 'Dispute Admin';
+                  if (slugs.includes('verification_admin')) return 'Verification Admin';
+                  return 'Admin';
+                })()}
               </p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
         <button
           type="button"
           onClick={handleLogout}
-          title={collapsed ? t('nav.signOut') : undefined}
+          title={!showLabel ? t('nav.signOut') : undefined}
           className={cn(
-            'flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-400 transition-all hover:bg-white/5 hover:text-white',
-            collapsed && 'justify-center px-2',
+            'flex w-full cursor-pointer items-center rounded-xl text-sm font-medium text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-900',
+            showLabel ? 'gap-3 px-3 py-2.5' : 'justify-center px-0 py-2.5',
           )}
         >
-          <LogOut className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
-          {!collapsed && <span>{t('nav.signOut')}</span>}
+          <LogOut className="h-[18px] w-[18px] shrink-0 text-gray-400" aria-hidden="true" />
+          {showLabel && <span>{t('nav.signOut')}</span>}
         </button>
       </div>
     </div>
   );
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-gray-50">
 
-      {/* ── Desktop sidebar ───────────────────────────────── */}
-      <aside
-        className={cn(
-          'hidden lg:flex lg:flex-col fixed inset-y-0 left-0 z-30',
-          'bg-[#1a2340] shadow-[4px_0_24px_rgba(0,0,0,0.15)]',
-          'transition-[width] duration-300 ease-in-out',
-          collapsed ? 'lg:w-16' : 'lg:w-64',
-        )}
-      >
-        <SidebarInner onNavigate={undefined} />
+      {/* ── Existing Navbar — untouched ──────────────────────────────────
+           Provides: logo → /, NotificationBell, LanguageSelector, UserMenu,
+           black background on non-landing pages, responsive mobile drawer. */}
+      <Navbar />
 
-        {/* Collapse toggle */}
-        <button
-          type="button"
-          onClick={toggleCollapsed}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className="absolute -right-3 top-20 flex h-6 w-6 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 shadow-sm hover:bg-gray-50 hover:text-ink-900 transition-colors"
+      <div className="flex flex-1">
+
+        {/* ── Desktop sidebar — icon-only by default, expands on hover ── */}
+        <aside
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          className={cn(
+            'hidden lg:flex lg:flex-col',
+            'fixed left-0 top-16 bottom-0 z-30',
+            'border-r border-gray-200 bg-white shadow-sm',
+            'transition-[width] duration-300 ease-in-out overflow-hidden',
+            hovered ? 'w-64' : 'w-16',
+          )}
         >
-          {collapsed
-            ? <ChevronRight className="h-3.5 w-3.5" />
-            : <ChevronLeft className="h-3.5 w-3.5" />
-          }
-        </button>
-      </aside>
+          <SidebarContent showLabel={hovered} onNavigate={undefined} />
+        </aside>
 
-      {/* ── Mobile backdrop ────────────────────────────────── */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
-          aria-hidden="true"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
-
-      {/* ── Mobile drawer ──────────────────────────────────── */}
-      <aside
-        ref={drawerRef}
-        tabIndex={-1}
-        aria-label="Admin navigation"
-        className={cn(
-          'fixed inset-y-0 left-0 z-50 w-72 bg-[#1a2340] outline-none',
-          'transition-transform duration-300 ease-in-out lg:hidden',
-          mobileOpen ? 'translate-x-0' : '-translate-x-full',
-        )}
-      >
-        <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
-          <div className="flex items-center gap-2">
-            <Logo variant="light" tagline={false} markClassName="h-7 w-auto" />
-            <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-red-400">
-              Admin
-            </span>
-          </div>
-          <button
-            type="button"
-            aria-label="Close menu"
+        {/* ── Mobile backdrop ───────────────────────────────────────────── */}
+        {mobileOpen && (
+          <div
+            className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm lg:hidden"
+            aria-hidden="true"
             onClick={() => setMobileOpen(false)}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        <div className="h-[calc(100%-60px)] overflow-y-auto">
-          <SidebarInner onNavigate={() => setMobileOpen(false)} />
-        </div>
-      </aside>
-
-      {/* ── Main content ───────────────────────────────────── */}
-      <div
-        className={cn(
-          'flex flex-1 flex-col min-w-0 transition-[margin] duration-300 ease-in-out',
-          'lg:ml-64',
-          collapsed && 'lg:ml-16',
+          />
         )}
-      >
-        {/* Sticky top bar */}
-        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-gray-200 bg-white/95 px-4 backdrop-blur-sm sm:px-6">
-          <button
-            type="button"
-            aria-label="Open menu"
-            onClick={() => setMobileOpen(true)}
-            className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
 
-          <span className="hidden text-sm font-semibold text-gray-400 lg:inline">
-            Admin Panel
-          </span>
-
-          <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
-              {initials}
+        {/* ── Mobile slide-out drawer ───────────────────────────────────── */}
+        <aside
+          ref={drawerRef}
+          tabIndex={-1}
+          aria-label="Admin navigation"
+          className={cn(
+            'fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl outline-none',
+            'transition-transform duration-300 ease-in-out lg:hidden',
+            mobileOpen ? 'translate-x-0' : '-translate-x-full',
+          )}
+        >
+          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-gray-800">Admin Menu</span>
+              <span className="rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-red-600">
+                {isSuperAdmin ? 'Super' : 'Admin'}
+              </span>
             </div>
-            <span className="hidden text-sm font-medium text-gray-700 sm:inline">
-              {firstName}
-            </span>
+            <button
+              type="button"
+              aria-label="Close menu"
+              onClick={() => setMobileOpen(false)}
+              className="cursor-pointer rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
-        </header>
+          <SidebarContent showLabel onNavigate={() => setMobileOpen(false)} />
+        </aside>
 
-        <main id="main-content" className="flex-1 p-4 sm:p-6 lg:p-8" tabIndex={-1}>
-          <Outlet />
-        </main>
+        {/* ── Main content ──────────────────────────────────────────────── */}
+        <div className="flex flex-1 flex-col min-w-0 lg:ml-16">
+          {/* Mobile top bar — hamburger only (Navbar handles brand/user) */}
+          <div className="flex items-center border-b border-gray-200 bg-white px-4 py-3 lg:hidden">
+            <button
+              type="button"
+              aria-label="Open admin menu"
+              onClick={() => setMobileOpen(true)}
+              className="cursor-pointer rounded-lg p-2 text-gray-500 hover:bg-gray-100"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <span className="ml-3 text-sm font-semibold text-gray-700">Admin Panel</span>
+          </div>
+
+          <main id="main-content" className="flex-1 p-4 sm:p-6 lg:p-8" tabIndex={-1}>
+            <Outlet />
+          </main>
+        </div>
+
       </div>
     </div>
   );

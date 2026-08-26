@@ -118,6 +118,94 @@ export const exportTransactions = async (params = {}) => {
   return res.data;
 };
 
+// ── User: Refund Requests ──────────────────────────────────────────────────
+
+export const requestMilestoneRefund = async (contractId, milestoneId, payload) => {
+  const res = await apiClient.post(
+    `/contracts/${contractId}/milestones/${milestoneId}/refund-request`,
+    payload
+  );
+  return res.data;
+};
+
+export const getMyRefundRequests = async (params = {}) => {
+  const res = await apiClient.get('/payments/refund-requests', { params });
+  return res.data;
+};
+
+// ── User: Withdrawals ─────────────────────────────────────────────────────
+
+export const getMyWithdrawals = async (params = {}) => {
+  const res = await apiClient.get('/payments/withdrawals', { params });
+  return res.data;
+};
+
+export const getMyWithdrawal = async (id) => {
+  const res = await apiClient.get(`/payments/withdrawals/${id}`);
+  return res.data;
+};
+
+export const requestWithdrawal = async (payload) => {
+  const res = await apiClient.post('/payments/withdrawals', payload);
+  return res.data;
+};
+
+export const cancelWithdrawal = async (id) => {
+  const res = await apiClient.post(`/payments/withdrawals/${id}/cancel`);
+  return res.data;
+};
+
+// ── User: Fee Calculation ──────────────────────────────────────────────────
+
+export const calculateFees = async (amount) => {
+  const res = await apiClient.post('/payments/calculate-fees', { amount });
+  return res.data;
+};
+
+// ── Admin: Withdrawals ─────────────────────────────────────────────────────
+
+export const getAdminWithdrawals = async (params = {}) => {
+  const res = await apiClient.get('/admin/withdrawals', { params });
+  return res.data;
+};
+
+export const getAdminWithdrawal = async (id) => {
+  const res = await apiClient.get(`/admin/withdrawals/${id}`);
+  return res.data;
+};
+
+export const processWithdrawal = async (id, payload = {}) => {
+  const res = await apiClient.put(`/admin/withdrawals/${id}/process`, payload);
+  return res.data;
+};
+
+export const completeWithdrawal = async (id, payload = {}) => {
+  const res = await apiClient.put(`/admin/withdrawals/${id}/complete`, payload);
+  return res.data;
+};
+
+export const failWithdrawal = async (id, payload) => {
+  const res = await apiClient.put(`/admin/withdrawals/${id}/fail`, payload);
+  return res.data;
+};
+
+// ── Admin: Refund Request Management ────────────────────────────────────────
+
+export const getAdminRefundRequests = async (params = {}) => {
+  const res = await apiClient.get('/admin/refund-requests', { params });
+  return res.data;
+};
+
+export const approveRefund = async (paymentId, payload = {}) => {
+  const res = await apiClient.put(`/admin/payments/${paymentId}/refund-approve`, payload);
+  return res.data;
+};
+
+export const rejectRefund = async (paymentId, payload = {}) => {
+  const res = await apiClient.put(`/admin/payments/${paymentId}/refund-reject`, payload);
+  return res.data;
+};
+
 // ── Convenience default export ────────────────────────────────────────────────
 
 const paymentService = {
@@ -132,6 +220,15 @@ const paymentService = {
   getTransaction,
   fundMilestone,
   releaseMilestone,
+  requestMilestoneRefund,
+  getMyRefundRequests,
+  // withdrawals
+  getMyWithdrawals,
+  getMyWithdrawal,
+  requestWithdrawal,
+  cancelWithdrawal,
+  // fees
+  calculateFees,
   // admin
   getAdminPaymentStats,
   getAdminPayments,
@@ -141,6 +238,14 @@ const paymentService = {
   getAdminTransactions,
   getAdminTransaction,
   exportTransactions,
+  getAdminRefundRequests,
+  approveRefund,
+  rejectRefund,
+  getAdminWithdrawals,
+  getAdminWithdrawal,
+  processWithdrawal,
+  completeWithdrawal,
+  failWithdrawal,
 };
 
 export default paymentService;

@@ -53,6 +53,9 @@ export function normalizeMilestone(milestone) {
     dueDate: milestone.due_date,
     submittedAt: milestone.submitted_at,
     approvedAt: milestone.approved_at,
+    paidAt: milestone.paid_at,
+    paymentId: milestone.payment_id,
+    escrowFundedAt: milestone.escrow_funded_at,
 
     submissions: (milestone.submissions || []).map(normalizeMilestoneSubmission),
     latestSubmission: normalizeMilestoneSubmission(milestone.latest_submission),

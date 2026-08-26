@@ -28,7 +28,8 @@ export default function JobFiltersPanel({ values = {}, onChange, onApply, onClea
 
   // Credential state (only relevant for freelancers).
   const isFreelancer = user?.role === ROLES.FREELANCER;
-  const isApproved = user?.is_verified ?? user?.has_approved_credentials ?? false;
+  // Must match EnsureVerifiedFreelancer middleware: profile approved + credentials approved.
+  const isApproved = user?.is_fully_approved ?? false;
   const verificationStatus = user?.verification_status ?? (isApproved ? 'approved' : 'unverified');
 
   // null = not blocked; string = reason blocked
