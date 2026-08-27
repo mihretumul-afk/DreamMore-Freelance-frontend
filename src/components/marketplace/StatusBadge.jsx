@@ -25,8 +25,13 @@ const DEFAULT_TONES = {
   // Contract / milestone statuses
   active: 'success',
   paused: 'warning',
+  awaiting_funding: 'warning',
+  funded: 'info',
   in_progress: 'info',
+  submitted: 'warning',
+  revision_requested: 'warning',
   approved: 'success',
+  released: 'success',
   paid: 'success',
   completed: 'success',
   cancelled: 'danger',

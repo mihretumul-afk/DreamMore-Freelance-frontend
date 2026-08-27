@@ -11,7 +11,8 @@ import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import ProposalSkeleton from '../../components/proposals/ProposalSkeleton';
 import ConfirmActionModal from '../../components/proposals/ConfirmActionModal';
-import RatingDisplay from '../../components/marketplace/RatingDisplay';
+import ProposalPortfolioGallery from '../../components/proposals/ProposalPortfolioGallery';
+import { MapPin, DollarSign, Award, Code, Globe, User } from 'lucide-react';
 import { jobService } from '../../services/jobService';
 import { proposalService } from '../../services/proposalService';
 import { normalizeJob } from '../../utils/jobMapper';
@@ -172,129 +173,166 @@ export default function EmployerJobProposalsPage() {
             <CardBody className="p-2 sm:p-3">
               <ul className="divide-y divide-gray-100">
                 {proposals.map((proposal) => (
-                  <li key={proposal.id} className="px-3 py-5 sm:px-5">
-                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="flex min-w-0 items-start gap-3.5">
-                        <Avatar name={proposal.freelancer?.name} src={proposal.freelancer?.avatar} size="lg" />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <Link
-                              to={`/freelancers/${proposal.freelancerId}`}
-                              className="text-base font-bold text-ink-900 hover:text-brand-600 transition"
-                            >
-                              {proposal.freelancer?.name ?? `Freelancer #${proposal.freelancerId}`}
-                            </Link>
-                            {proposal.freelancer?.verificationStatus === 'approved' && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-[11px] font-semibold text-success-700">
-                                <ShieldCheck className="h-3 w-3" /> Verified
-                              </span>
+                  <li key={proposal.id} className="px-3 py-6 sm:px-5">
+                    <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="flex min-w-0 items-start gap-4">
+                        <Avatar name={proposal.freelancer?.name} src={proposal.freelancer?.avatar} size="xl" className="ring-2 ring-brand-100 shadow-sm" />
+                        <div className="min-w-0 flex-1 space-y-3">
+                          {/* Freelancer Header & Badges */}
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Link
+                                to={`/freelancers/${proposal.freelancerId}`}
+                                className="text-lg font-black text-slate-900 hover:text-brand-600 transition"
+                              >
+                                {proposal.freelancer?.name ?? `Freelancer #${proposal.freelancerId}`}
+                              </Link>
+                              {proposal.freelancer?.verificationStatus === 'approved' && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 border border-emerald-200">
+                                  <ShieldCheck className="h-3.5 w-3.5" /> Verified Expert
+                                </span>
+                              )}
+                              <StatusBadge status={proposal.status} size="xs" />
+                            </div>
+
+                            {proposal.freelancer?.headline && (
+                              <p className="mt-0.5 text-sm font-semibold text-brand-700">
+                                {proposal.freelancer.headline}
+                              </p>
                             )}
-                            <StatusBadge status={proposal.status} size="xs" />
+
+                            {/* Key Stats Bar */}
+                            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-600 font-medium">
+                              <span className="font-extrabold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-lg border border-brand-200">
+                                Proposed Bid: {formatETB(proposal.bidAmount)}
+                                {proposal.currency && proposal.currency !== 'ETB' ? ` ${proposal.currency}` : ''}
+                              </span>
+                              <span>·</span>
+                              <span>Duration: {proposal.estimatedDuration || 'Not specified'}</span>
+                              {proposal.freelancer?.hourlyRate && (
+                                <>
+                                  <span>·</span>
+                                  <span className="flex items-center gap-0.5">
+                                    Rate: {formatETB(proposal.freelancer.hourlyRate)}/hr
+                                  </span>
+                                </>
+                              )}
+                              {proposal.freelancer?.location && (
+                                <>
+                                  <span>·</span>
+                                  <span className="flex items-center gap-0.5 text-slate-500">
+                                    <MapPin className="h-3.5 w-3.5" /> {proposal.freelancer.location}
+                                  </span>
+                                </>
+                              )}
+                            </div>
                           </div>
 
-                          {proposal.freelancer?.headline && (
-                            <p className="mt-0.5 text-xs text-gray-600 font-medium">
-                              {proposal.freelancer.headline}
-                            </p>
+                          {/* Overview / Bio Spotlight */}
+                          {proposal.freelancer?.overview && (
+                            <div className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-3 text-xs text-slate-700 leading-relaxed">
+                              <p className="font-bold text-slate-900 mb-1 flex items-center gap-1">
+                                <User className="h-3.5 w-3.5 text-brand-600" /> Freelancer Overview:
+                              </p>
+                              <p className="line-clamp-3 leading-relaxed">{proposal.freelancer.overview}</p>
+                            </div>
                           )}
-
-                          <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
-                            <RatingDisplay rating={proposal.freelancer?.rating ?? 0} count={proposal.freelancer?.reviewCount ?? 0} size="xs" />
-                            <span>·</span>
-                            <p className="font-semibold text-brand-600">
-                              Bid: {formatETB(proposal.bidAmount)}
-                              {proposal.currency && proposal.currency !== 'ETB' ? ` ${proposal.currency}` : ''}
-                            </p>
-                            <span>·</span>
-                            <span>{proposal.estimatedDuration || 'No duration'}</span>
-                          </div>
 
                           {/* Skills badges */}
                           {proposal.freelancer?.skills && proposal.freelancer.skills.length > 0 && (
-                            <div className="mt-2 flex flex-wrap gap-1.5">
-                              {proposal.freelancer.skills.map((s) => (
-                                <span
-                                  key={s.id || s.name}
-                                  className="rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-700"
-                                >
-                                  {s.name}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Cover letter */}
-                          {proposal.coverLetter && (
-                            <div className="mt-3 rounded-lg bg-gray-50 p-3 text-xs leading-relaxed text-gray-700">
-                              <p className="font-semibold text-ink-900 mb-1">Cover Letter / Pitch:</p>
-                              <p className="whitespace-pre-line">{proposal.coverLetter}</p>
-                            </div>
-                          )}
-
-                          {/* Attached portfolio items */}
-                          {proposal.portfolioItems && proposal.portfolioItems.length > 0 && (
-                            <div className="mt-3 space-y-2">
-                              <p className="flex items-center gap-1.5 text-xs font-bold text-ink-900">
-                                <Briefcase className="h-3.5 w-3.5 text-brand-600" />
-                                Attached Portfolio Projects ({proposal.portfolioItems.length}):
-                              </p>
-                              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                                {proposal.portfolioItems.map((item) => (
-                                  <div
-                                    key={item.id}
-                                    className="flex items-center gap-2.5 rounded-lg border border-gray-200 bg-white p-2.5 text-xs shadow-2xs"
+                            <div className="space-y-1">
+                              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Core Expertise:</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {proposal.freelancer.skills.map((s) => (
+                                  <span
+                                    key={s.id || s.name}
+                                    className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 border border-slate-200/60"
                                   >
-                                    {item.imageUrl ? (
-                                      <img src={item.imageUrl} alt={item.title} className="h-10 w-10 shrink-0 rounded object-cover" />
-                                    ) : (
-                                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-gray-100 text-gray-400">
-                                        <Briefcase className="h-4 w-4" />
-                                      </div>
-                                    )}
-                                    <div className="min-w-0 flex-1">
-                                      <p className="font-semibold text-ink-900 truncate">{item.title}</p>
-                                      {item.description && (
-                                        <p className="text-[11px] text-gray-500 truncate">{item.description}</p>
-                                      )}
-                                    </div>
-                                    {item.projectUrl && (
-                                      <a
-                                        href={item.projectUrl}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="p-1 text-brand-600 hover:bg-brand-50 rounded"
-                                        title="View project link"
-                                      >
-                                        <ExternalLink className="h-3.5 w-3.5" />
-                                      </a>
-                                    )}
-                                  </div>
+                                    {typeof s === 'string' ? s : s.name}
+                                  </span>
                                 ))}
                               </div>
                             </div>
                           )}
 
-                          <p className="mt-2.5 flex items-center gap-1 text-[11px] text-gray-400">
+                          {/* Freelancer External Links */}
+                          <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
+                            <Link
+                              to={`/freelancers/${proposal.freelancerId}`}
+                              className="inline-flex items-center gap-1 font-bold text-brand-600 hover:text-brand-700 underline"
+                            >
+                              <User className="h-3.5 w-3.5" /> View Full Profile & Credentials →
+                            </Link>
+                            {proposal.freelancer?.githubUrl && (
+                              <a
+                                href={proposal.freelancer.githubUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-900"
+                              >
+                                <Code className="h-3.5 w-3.5" /> GitHub
+                              </a>
+                            )}
+                            {proposal.freelancer?.linkedinUrl && (
+                              <a
+                                href={proposal.freelancer.linkedinUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700"
+                              >
+                                <Briefcase className="h-3.5 w-3.5" /> LinkedIn
+                              </a>
+                            )}
+                            {proposal.freelancer?.website && (
+                              <a
+                                href={proposal.freelancer.website}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700"
+                              >
+                                <Globe className="h-3.5 w-3.5" /> Website
+                              </a>
+                            )}
+                          </div>
+
+                          {/* Cover letter / Pitch */}
+                          {proposal.coverLetter && (
+                            <div className="rounded-xl border border-brand-100 bg-brand-50/40 p-4 text-xs leading-relaxed text-slate-800">
+                              <p className="font-bold text-brand-900 text-sm mb-1.5 flex items-center gap-1.5">
+                                Proposal Cover Letter & Pitch:
+                              </p>
+                              <p className="whitespace-pre-line leading-relaxed text-slate-700">{proposal.coverLetter}</p>
+                            </div>
+                          )}
+
+                          {/* Advanced Attached Portfolio Projects Gallery */}
+                          {proposal.portfolioItems && proposal.portfolioItems.length > 0 && (
+                            <div className="pt-2">
+                              <ProposalPortfolioGallery items={proposal.portfolioItems} />
+                            </div>
+                          )}
+
+                          <p className="pt-1 flex items-center gap-1 text-[11px] text-slate-400 font-medium">
                             <Clock className="h-3 w-3" aria-hidden="true" />
                             Submitted {formatDate(proposal.createdAt)}
                           </p>
                         </div>
                       </div>
 
-                      {/* Actions */}
+                      {/* Employer Action Controls */}
                       <div className="flex shrink-0 flex-wrap gap-2 lg:flex-col lg:items-end">
                         {proposal.status === 'pending' && (
                           <Button size="xs" variant="outline" onClick={() => openAction(proposal, 'shortlist')}>
-                            <Star className="h-3.5 w-3.5" aria-hidden="true" /> Shortlist
+                            <Star className="h-3.5 w-3.5" aria-hidden="true" /> Shortlist Candidate
                           </Button>
                         )}
                         {(proposal.status === 'pending' || proposal.status === 'shortlisted') && (
                           <>
                             <Button size="xs" variant="danger" onClick={() => openAction(proposal, 'reject')}>
-                              <XCircle className="h-3.5 w-3.5" aria-hidden="true" /> Reject
+                              <XCircle className="h-3.5 w-3.5" aria-hidden="true" /> Reject Proposal
                             </Button>
                             <Button size="xs" variant="success" onClick={() => openAction(proposal, 'accept')}>
-                              <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> Accept Proposal
+                              <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> Accept & Hire
                             </Button>
                           </>
                         )}

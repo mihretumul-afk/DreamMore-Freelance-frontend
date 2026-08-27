@@ -12,7 +12,7 @@ import ErrorState from '../../components/common/ErrorState';
 import PageHeader from '../../components/marketplace/PageHeader';
 import StatusBadge from '../../components/marketplace/StatusBadge';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
+import ProposalPortfolioGallery from '../../components/proposals/ProposalPortfolioGallery';
 import ProposalForm from '../../components/proposals/ProposalForm';
 import ConfirmActionModal from '../../components/proposals/ConfirmActionModal';
 import ProposalSkeleton from '../../components/proposals/ProposalSkeleton';
@@ -126,6 +126,7 @@ export default function FreelancerProposalDetailsPage() {
     bidAmount: proposal.bidAmount != null ? String(proposal.bidAmount) : '',
     currency: proposal.currency ?? 'ETB',
     estimatedDuration: proposal.estimatedDuration ?? '',
+    portfolioItemIds: (proposal.portfolioItems || []).map((i) => i.id),
   };
 
   return (
@@ -181,6 +182,11 @@ export default function FreelancerProposalDetailsPage() {
               </p>
             </CardBody>
           </Card>
+
+          {/* Attached Portfolio Projects */}
+          {proposal.portfolioItems && proposal.portfolioItems.length > 0 && (
+            <ProposalPortfolioGallery items={proposal.portfolioItems} />
+          )}
 
           {/* Contract, when the backend created one */}
           {proposal.contract && (

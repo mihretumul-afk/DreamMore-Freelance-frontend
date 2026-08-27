@@ -4,6 +4,7 @@ import { Card, CardBody, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import paymentService from '../../services/paymentService';
 import contractService from '../../services/contractService';
+import { normalizeContract } from '../../utils/contractMapper';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -21,12 +22,15 @@ export default function CheckoutPage() {
   const loadDetails = useCallback(async () => {
     try {
       setLoading(true);
-      const [contractData, milestoneData] = await Promise.all([
-        contractService.getContract(contractId),
-        contractService.getMilestone(contractId, milestoneId),
-      ]);
-      setContract(contractData.data || contractData);
-      setMilestone(milestoneData.data || milestoneData);
+      const contractData = await contractService.getContract(contractId);
+      const contractPayload = contractData.data || contractData;
+      const normalizedContract = normalizeContract(contractPayload);
+      setContract(normalizedContract);
+      setMilestone(
+        normalizedContract?.milestones?.find(
+          (candidate) => String(candidate.id) === String(milestoneId),
+        ) || null,
+      );
     } catch (err) {
       setError(err.message || 'Failed to load milestone details');
     } finally {

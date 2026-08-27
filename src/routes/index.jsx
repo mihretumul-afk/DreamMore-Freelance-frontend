@@ -77,6 +77,7 @@ const AuditLogsPage = lazy(() => import('../pages/admin/AuditLogsPage'));
 const PaymentsPage = lazy(() => import('../pages/admin/PaymentsPage'));
 const MilestonesAdminPage = lazy(() => import('../pages/admin/MilestonesAdminPage'));
 const TransactionsPage = lazy(() => import('../pages/admin/TransactionsPage'));
+const AdminWithdrawalsPage = lazy(() => import('../pages/admin/AdminWithdrawalsPage'));
 // Stage 1 Payment — user-facing
 const PaymentCenterPage = lazy(() => import('../pages/shared/PaymentCenterPage'));
 const PaymentMethodsPage = lazy(() => import('../pages/shared/PaymentMethodsPage'));
@@ -164,6 +165,7 @@ export const router = createBrowserRouter([
           { path: 'payments', element: lazyPage(<PaymentsPage />) },
           { path: 'milestones', element: lazyPage(<MilestonesAdminPage />) },
           { path: 'transactions', element: lazyPage(<TransactionsPage />) },
+          { path: 'withdrawals', element: lazyPage(<AdminWithdrawalsPage />) },
         ],
       },
     ],

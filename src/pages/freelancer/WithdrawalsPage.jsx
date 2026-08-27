@@ -24,6 +24,7 @@ const STATUS_CONFIG = {
   processing: { tone: 'info',    label: 'Processing', icon: RefreshCw },
   completed:  { tone: 'success', label: 'Completed',  icon: CheckCircle2 },
   failed:     { tone: 'danger',  label: 'Failed',     icon: XCircle },
+  rejected:   { tone: 'danger',  label: 'Rejected',   icon: XCircle },
   cancelled:  { tone: 'neutral', label: 'Cancelled',  icon: XCircle },
 };
 
@@ -221,7 +222,7 @@ export default function WithdrawalsPage() {
               <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
                 className="h-9 rounded-input border border-gray-300 bg-white px-3 text-sm text-ink-900 focus:border-brand-500 focus:outline-none">
                 <option value="">All statuses</option>
-                {['requested', 'processing', 'completed', 'failed', 'cancelled'].map(s => (
+                {['requested', 'processing', 'completed', 'failed', 'rejected', 'cancelled'].map(s => (
                   <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
                 ))}
               </select>

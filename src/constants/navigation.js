@@ -26,6 +26,7 @@ import {
   Milestone,
   ArrowLeftRight,
   UserCog,
+  Banknote,
 } from 'lucide-react';
 
 /**
@@ -123,6 +124,11 @@ export const ADMIN_NAV_LINKS = [
     key: 'nav.transactions', label: 'Transactions',
     to: '/admin/transactions', icon: ArrowLeftRight, end: true,
     permission: 'transactions.view', group: 'finance',
+  },
+  {
+    key: 'nav.withdrawals', label: 'Withdrawals',
+    to: '/admin/withdrawals', icon: Banknote, end: true,
+    permission: 'withdrawals.view', group: 'finance',
   },
 
   // ── Moderation ────────────────────────────────────────────────────────

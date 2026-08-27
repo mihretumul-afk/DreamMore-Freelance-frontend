@@ -30,13 +30,29 @@ export const milestoneService = {
 
   /** Employer creates a milestone on an active contract. */
   createMilestone: async (contractId, payload) => {
-    const response = await apiClient.post(`/contracts/${contractId}/milestones`, payload);
+    const isFormData = payload instanceof FormData;
+    const response = await apiClient.post(
+      `/contracts/${contractId}/milestones`,
+      payload,
+      isFormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {},
+    );
     return response.data; // { success, message, data } (201)
   },
 
   /** Employer updates a pending/in-progress milestone on an active contract. */
   updateMilestone: async (contractId, milestoneId, payload) => {
-    const response = await apiClient.put(`/contracts/${contractId}/milestones/${milestoneId}`, payload);
+    const isFormData = payload instanceof FormData;
+    const response = await apiClient.put(
+      `/contracts/${contractId}/milestones/${milestoneId}`,
+      payload,
+      isFormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {},
+    );
+    return response.data; // { success, message, data }
+  },
+
+  /** Freelancer starts working on a funded milestone. */
+  startWork: async (contractId, milestoneId) => {
+    const response = await apiClient.post(`/contracts/${contractId}/milestones/${milestoneId}/start`);
     return response.data; // { success, message, data }
   },
 

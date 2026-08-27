@@ -7,12 +7,16 @@ import {
   Link as LinkIcon,
   Send,
   AlertCircle,
+  Image,
+  Film,
+  Music,
+  FileText,
 } from 'lucide-react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Textarea from '../ui/Textarea';
 import Input from '../ui/Input';
-import { formatETB } from '../../utils/format';
+import { formatETB, formatFileSize } from '../../utils/format';
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
@@ -32,6 +36,7 @@ export default function SubmitWorkModal({
   const [links, setLinks] = useState([]);
   const [newLinkUrl, setNewLinkUrl] = useState('');
   const [localFileError, setLocalFileError] = useState(null);
+  const [filePreviews, setFilePreviews] = useState({});
 
   const isResubmission = milestone?.status === 'revision_requested';
 
@@ -46,16 +51,31 @@ export default function SubmitWorkModal({
         return;
       }
       validFiles.push(file);
+
+      // Generate preview for images
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          setFilePreviews((prev) => ({ ...prev, [file.name]: ev.target.result }));
+        };
+        reader.readAsDataURL(file);
+      }
     }
 
     setFiles((prev) => [...prev, ...validFiles]);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleRemoveFile = (index) => {
+    const removed = files[index];
     setFiles((prev) => prev.filter((_, i) => i !== index));
+    if (removed) {
+      setFilePreviews((prev) => {
+        const next = { ...prev };
+        delete next[removed.name];
+        return next;
+      });
+    }
   };
 
   const handleAddLink = (e) => {
@@ -107,13 +127,17 @@ export default function SubmitWorkModal({
     setLinks([]);
     setNewLinkUrl('');
     setLocalFileError(null);
+    setFilePreviews({});
     onClose?.();
   };
 
-  const formatFileSize = (bytes) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  const getFileIconInfo = (file) => {
+    const type = file.type || '';
+    if (type.startsWith('image/')) return { Icon: Image, color: 'text-emerald-500', bg: 'bg-emerald-50' };
+    if (type.startsWith('video/')) return { Icon: Film, color: 'text-purple-500', bg: 'bg-purple-50' };
+    if (type.startsWith('audio/')) return { Icon: Music, color: 'text-blue-500', bg: 'bg-blue-50' };
+    if (type === 'application/pdf') return { Icon: FileText, color: 'text-red-500', bg: 'bg-red-50' };
+    return { Icon: File, color: 'text-gray-500', bg: 'bg-gray-50' };
   };
 
   return (
@@ -188,7 +212,7 @@ export default function SubmitWorkModal({
                   <button
                     type="button"
                     onClick={() => handleRemoveLink(idx)}
-                    className="ml-2 text-gray-400 hover:text-red-500"
+                    className="ml-2 text-gray-400 hover:text-red-500 cursor-pointer"
                     aria-label="Remove link"
                   >
                     <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -223,32 +247,56 @@ export default function SubmitWorkModal({
               Click to select files or drag and drop
             </p>
             <p className="mt-1 text-[11px] text-gray-400">
-              Supported: Images, Videos, PDF, Source Code (ZIP/TAR), Figma, Docs
+              Supported: Images, Videos, Audio, PDF, Source Code (ZIP/TAR), Figma, Docs
             </p>
           </div>
 
           {files.length > 0 && (
             <ul className="mt-3 space-y-2">
-              {files.map((file, idx) => (
-                <li
-                  key={idx}
-                  className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-2.5 text-xs shadow-sm"
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <File className="h-4 w-4 text-brand-500 shrink-0" aria-hidden="true" />
-                    <span className="truncate font-medium text-ink-900">{file.name}</span>
-                    <span className="text-gray-400 shrink-0">({formatFileSize(file.size)})</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveFile(idx)}
-                    className="p-1 text-gray-400 hover:text-red-500"
-                    aria-label="Remove file"
+              {files.map((file, idx) => {
+                const { Icon: FileIcon, color, bg } = getFileIconInfo(file);
+                const preview = filePreviews[file.name];
+                return (
+                  <li
+                    key={idx}
+                    className="rounded-lg border border-gray-200 bg-white p-2.5 text-xs shadow-sm"
                   >
-                    <X className="h-4 w-4" aria-hidden="true" />
-                  </button>
-                </li>
-              ))}
+                    {/* Image thumbnail preview */}
+                    {file.type.startsWith('image/') && preview && (
+                      <div className="mb-2 flex h-20 items-center justify-center overflow-hidden rounded-md bg-gray-100">
+                        <img src={preview} alt={file.name} className="h-full w-full object-cover" />
+                      </div>
+                    )}
+
+                    {/* Non-image file type strip */}
+                    {!file.type.startsWith('image/') && (
+                      <div className="mb-1.5 flex items-center gap-2">
+                        <div className={`flex h-7 w-7 items-center justify-center rounded-md ${bg}`}>
+                          <FileIcon className={`h-4 w-4 ${color}`} aria-hidden="true" />
+                        </div>
+                        <span className="text-xs font-medium text-gray-500">
+                          {file.type.startsWith('video/') ? 'Video' : file.type.startsWith('audio/') ? 'Audio' : file.type === 'application/pdf' ? 'PDF' : 'Document'}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="truncate font-medium text-ink-900">{file.name}</span>
+                        <span className="text-gray-400 shrink-0">({formatFileSize(file.size)})</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFile(idx)}
+                        className="p-1 text-gray-400 hover:text-red-500 cursor-pointer"
+                        aria-label="Remove file"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

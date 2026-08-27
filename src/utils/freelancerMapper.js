@@ -44,6 +44,11 @@ export function normalizeFreelancer(profile) {
     experienceLevelLabel: humanize(profile.experience_level),
     availability: profile.availability_status ?? 'available',
 
+    // Category mapping
+    categoryId: profile.category_id ?? profile.category?.id ?? null,
+    categorySlug: profile.category?.slug ?? profile.category_slug ?? null,
+    categoryName: profile.category?.name ?? profile.category_name ?? null,
+
     // Stats
     rating: profile.rating ?? 0,
     completedJobsCount: profile.completed_jobs_count ?? 0,

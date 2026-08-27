@@ -162,6 +162,13 @@ export const calculateFees = async (amount) => {
   return res.data;
 };
 
+// ── User: Milestone Earnings ──────────────────────────────────────────────
+
+export const getMilestoneEarnings = async () => {
+  const res = await apiClient.get('/payments/earnings/milestones');
+  return res.data;
+};
+
 // ── Admin: Withdrawals ─────────────────────────────────────────────────────
 
 export const getAdminWithdrawals = async (params = {}) => {
@@ -181,6 +188,11 @@ export const processWithdrawal = async (id, payload = {}) => {
 
 export const completeWithdrawal = async (id, payload = {}) => {
   const res = await apiClient.put(`/admin/withdrawals/${id}/complete`, payload);
+  return res.data;
+};
+
+export const rejectWithdrawal = async (id, payload) => {
+  const res = await apiClient.put(`/admin/withdrawals/${id}/reject`, payload);
   return res.data;
 };
 
@@ -229,6 +241,8 @@ const paymentService = {
   cancelWithdrawal,
   // fees
   calculateFees,
+  // earnings
+  getMilestoneEarnings,
   // admin
   getAdminPaymentStats,
   getAdminPayments,
@@ -245,6 +259,7 @@ const paymentService = {
   getAdminWithdrawal,
   processWithdrawal,
   completeWithdrawal,
+  rejectWithdrawal,
   failWithdrawal,
 };
 
