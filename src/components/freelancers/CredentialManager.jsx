@@ -8,6 +8,11 @@ import {
   Clock,
   CheckCircle,
   XCircle,
+  Upload,
+  Key,
+  Building2,
+  Sparkles,
+  RefreshCw,
 } from 'lucide-react';
 import Card, { CardHeader, CardBody } from '../ui/Card';
 import Button from '../ui/Button';
@@ -18,19 +23,18 @@ import Select from '../ui/Select';
 import { credentialService } from '../../services/credentialService';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate } from '../../utils/format';
+import { cn } from '../../utils/cn';
 
 const CREDENTIAL_TYPES = [
-  { value: 'dream_more_certificate', label: 'Dream More Certificate' },
-  { value: 'external_certificate', label: 'External Certificate' },
-  { value: 'training_certificate', label: 'Training Certificate' },
-  { value: 'professional_qualification', label: 'Professional Qualification' },
-  { value: 'other', label: 'Other' },
+  { value: 'dream_more_certificate', label: 'DreamMore Certificate', icon: Sparkles, description: 'Verify your DreamMore learning achievements' },
+  { value: 'external_certificate', label: 'External Company Certificate', icon: Building2, description: 'Upload certificates from external organizations' },
 ];
 
 const STATUS_CONFIG = {
   pending: { tone: 'warning', label: 'Pending Review', icon: Clock },
   approved: { tone: 'success', label: 'Approved', icon: CheckCircle },
   rejected: { tone: 'danger', label: 'Rejected', icon: XCircle },
+  resubmission_required: { tone: 'purple', label: 'Resubmission Required', icon: RefreshCw },
 };
 
 const ALLOWED_TYPES = [
@@ -48,12 +52,13 @@ export default function CredentialManager() {
   const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({
     title: '',
-    type: 'external_certificate',
+    type: 'dream_more_certificate',
     issuingOrganization: '',
     certificateIdentifier: '',
     issueDate: '',
     expiryDate: '',
     document: null,
+    description: '',
   });
   const [fieldErrors, setFieldErrors] = useState({});
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -98,13 +103,24 @@ export default function CredentialManager() {
   };
 
   const handleUpload = async () => {
+    // Validation
     if (!form.title.trim()) {
       setFieldErrors({ title: 'Title is required.' });
       return;
     }
-    if (!form.document) {
-      setFieldErrors({ document: 'Please select a document to upload.' });
-      return;
+
+    if (form.type === 'dream_more_certificate') {
+      // DreamMore certificate requires certificate ID
+      if (!form.certificateIdentifier.trim()) {
+        setFieldErrors({ certificateIdentifier: 'Certificate ID is required for DreamMore certificates.' });
+        return;
+      }
+    } else {
+      // External certificate requires document upload
+      if (!form.document) {
+        setFieldErrors({ document: 'Please upload your certificate document.' });
+        return;
+      }
     }
 
     setFieldErrors({});
@@ -114,23 +130,25 @@ export default function CredentialManager() {
       const formData = new FormData();
       formData.append('title', form.title.trim());
       formData.append('type', form.type);
-      formData.append('document', form.document);
-      if (form.issuingOrganization.trim()) formData.append('issuing_organization', form.issuingOrganization.trim());
-      if (form.certificateIdentifier.trim()) formData.append('certificate_identifier', form.certificateIdentifier.trim());
+      formData.append('description', form.description.trim());
+      
+      if (form.type === 'dream_more_certificate') {
+        // DreamMore certificate: submit certificate ID
+        formData.append('certificate_identifier', form.certificateIdentifier.trim());
+        formData.append('issuing_organization', 'DreamMore');
+      } else {
+        // External certificate: submit document
+        if (form.document) formData.append('document', form.document);
+        if (form.issuingOrganization.trim()) formData.append('issuing_organization', form.issuingOrganization.trim());
+        if (form.certificateIdentifier.trim()) formData.append('certificate_identifier', form.certificateIdentifier.trim());
+      }
+      
       if (form.issueDate) formData.append('issue_date', form.issueDate);
       if (form.expiryDate) formData.append('expiry_date', form.expiryDate);
 
       await credentialService.createCredential(formData);
       setShowUpload(false);
-      setForm({
-        title: '',
-        type: 'external_certificate',
-        issuingOrganization: '',
-        certificateIdentifier: '',
-        issueDate: '',
-        expiryDate: '',
-        document: null,
-      });
+      resetForm();
       loadCredentials();
     } catch (err) {
       const errors = err?.response?.data?.errors;
@@ -138,13 +156,28 @@ export default function CredentialManager() {
         const mapped = {};
         if (errors.title) mapped.title = Array.isArray(errors.title) ? errors.title[0] : errors.title;
         if (errors.document) mapped.document = Array.isArray(errors.document) ? errors.document[0] : errors.document;
+        if (errors.certificate_identifier) mapped.certificateIdentifier = Array.isArray(errors.certificate_identifier) ? errors.certificate_identifier[0] : errors.certificate_identifier;
         setFieldErrors(mapped);
       } else {
-        setFieldErrors({ document: getErrorMessage(err, 'Upload failed.') });
+        setFieldErrors({ general: getErrorMessage(err, 'Upload failed.') });
       }
     } finally {
       setUploading(false);
     }
+  };
+
+  const resetForm = () => {
+    setForm({
+      title: '',
+      type: 'dream_more_certificate',
+      issuingOrganization: '',
+      certificateIdentifier: '',
+      issueDate: '',
+      expiryDate: '',
+      document: null,
+      description: '',
+    });
+    setFieldErrors({});
   };
 
   const handleDelete = async () => {
@@ -242,17 +275,19 @@ export default function CredentialManager() {
                         {cred.issue_date && <span>Issued: {formatDate(cred.issue_date)}</span>}
                         {cred.expiry_date && <span>Expires: {formatDate(cred.expiry_date)}</span>}
                       </div>
-                      {cred.status === 'rejected' && cred.rejection_reason && (
-                        <p className="mt-1 text-xs text-danger-600">
-                          Rejection reason: {cred.rejection_reason}
+                      {(cred.status === 'rejected' || cred.status === 'resubmission_required') && cred.rejection_reason && (
+                        <p className="mt-1 text-xs text-danger-600 font-medium">
+                          {cred.status === 'resubmission_required' ? 'Resubmission reason' : 'Rejection reason'}: {cred.rejection_reason}
                         </p>
                       )}
                     </div>
                     <div className="flex shrink-0 gap-2">
-                      <Button variant="ghost" size="xs" onClick={() => handleDownload(cred)}>
-                        <Download className="h-3.5 w-3.5" /> Download
-                      </Button>
-                      {cred.status === 'pending' && (
+                      {cred.file_path && (
+                        <Button variant="ghost" size="xs" onClick={() => handleDownload(cred)}>
+                          <Download className="h-3.5 w-3.5" /> Download
+                        </Button>
+                      )}
+                      {(cred.status === 'pending' || cred.status === 'rejected' || cred.status === 'resubmission_required') && (
                         <Button
                           variant="ghost"
                           size="xs"
@@ -273,48 +308,158 @@ export default function CredentialManager() {
       {/* Upload Modal */}
       <Modal
         open={showUpload}
-        onClose={() => setShowUpload(false)}
+        onClose={() => { setShowUpload(false); resetForm(); }}
         title="Add Credential"
-        description="Upload a professional document or certificate for review."
+        description="Add a DreamMore certificate or upload an external company certificate."
         size="md"
       >
-        <div className="space-y-4">
+        <div className="space-y-5">
+          {/* Certificate Type Selection */}
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-ink-900">Certificate Type *</label>
+            <div className="grid grid-cols-2 gap-3">
+              {CREDENTIAL_TYPES.map((opt) => {
+                const Icon = opt.icon;
+                const isSelected = form.type === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setForm((prev) => ({ ...prev, type: opt.value, document: null, certificateIdentifier: '' }))}
+                    disabled={uploading}
+                    className={cn(
+                      'flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all duration-200',
+                      isSelected
+                        ? 'border-brand-500 bg-brand-50 shadow-md'
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50',
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'flex h-10 w-10 items-center justify-center rounded-full',
+                        isSelected ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-500',
+                      )}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <p className={cn('text-sm font-semibold', isSelected ? 'text-brand-700' : 'text-ink-900')}>
+                      {opt.label}
+                    </p>
+                    <p className="text-[11px] text-gray-500">{opt.description}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Title */}
           <Input
-            label="Title *"
-            placeholder="e.g. Web Development Certificate"
+            label="Certificate Title *"
+            placeholder="e.g. Web Development Mastery"
             value={form.title}
             onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
             error={fieldErrors.title}
             disabled={uploading}
           />
 
-          <Select
-            label="Type *"
-            value={form.type}
-            onChange={(e) => setForm((prev) => ({ ...prev, type: e.target.value }))}
-            disabled={uploading}
-          >
-            {CREDENTIAL_TYPES.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </Select>
+          {/* Description */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-ink-900">Description</label>
+            <textarea
+              rows={3}
+              placeholder="Brief description of this certificate..."
+              value={form.description}
+              onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+              disabled={uploading}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-ink-900 placeholder:text-gray-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 disabled:bg-gray-50 disabled:text-gray-400"
+            />
+          </div>
 
-          <Input
-            label="Issuing Organization"
-            placeholder="e.g. Dream More, Coursera, etc."
-            value={form.issuingOrganization}
-            onChange={(e) => setForm((prev) => ({ ...prev, issuingOrganization: e.target.value }))}
-            disabled={uploading}
-          />
+          {/* DreamMore Certificate: Certificate ID */}
+          {form.type === 'dream_more_certificate' && (
+            <div className="rounded-xl border border-brand-200 bg-brand-50/50 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100">
+                  <Key className="h-5 w-5 text-brand-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-brand-900">DreamMore Certificate Verification</p>
+                  <p className="mt-0.5 text-xs text-brand-700">
+                    Enter your certificate ID from DreamMore LMS. We'll verify it automatically.
+                  </p>
+                  <Input
+                    label="Certificate ID *"
+                    placeholder="e.g. DM-WD-2024-001"
+                    value={form.certificateIdentifier}
+                    onChange={(e) => setForm((prev) => ({ ...prev, certificateIdentifier: e.target.value }))}
+                    error={fieldErrors.certificateIdentifier}
+                    disabled={uploading}
+                    className="mt-3"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
-          <Input
-            label="Certificate / Document ID"
-            placeholder="e.g. DM-WD-2024-001"
-            value={form.certificateIdentifier}
-            onChange={(e) => setForm((prev) => ({ ...prev, certificateIdentifier: e.target.value }))}
-            disabled={uploading}
-          />
+          {/* External Certificate: Document Upload */}
+          {form.type === 'external_certificate' && (
+            <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+                  <Upload className="h-5 w-5 text-gray-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-ink-900">Upload Certificate Document</p>
+                  <p className="mt-0.5 text-xs text-gray-600">
+                    Upload your certificate as a document, photo, or image file.
+                  </p>
+                  
+                  <Input
+                    label="Issuing Organization"
+                    placeholder="e.g. Coursera, Google, AWS, etc."
+                    value={form.issuingOrganization}
+                    onChange={(e) => setForm((prev) => ({ ...prev, issuingOrganization: e.target.value }))}
+                    disabled={uploading}
+                    className="mt-3"
+                  />
 
+                  <div className="mt-3">
+                    <label className="mb-1 block text-sm font-medium text-ink-900">Certificate Document *</label>
+                    <div className="relative">
+                      <input
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.webp,.pdf"
+                        onChange={handleFileChange}
+                        disabled={uploading}
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-lg file:border-0 file:bg-brand-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
+                      />
+                    </div>
+                    {form.document && (
+                      <div className="mt-2 flex items-center gap-2 rounded-lg bg-white px-3 py-2 border border-gray-200">
+                        <FileText className="h-4 w-4 text-brand-500" />
+                        <span className="text-xs font-medium text-ink-900">{form.document.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => setForm((prev) => ({ ...prev, document: null }))}
+                          className="ml-auto text-gray-400 hover:text-red-500"
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                    {fieldErrors.document && (
+                      <p role="alert" className="mt-1 text-xs font-medium text-danger-600">
+                        {fieldErrors.document}
+                      </p>
+                    )}
+                    <p className="mt-1 text-xs text-gray-400">JPG, PNG, WEBP, or PDF. Max 10MB.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Dates */}
           <div className="grid grid-cols-2 gap-4">
             <Input
               type="date"
@@ -332,32 +477,20 @@ export default function CredentialManager() {
             />
           </div>
 
-          <div>
-            <label className="mb-1 block text-sm font-medium text-ink-900">Document *</label>
-            <input
-              type="file"
-              accept=".jpg,.jpeg,.png,.webp,.pdf"
-              onChange={handleFileChange}
-              disabled={uploading}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-lg file:border-0 file:bg-brand-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
-            />
-            {form.document && (
-              <p className="mt-1 text-xs text-gray-500">Selected: {form.document.name}</p>
-            )}
-            {fieldErrors.document && (
-              <p role="alert" className="mt-1 text-xs font-medium text-danger-600">
-                {fieldErrors.document}
-              </p>
-            )}
-            <p className="mt-1 text-xs text-gray-400">JPG, PNG, WEBP, or PDF. Max 10MB.</p>
-          </div>
+          {/* General error */}
+          {fieldErrors.general && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+              <p className="text-sm font-medium text-red-700">{fieldErrors.general}</p>
+            </div>
+          )}
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-4">
-            <Button variant="outline" onClick={() => setShowUpload(false)} disabled={uploading}>
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+            <Button variant="outline" onClick={() => { setShowUpload(false); resetForm(); }} disabled={uploading}>
               Cancel
             </Button>
             <Button onClick={handleUpload} loading={uploading}>
-              Submit for Review
+              {form.type === 'dream_more_certificate' ? 'Verify Certificate' : 'Submit for Review'}
             </Button>
           </div>
         </div>

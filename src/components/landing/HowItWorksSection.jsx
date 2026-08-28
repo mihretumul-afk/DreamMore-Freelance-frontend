@@ -1,58 +1,44 @@
-import { User, Building2 } from 'lucide-react';
+import { ClipboardList, Users, Briefcase, CreditCard } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Container from '../common/Container';
-import SectionHeading from '../common/SectionHeading';
 import Reveal from '../common/Reveal';
-import Card from '../ui/Card';
+import Button from '../ui/Button';
 import { useI18n } from '../../i18n';
 
-const FREELANCER_STEPS = [
-  { titleKey: 'how.freelancerStep1Title', descriptionKey: 'how.freelancerStep1Desc' },
-  { titleKey: 'how.freelancerStep2Title', descriptionKey: 'how.freelancerStep2Desc' },
-  { titleKey: 'how.freelancerStep3Title', descriptionKey: 'how.freelancerStep3Desc' },
-  { titleKey: 'how.freelancerStep4Title', descriptionKey: 'how.freelancerStep4Desc' },
+const STEPS = [
+  {
+    icon: ClipboardList,
+    titleKey: 'how.employerStep1Title',
+    descriptionKey: 'how.employerStep1Desc',
+  },
+  {
+    icon: Users,
+    titleKey: 'how.employerStep2Title',
+    descriptionKey: 'how.employerStep2Desc',
+  },
+  {
+    icon: Briefcase,
+    titleKey: 'how.employerStep3Title',
+    descriptionKey: 'how.employerStep3Desc',
+  },
+  {
+    icon: CreditCard,
+    titleKey: 'how.employerStep4Title',
+    descriptionKey: 'how.employerStep4Desc',
+  },
 ];
 
-const EMPLOYER_STEPS = [
-  { titleKey: 'how.employerStep1Title', descriptionKey: 'how.employerStep1Desc' },
-  { titleKey: 'how.employerStep2Title', descriptionKey: 'how.employerStep2Desc' },
-  { titleKey: 'how.employerStep3Title', descriptionKey: 'how.employerStep3Desc' },
-  { titleKey: 'how.employerStep4Title', descriptionKey: 'how.employerStep4Desc' },
-];
-
-function StepCard({ role, icon: Icon, heading, steps, id, delay }) {
+function StepItem({ icon: Icon, titleKey, descriptionKey, delay }) {
   const { t } = useI18n();
   return (
-    <Reveal delay={delay} className="h-full">
-      <Card id={id} className="h-full p-6 sm:p-8">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-500">
-            <Icon className="h-5 w-5 text-white" aria-hidden="true" />
-          </div>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-brand-500">{role}</p>
-            <h3 className="text-lg font-bold text-ink-900">{heading}</h3>
-          </div>
-        </div>
-
-        <ol className="mt-6 space-y-5">
-          {steps.map((step, index) => (
-            <li key={step.titleKey} className="flex gap-4">
-              <span
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ink-900 text-xs font-bold text-white"
-                aria-hidden="true"
-              >
-                {index + 1}
-              </span>
-              <div>
-                <h4 className="text-sm font-bold text-ink-900">{t(step.titleKey)}</h4>
-                <p className="mt-0.5 text-sm leading-relaxed text-gray-500">
-                  {t(step.descriptionKey)}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </Card>
+    <Reveal delay={delay} className="flex flex-col items-center text-center">
+      <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-gray-100 bg-white shadow-sm">
+        <Icon className="h-9 w-9 text-blue-600" strokeWidth={1.4} aria-hidden="true" />
+      </div>
+      <h3 className="mt-5 text-base font-bold text-gray-900">{t(titleKey)}</h3>
+      <p className="mt-2 max-w-[220px] text-sm leading-relaxed text-gray-500">
+        {t(descriptionKey)}
+      </p>
     </Reveal>
   );
 }
@@ -61,39 +47,45 @@ export default function HowItWorksSection() {
   const { t } = useI18n();
 
   return (
-    <section className="bg-gray-50 py-16 lg:py-24" aria-labelledby="how-it-works-heading">
+    <section className="bg-white py-16 lg:py-24" aria-labelledby="how-it-works-heading">
       <Container>
-        <Reveal>
-          <SectionHeading
-            align="center"
-            eyebrow={t('how.eyebrow')}
-            title={t('how.title')}
-            description={t('how.description')}
-          />
-        </Reveal>
-
-        <h2 id="how-it-works-heading" className="sr-only">
-          {t('how.srHeading')}
-        </h2>
-
-        <div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <StepCard
-            id="for-freelancers"
-            role={t('how.forFreelancers')}
-            icon={User}
-            heading={t('how.freelancerHeading')}
-            steps={FREELANCER_STEPS}
-            delay={0}
-          />
-          <StepCard
-            id="for-employers"
-            role={t('how.forEmployers')}
-            icon={Building2}
-            heading={t('how.employerHeading')}
-            steps={EMPLOYER_STEPS}
-            delay={120}
-          />
+        {/* Heading */}
+        <div className="mx-auto max-w-2xl text-center">
+          <h2
+            id="how-it-works-heading"
+            className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
+          >
+            {t('how.title')}
+          </h2>
+          <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-blue-600" aria-hidden="true" />
         </div>
+
+        {/* Steps grid with connecting lines */}
+        <div className="relative mt-14 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+          {/* Horizontal connecting line (desktop only) */}
+          <div
+            className="absolute left-[12.5%] right-[12.5%] top-12 hidden h-px bg-gray-200 lg:block"
+            aria-hidden="true"
+          />
+
+          {STEPS.map((step, index) => (
+            <div key={step.titleKey} className="relative">
+              <StepItem
+                icon={step.icon}
+                titleKey={step.titleKey}
+                descriptionKey={step.descriptionKey}
+                delay={index * 100}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* CTA Button */}
+        <Reveal delay={400} className="mt-14 text-center">
+          <Button as={Link} to="/how-it-works" variant="primary" size="lg">
+            {t('how.ctaLabel')}
+          </Button>
+        </Reveal>
       </Container>
     </section>
   );

@@ -218,11 +218,66 @@ export const rejectRefund = async (paymentId, payload = {}) => {
   return res.data;
 };
 
+// ── Wallet & Escrow ────────────────────────────────────────────────────────
+export const getWallet = async () => {
+  const res = await apiClient.get('/wallet');
+  return res.data;
+};
+
+export const withdrawWallet = async (amount, currency = 'ETB') => {
+  const res = await apiClient.post('/wallet/withdraw', { amount, currency });
+  return res.data;
+};
+
+export const getEscrowTransactions = async () => {
+  const res = await apiClient.get('/wallet/transactions');
+  return res.data;
+};
+
+export const raiseDispute = async (payload) => {
+  const res = await apiClient.post('/disputes', payload);
+  return res.data;
+};
+
+export const getAdminDisputes = async (params = {}) => {
+  const res = await apiClient.get('/admin/disputes', { params });
+  return res.data;
+};
+
+export const resolveDispute = async (disputeId, payload) => {
+  const res = await apiClient.put(`/admin/disputes/${disputeId}/resolve`, payload);
+  return res.data;
+};
+
+export const getRevenueSummary = async () => {
+  const res = await apiClient.get('/admin/reports/revenue-summary');
+  return res.data;
+};
+
+export const updatePlatformFee = async (payload) => {
+  const res = await apiClient.put('/admin/platform-settings/fee', payload);
+  return res.data;
+};
+
+export const getAdminMilestones = async (params = {}) => {
+  const res = await apiClient.get('/admin/milestones', { params });
+  return res.data;
+};
+
 // ── Convenience default export ────────────────────────────────────────────────
 
 const paymentService = {
   // user
   getBalance,
+  getWallet,
+  withdrawWallet,
+  getEscrowTransactions,
+  raiseDispute,
+  getAdminDisputes,
+  getAdminMilestones,
+  resolveDispute,
+  getRevenueSummary,
+  updatePlatformFee,
   getPaymentMethods,
   addPaymentMethod,
   getPaymentMethod,

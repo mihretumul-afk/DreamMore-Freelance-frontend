@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
+import WalletCard from '../../components/common/WalletCard';
 import Avatar from '../../components/marketplace/Avatar';
 import RatingDisplay from '../../components/marketplace/RatingDisplay';
 import StatusBadge from '../../components/marketplace/StatusBadge';
@@ -184,27 +185,27 @@ export default function FreelancerDashboardPage() {
     <div className="space-y-7">
 
       {/* ── Welcome hero banner ───────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1a2340] via-[#1e2d50] to-[#2a3d6e] px-6 py-7 text-white shadow-xl">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white via-gray-50 to-gray-100 px-6 py-7 text-gray-900 shadow-xl">
         {/* decorative circles */}
         <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-brand-500/10" />
         <div className="pointer-events-none absolute -bottom-8 right-20 h-32 w-32 rounded-full bg-violet-500/10" />
 
         <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl border-2 border-white/20 bg-white/10 shadow-lg">
+            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl border-2 border-gray-200 bg-gray-100 shadow-lg">
               {profile.avatar
                 ? <img src={profile.avatar} alt={profile.name} className="h-full w-full object-cover" />
                 : (
-                  <div className="flex h-full w-full items-center justify-center text-xl font-extrabold text-white">
+                  <div className="flex h-full w-full items-center justify-center text-xl font-extrabold text-gray-700">
                     {(profile.name || firstName).charAt(0).toUpperCase()}
                   </div>
                 )
               }
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-300">{greeting} 👋</p>
+              <p className="text-sm font-medium text-gray-500">{greeting} 👋</p>
               <h1 className="text-2xl font-extrabold tracking-tight">{firstName}</h1>
-              <p className="mt-0.5 text-sm text-slate-300 line-clamp-1">
+              <p className="mt-0.5 text-sm text-gray-500 line-clamp-1">
                 {profile.headline || 'Freelancer on DreamMore'}
               </p>
             </div>
@@ -212,7 +213,7 @@ export default function FreelancerDashboardPage() {
 
           <div className="flex shrink-0 flex-wrap items-center gap-3">
             {profile.rating > 0 && (
-              <div className="flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-sm">
+              <div className="flex items-center gap-1.5 rounded-xl bg-gray-100 px-3 py-2 text-sm">
                 <Star className="h-4 w-4 text-amber-400" />
                 <span className="font-bold">{profile.rating.toFixed(1)}</span>
               </div>
@@ -304,6 +305,9 @@ export default function FreelancerDashboardPage() {
           );
         })()}
       </div>
+
+      {/* ── Wallet balance & test withdrawal card ─────────────────────── */}
+      <WalletCard userRole="freelancer" />
 
       {/* ── Stat cards ───────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">

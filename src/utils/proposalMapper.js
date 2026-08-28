@@ -59,6 +59,7 @@ export function normalizeProposal(proposal) {
       skills: item.skills ?? [],
       createdAt: item.created_at,
     })),
+    proposedMilestones: proposal.proposed_milestones || proposal.proposedMilestones || [],
     contract: proposal.contract ? { id: proposal.contract.id, status: proposal.contract.status } : null,
 
     createdAt: proposal.created_at,
@@ -77,6 +78,15 @@ export function proposalFormToPayload(form) {
     currency: (form.currency || '').trim().toUpperCase() || 'ETB',
     estimated_duration: form.estimatedDuration.trim(),
   };
+
+  if (Array.isArray(form.proposedMilestones) && form.proposedMilestones.length > 0) {
+    payload.proposed_milestones = form.proposedMilestones.map((m) => ({
+      title: m.title.trim(),
+      amount: Number(m.amount),
+      dueDate: m.dueDate ? m.dueDate.slice(0, 10) : null,
+      description: m.description ? m.description.trim() : null,
+    }));
+  }
 
   if (Array.isArray(form.portfolioItemIds) && form.portfolioItemIds.length > 0) {
     payload.portfolio_item_ids = form.portfolioItemIds;

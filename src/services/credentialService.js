@@ -18,10 +18,11 @@ export const credentialService = {
   },
 
   /** Submit a new credential with file upload. */
-  createCredential: async (formData) => {
-    const response = await apiClient.post('/credentials', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+  createCredential: async (payload) => {
+    const isFormData = payload instanceof FormData;
+    const response = await apiClient.post('/credentials', payload, isFormData ? {
+      headers: { 'Content-Type': undefined },
+    } : {});
     return response.data;
   },
 
@@ -31,12 +32,16 @@ export const credentialService = {
     return response.data;
   },
 
-  /** Update an existing pending credential (uses _method override for multipart PUT). */
-  updateCredential: async (id, formData) => {
-    formData.append('_method', 'PUT');
-    const response = await apiClient.post(`/credentials/${id}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+  /** Update an existing credential. */
+  updateCredential: async (id, payload) => {
+    if (payload instanceof FormData) {
+      payload.append('_method', 'PUT');
+      const response = await apiClient.post(`/credentials/${id}`, payload, {
+        headers: { 'Content-Type': undefined },
+      });
+      return response.data;
+    }
+    const response = await apiClient.put(`/credentials/${id}`, payload);
     return response.data;
   },
 

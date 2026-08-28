@@ -146,9 +146,10 @@ export const am = {
 
   // ---- How it works ----
   'how.eyebrow': 'እንዴት እንደሚሰራ',
-  'how.title': 'ለሁለቱም ወገኖች ቀላል',
+  'how.title': 'ስራ ለማድረግ ቀላል ነው',
   'how.description':
     'ለፍሪላንሰሮች ስራ ለማግኘት እና ለቀጣሪዎች ቡድን ለመገንባት ግልጽ እና ቀላል ሂደት።',
+  'how.ctaLabel': 'ድሪም ሞር እንዴት ይሰራል ይመልከቱ',
   'how.srHeading': 'ድሪም ሞር አፕወርክስ እንዴት ይሰራል',
   'how.forFreelancers': 'ለፍሪላንሰሮች',
   'how.forEmployers': 'ለቀጣሪዎች',
@@ -177,6 +178,89 @@ export const am = {
   'how.employerStep4Desc':
     'ስራው ሲደርስ ደረጃዎችን ያጽድቁ እና ፍትሃዊ ግምገማዎችን ይስጡ።',
 
+  // ---- How it works — detailed page ----
+  'how.pageTitle': 'ድሪም ሞር እንዴት ይሰራል',
+  'how.pageSubtitle':
+    'ስራ ለማድረግ የدم አመራር — ባለሙያ ሲያዝ ወይም ቀጣዩን ፕሮጀክት ሲፈልግ።',
+  'how.heroTitle': 'እንዴት ይሰራል',
+  'how.heroDesc':
+    'ድሪም ሞር አፕወርክስ ከምርጥ የኢትዮጵያ ባለሙያዎች ጋር መገናኘት ቀላል ያደርገዋል። ስራ ማስተግ偻ት እስከ ክፍያ ተቀበል ድረስ፣ እያንዳንዱ ደረጃ ቀላል፣ ግልጽ እና አስተማማኝ ነው።',
+  'how.forEmployersTitle': 'ለቀጣሪዎች',
+  'how.forEmployersSubtitle': 'በቀላል አራት ደረጃዎች ትክክለኛውን ባለሙያ ይቅጠሩ።',
+  'how.empStep1Title': 'ስራ ይለጥፉ',
+  'how.empStep1Desc': 'የሚፈልጉትን ስራ ይግለጹ፣ በጀትዎን ያስ kennenlernen እና የስራ ማስታወቂያዎን ያ公开发表 ያድርጉ።',
+  'how.empStep1Detail':
+    'ከድረ-ገጽ ልማት፣ ግራፊክ ዲዛይን፣ የይዘት ጽሑፍ እና ሌሎች ምድቦች ይምረጡ። ክህሎቶችን፣ ጊዜዎችን እና የበጀት ክልሎችን ያስተካክሉ።',
+  'how.empStep2Title': 'ማመልከቻዎችን ይገምግሙ',
+  'how.empStep2Desc':
+    'ከብቁ ፍሪላንሰሮች ማመልከቻዎችን ይቀበሉ፣ የስራ ማህደሮችን ያወዳድሩ እና ምርጥ እጩዎችን ይምረጡ።',
+  'how.empStep2Detail':
+    'እያንዳንዱ ማመልከቻ የማመልከቻ ደብዳቤ፣ የም_bid ዋጋ፣ የሚወስደው ጊዜ እና የስራ ማህደር ማገናኛዎችን ያካትታል።',
+  'how.empStep3Title': 'ይቅጠሩ እና ደረጃዎችን ያስ Kongress ያድርጉ',
+  'how.empStep3Desc':
+    'ከተመረጠው ፍሪላንሰር ጋር ስለ ውጤቶች፣ ጊዜዎች እና የክፍያ ደረጃዎች ይስማሙ።',
+  'how.empStep3Detail':
+    'ፕሮጀክቶችን ወደ ግልጽ ደረጃዎች ያከፋፍሉ። ክፍያዎች ስርጭት ድርስት ውስጥ ይከሰሳሉ እስከ ስራው የጸደቀ ድረስ።',
+  'how.empStep4Title': 'ስራውን ይገምግሙ እና ያጽድቁ',
+  'how.empStep4Desc':
+    'የተደረሰውን ስራ ይገምግሙ፣ ደረጃዎችን ያጽድቁ እና ክፍያዎችን በእምነት ይለቁ።',
+  'how.empStep4Detail':
+    'ፈፅሞ ከፈለጉ ክለሳ ይጠይቁ፣ ሐቀኝነት ያላቸው ግምገማዎችን ይስጡ እና ከምርጥ ባለሙያዎች ጋር የረጅም ጊዜ ግንኙነቶችን ይገንቡ።',
+  'how.forFreelancersTitle': 'ለፍሪላንሰሮች',
+  'how.forFreelancersSubtitle': 'ጠቃሚ ስራዎችን ያግኙ እና ለክህሎቶችዎ ይክፈሉ።',
+  'how.freeStep1Title': 'መገለጫዎን ይፍጠሩ',
+  'how.freeStep1Desc':
+    'ክህሎቶችዎን፣ የስራ ማህደርዎን እና ልምድዎን ለቀጣሪዎች ያሳዩ።',
+  'how.freeStep1Detail':
+    'ምርጥ የስራ ማብsb examplesዎችን፣ ማረጋገጫዎችን እና ተወዳጅ bio ያስተካክሉ። የተረጋገጡ መገለጫዎች ከ3 ጊነት ተጨባጭ ይ ይወቃሉ።',
+  'how.freeStep2Title': 'ስራዎችን ይፈልጉ እና ያመልክቱ',
+  'how.freeStep2Desc':
+    'ከችሎታዎ ጋር የሚስማሙ ስራዎችን ያግኙ እና ማመልከቻዎችን ያስገቡ።',
+  'how.freeStep2Detail':
+    'ማጣሪያዎችን ተጠቀም ስራዎችን በምድር፣ በበጀት እና በልምድ ደረጃ ይፈልጉ። እያንዳንዱን ማመልከቻ ለማቅረብ ያስተካክሉ።',
+  'how.freeStep3Title': 'ስራውን በደረጃ ያጠናቅቁ',
+  'how.freeStep3Desc':
+    'በግልጽ ደረጃዎች ይስሩ እና ለቀጣሪው ሁልጊዜ መረጃ ይስጡ።',
+  'how.freeStep3Detail':
+    'ንግግር እና የደረጃ ተከታታይ ተጠቀም በቀላሉ ይ сотрудничество ያድርጉ። ውጤቶችን ያስቀምጡ እና ፈጣን ግብረ መልስ ያግኙ።',
+  'how.freeStep4Title': 'ክፍያ ያግኙ እና ያድጉ',
+  'how.freeStep4Desc':
+    'በተፈቀደ ደረጃ ክፍያ ያግኙ እና በአስተማማኝ ስም ይገንቡ።',
+  'how.freeStep4Detail':
+    'ክፍያዎች በቀጣሪ ጽድог በኋላ ፈጣን ይለቃሉ። በግምገማዎች ስምዎን ይገንቡ እና የፍሪላንስ እድual ያድጉ።',
+  'how.benefitsTitle': 'ለምን ድሪም ሞር ይምረጡ?',
+  'how.benefitsSubtitle': 'ለኢትዮጵያ ባለሙያ እና ለዓለም ገበያ የተዘጋጀ።',
+  'how.benefit1Title': 'አስተማማኝ ክፍያዎች',
+  'how.benefit1Desc':
+    'ስርጭት የተመሰረተ ክፍያ ፍሪላንሰሮችን እና ቀጣሪዎችን ይጠብቃል። ገንዘቦች ስራ በጸደቀ ችግር ብቻ ይለቃሉ።',
+  'how.benefit2Title': 'የደረጃ ተከታታይ',
+  'how.benefit2Desc':
+    'ፕሮጀክቶችን ወደ ግልጽ ደረጃዎች ያከፋፍሉ። እድገትን ይከታተሉ፣ ግብረ መልስ ያካፍሉ እና ሁልጊዜ ተስማሚ ይሁኑ።',
+  'how.benefit3Title': 'የተረጋገጡ ባለሙያዎች',
+  'how.benefit3Desc':
+    'እያንዳንዱ ፍሪላንሰር የማንነት እና የክህሎት ማረጋገጫ ያገኘ ሲሆን በእምነት ይቅጡ።',
+  'how.benefit4Title': 'አካባቢ እና ዓለም አቀፍ',
+  'how.benefit4Desc':
+    'በኢትዮጵያ የተሰራ፣ ለዓለም የተነደፈ። የአገር ውስጥ የክፍያ ድጋፍ ከዓለም አቀፍ ተደራሽነት ጋር።',
+  'how.faqTitle': 'ተደጋጋሚ ጥያቄዎች',
+  'how.faq1Q': 'እንደ ቀጣሪ እንዴት እመዝገባለሁ?',
+  'how.faq1A':
+    'ነፃ መለያ ይፍጠሩ፣ የመጀመሪያ ስራዎን በመግለጫ እና በጀት ይለጥፉ እና በ.hl ውስጥ ማመልከቻዎችን ይቀበሉ።',
+  'how.faq2Q': 'ክፍያዎች እንዴት ይሠራሉ?',
+  'how.faq2A':
+    'ክፍያዎች በደረጃ በስርጭት ድርስት ውስጥ ይከሰሳሉ። የመቀረŸ ስራ ስትጽድቅ፣ ገንዘቡ ወደ ፍሪላንሰሩ ፈጣን ይለቃል።',
+  'how.faq3Q': 'ስራው እንደሚፈልገው ካልሆነ ምንድን ነው?',
+  'how.faq3A':
+    'በደረጃ ስርዓት ክለሳ ጠይቀው ይችላሉ። ችግሩ ከቀጠለ፣ የንድ የመካከል ቡድን ይረዳዎታል።',
+  'how.faq4Q': 'ድሪም ሞር ከኢትዮጵያ ውጭ ይገኛል?',
+  'how.faq4A':
+    'አዎ! ለኢትዮጵያ ባለሙያ የተዘጋጀ ቢሆንም፣ ዓለም ሙሉ በሙሉ ፍሪላንሰሮችን ማeyeal ወይም ስራ ማግኘት ይችላሉ።',
+  'how.pageCtaTitle': 'ለመጀመር ዝግጁ ነዎት?',
+  'how.pageCtaDesc':
+    'በድሪም ሞር ላይ እየተገነቡ ላሉ በሺዎች የሚቆጠሩ ፍሪላንሰሮች እና ቀጣሪዎች ይቀላቀሉ።',
+  'how.pageCtaSignUp': 'መለያዎን ይፍጠሩ',
+  'how.pageCtaPostJob': 'ስራ ይለጥፉ',
+
   // ---- Trust ----
   'trust.eyebrow': 'እምነት እና ደህንነት',
   'trust.title': 'በአስተማማኝነት የተገነባ',
@@ -196,6 +280,29 @@ export const am = {
   'trust.quote':
     '“የኢትዮጵያ ባለሙያ የዓለም ደረጃ ነው። የምንኖረው እዚህ — እና በየትኛውም ቦታ — ያሉ ቀጣሪዎች እንዲያገኙት፣ እንዲቀጥሩት እና ከእሱ ጋር እንዲገነቡ ለማድረግ ነው።”',
   'trust.signature': '— የድሪም ሞር አፕወርክስ ቡድን',
+
+  // ---- Trusted By Section ----
+  'trusted.eyebrow': 'በ蹙 የተቀበሉ ዋና ኩባንያዎች',
+  'trusted.title': 'በመላው ኢትዮጵያ ስኬት እያቀረቡ',
+  'trusted.subtitle':
+    'ከአዲስ አበባ ስታርትአፕዎች እስከ በምስራቅ አፍሪካ ያሉ ትልልል ኩባንያዎች — ምርጥ ባለሙያ ለማግኘት በረበት ኩባንያዎች ድሪም ሞር ይመገባሉ።',
+  'trusted.trustedByLabel': 'ድሪም ሞር የሚጠቀሙ ኩባንያዎች',
+  'trusted.statJobs': 'የተለጥፉ ስራዎች',
+  'trusted.statPaid': 'ለፍሪላንሰሮች የተከፈለ',
+  'trusted.statRating': 'አverage ደረጃ',
+  'trusted.statResponse': 'የምላሽ ጊዜ',
+  'trusted.testimonial1Quote':
+    'ድሪም ሞር በ24 ሰዓት ውስጥ UI/UX ዲዛይነር ለማግኘት ረድቶናል። ጥራቱ ልዩ ነበር እና የደረጃ ስርዓቱ ሙሉ ሰላም ሰጥቷል።',
+  'trusted.testimonial1Name': 'አበበ ከበደ',
+  'trusted.testimonial1Role': 'ስ责任፣ TechEthiopia',
+  'trusted.testimonial2Quote':
+    'እንደ ፍሪላንሰር፣ ድሪም ሞር ህይወቴን ቀይሷል። ከመጀመሪያው ወር ጀምሮ ተደራሽ ገቢ እየሰበሰብኩ ነው።',
+  'trusted.testimonial2Name': 'ሰላም ተስፋዬ',
+  'trusted.testimonial2Role': 'ሙሉ ተሞክሮ ያለው አልሚ',
+  'trusted.testimonial3Quote':
+    'ግልጽ ዋጋ እና የተረጋገጡ ባለሙያዎች ድርጅት ድሪም ሞርን ለሁሉም የልማት ፕሮጀክቶች የምንጠቀመው መመሪያ አድርገዋል።',
+  'trusted.testimonial3Name': 'ዳኒኤል ሙሉጌታ',
+  'trusted.testimonial3Role': 'የድি঒ጂታል ኃላፊ፣ የimentary ባንክ',
 
   // ---- CTA ----
   'cta.title': 'ታላቅ ነገር ለመገንባት ዝግጁ ነዎት?',

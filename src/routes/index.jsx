@@ -18,6 +18,7 @@ const JobDetailsPage = lazy(() => import('../pages/public/JobDetailsPage'));
 const FreelancersPage = lazy(() => import('../pages/public/FreelancersPage'));
 const FreelancerDetailsPage = lazy(() => import('../pages/public/FreelancerDetailsPage'));
 const CategoriesPage = lazy(() => import('../pages/public/CategoriesPage'));
+const HowItWorksPage = lazy(() => import('../pages/public/HowItWorksPage'));
 
 const LoginPage = lazy(() => import('../pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'));
@@ -28,6 +29,7 @@ const FreelancerProfilePage = lazy(() => import('../pages/freelancer/ProfilePage
 const FreelancerProfileEditPage = lazy(() => import('../pages/freelancer/ProfileEditPage'));
 const FreelancerJobsPage = lazy(() => import('../pages/freelancer/JobsPage'));
 const FreelancerProposalsPage = lazy(() => import('../pages/freelancer/ProposalsPage'));
+const FreelancerSubmitProposalPage = lazy(() => import('../pages/freelancer/FreelancerSubmitProposalPage'));
 const FreelancerProposalDetailsPage = lazy(() => import('../pages/freelancer/ProposalDetailsPage'));
 const FreelancerContractsPage = lazy(() => import('../pages/freelancer/ContractsPage'));
 const FreelancerContractDetailsPage = lazy(() => import('../pages/freelancer/ContractDetailsPage'));
@@ -121,6 +123,7 @@ export const router = createBrowserRouter([
           { path: 'freelancers', element: lazyPage(<FreelancersPage />) },
           { path: 'freelancers/:id', element: lazyPage(<FreelancerDetailsPage />) },
           { path: 'categories', element: lazyPage(<CategoriesPage />) },
+          { path: 'how-it-works', element: lazyPage(<HowItWorksPage />) },
         ],
       },
     ],
@@ -188,6 +191,7 @@ export const router = createBrowserRouter([
           { path: 'profile', element: lazyPage(<FreelancerProfilePage />) },
           { path: 'profile/edit', element: lazyPage(<FreelancerProfileEditPage />) },
           { path: 'jobs', element: lazyPage(<FreelancerJobsPage />) },
+          { path: 'jobs/:id/apply', element: lazyPage(<FreelancerSubmitProposalPage />) },
           { path: 'proposals', element: lazyPage(<FreelancerProposalsPage />) },
           { path: 'proposals/:id', element: lazyPage(<FreelancerProposalDetailsPage />) },
           { path: 'contracts', element: lazyPage(<FreelancerContractsPage />) },

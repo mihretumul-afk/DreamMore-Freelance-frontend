@@ -196,7 +196,12 @@ export default function JobProposalPanel({ job, onProposalSubmitted }) {
   // --- Freelancer: approved and can submit ---
   return (
     <div className="space-y-2">
-      <Button className="w-full" onClick={openSubmit} disabled={checking || submitting}>
+      <Button
+        as={Link}
+        to={`/freelancer/jobs/${job.id}/apply`}
+        className="w-full"
+        disabled={checking}
+      >
         <Send className="h-4 w-4" aria-hidden="true" /> {t('proposals.submitProposal')}
       </Button>
       {existing && (
@@ -211,45 +216,6 @@ export default function JobProposalPanel({ job, onProposalSubmitted }) {
           will reject the duplicate.
         </p>
       )}
-
-      <Modal
-        open={submitOpen}
-        onClose={closeSubmit}
-        title={t('proposals.submitProposal')}
-        description={`Place your bid for “${job.title}”.`}
-        size="lg"
-      >
-        {submitted ? (
-          <div className="flex flex-col items-center py-6 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-success-50">
-              <CheckCircle2 className="h-6 w-6 text-success-600" aria-hidden="true" />
-            </div>
-            <h3 className="mt-4 text-base font-bold text-ink-900">{t('proposals.submittedSuccess')}</h3>
-            <p className="mt-1 max-w-sm text-sm text-gray-500">
-              Your bid of {formatETB(submitted.bidAmount)}
-              {submitted.currency && submitted.currency !== 'ETB' ? ` ${submitted.currency}` : ''} is
-              now pending review.
-            </p>
-            <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-              <Button as={Link} to="/freelancer/proposals" onClick={closeSubmit}>
-                {t('proposals.myProposals')}
-              </Button>
-              <Button variant="outline" onClick={closeSubmit}>
-                {t('common.done')}
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <ProposalForm
-            submitLabel={t('proposals.submitProposal')}
-            submitting={submitting}
-            fieldErrors={fieldErrors}
-            generalError={generalError}
-            onSubmit={handleSubmit}
-            onCancel={closeSubmit}
-          />
-        )}
-      </Modal>
     </div>
   );
 }

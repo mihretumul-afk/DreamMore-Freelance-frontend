@@ -204,8 +204,9 @@ export default function FeaturedFreelancersSection() {
     <section className="bg-slate-50/60 py-12 lg:py-16 border-b border-gray-100" aria-labelledby="featured-freelancers-heading">
       <Container>
         {/* Section Heading Header */}
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-6 flex flex-col items-center gap-4 text-center">
           <SectionHeading
+            align="center"
             eyebrow={t('featuredFreelancers.eyebrow') || 'Verified Ethiopian Talent'}
             title={t('featuredFreelancers.title') || 'Registered DreamMore Freelancers'}
             description={

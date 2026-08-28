@@ -95,6 +95,14 @@ export const adminService = {
     return response.data;
   },
 
+  /** PUT /admin/credentials/:id/resubmit — request resubmission of a credential. */
+  requestCredentialResubmission: async (id, reason = '') => {
+    const response = await apiClient.put(`/admin/credentials/${id}/resubmit`, {
+      reason,
+    });
+    return response.data;
+  },
+
   /** GET /admin/credentials/:id/download — download credential file. */
   downloadCredential: async (id) => {
     const response = await apiClient.get(`/admin/credentials/${id}/download`, {

@@ -140,8 +140,9 @@ export default function CategoriesSection() {
           scrollStep={300}
           renderControls={({ controls }) => (
             <Reveal>
-              <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="mb-6 flex flex-col items-center gap-4 text-center">
                 <SectionHeading
+                  align="center"
                   eyebrow={t('categories.eyebrow') || 'Marketplace Categories'}
                   title={t('categories.title') || 'Popular Skill & Training Track Categories'}
                   description={
@@ -149,7 +150,7 @@ export default function CategoriesSection() {
                     'Find top-rated courses and high-demand skill categories to boost your career or hire expert talent.'
                   }
                 />
-                <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+                <div className="flex items-center justify-center gap-3 sm:gap-4 shrink-0">
                   <Link
                     to="/categories"
                     className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-brand-200 bg-brand-50/60 px-3.5 py-2 text-xs sm:text-sm font-semibold text-brand-600 shadow-2xs transition-all duration-200 hover:border-brand-300 hover:bg-brand-100/70 hover:text-brand-700"

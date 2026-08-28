@@ -41,8 +41,9 @@ export default function FeaturedJobsSection() {
         <HorizontalScrollRow
           scrollStep={340}
           renderControls={({ controls }) => (
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="mb-6 flex flex-col items-center gap-4 text-center">
               <SectionHeading
+                align="center"
                 eyebrow={t('featuredJobs.eyebrow') || 'Featured'}
                 title={t('featuredJobs.title') || 'Latest Job Opportunities'}
                 description={
@@ -50,7 +51,7 @@ export default function FeaturedJobsSection() {
                   'Hand-picked jobs from employers across Ethiopia and beyond.'
                 }
               />
-              <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+              <div className="flex items-center justify-center gap-3 sm:gap-4 shrink-0">
                 <Link
                   to="/jobs"
                   className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"

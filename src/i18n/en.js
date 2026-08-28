@@ -148,9 +148,10 @@ export const en = {
 
   // ---- How it works ----
   'how.eyebrow': 'How it works',
-  'how.title': 'Simple for both sides',
+  'how.title': 'It\'s Easy to Get Work Done',
   'how.description':
     'A clear process for freelancers finding work and employers building teams.',
+  'how.ctaLabel': 'See How DreamMore Works',
   'how.srHeading': 'How Dream More AppWorks works',
   'how.forFreelancers': 'For Freelancers',
   'how.forEmployers': 'For Employers',
@@ -179,25 +180,155 @@ export const en = {
   'how.employerStep4Desc':
     'Approve milestones as work is delivered and leave fair reviews.',
 
-  // ---- Trust ----
-  'trust.eyebrow': 'Trust & safety',
-  'trust.title': 'Built to be trusted',
-  'trust.description':
-    'Freelance marketplaces only work when both sides feel protected. Every part of Dream More AppWorks is designed around that promise.',
-  'trust.srHeading': 'Trust and verification',
-  'trust.feature1Title': 'Verified profiles',
-  'trust.feature1Desc': 'Identity and skill verification help employers hire with confidence.',
-  'trust.feature2Title': 'Milestone-based payments',
-  'trust.feature2Desc': 'Work is broken into milestones so both sides stay protected.',
-  'trust.feature3Title': 'Built for Ethiopia',
-  'trust.feature3Desc':
-    'Local payment support and Ethiopian context, from Addis Ababa to remote teams.',
-  'trust.feature4Title': 'Fair reviews & ratings',
-  'trust.feature4Desc': 'Reputation is built through honest, two-sided feedback.',
-  'trust.commitment': 'Our commitment',
-  'trust.quote':
-    '“Ethiopian talent is world-class. We exist to make it easy for employers here — and anywhere — to find it, hire it, and build with it.”',
-  'trust.signature': '— The Dream More AppWorks team',
+  // ---- How it works — detailed page ----
+  'how.pageTitle': 'How DreamMore Works',
+  'how.pageSubtitle':
+    'A step-by-step guide to getting work done — whether you are hiring talent or looking for your next project.',
+
+  'how.heroTitle': 'How It Works',
+  'how.heroDesc':
+    'Dream More AppWorks makes it easy to connect with top Ethiopian talent. From posting a job to getting paid, every step is simple, transparent, and secure.',
+
+  // Employer journey
+  'how.forEmployersTitle': 'For Employers',
+  'how.forEmployersSubtitle': 'Hire the right talent in four simple steps.',
+  'how.empStep1Title': 'Post a Job',
+  'how.empStep1Desc':
+    'Describe the work you need, set your budget, and publish your job listing. It takes less than 5 minutes.',
+  'how.empStep1Detail':
+    'Choose from categories like Web Development, Graphic Design, Content Writing, and more. Add skills, timelines, and budget ranges to attract the right freelancers.',
+  'how.empStep2Title': 'Review Proposals',
+  'how.empStep2Desc':
+    'Receive proposals from qualified freelancers, compare portfolios, and shortlist the best candidates.',
+  'how.empStep2Detail':
+    'Each proposal includes a cover letter, bid amount, estimated duration, and portfolio links — so you can make an informed decision quickly.',
+  'how.empStep3Title': 'Hire & Set Milestones',
+  'how.empStep3Desc':
+    'Agree on deliverables, timelines, and payment milestones with your chosen freelancer.',
+  'how.empStep3Detail':
+    'Break projects into clear milestones so both sides stay protected. Payments are held in escrow until work is approved.',
+  'how.empStep4Title': 'Review & Approve',
+  'how.empStep4Desc':
+    'Review delivered work, approve milestones, and release payments with confidence.',
+  'how.empStep4Detail':
+    'Request revisions if needed, leave honest reviews, and build long-term relationships with top talent.',
+
+  // Freelancer journey
+  'how.forFreelancersTitle': 'For Freelancers',
+  'how.forFreelancersSubtitle': 'Find meaningful work and get paid for your skills.',
+  'how.freeStep1Title': 'Create Your Profile',
+  'how.freeStep1Desc':
+    'Showcase your skills, portfolio, and experience to stand out to employers.',
+  'how.freeStep1Detail':
+    'Add your best work samples, certifications, and a compelling bio. Verified profiles get 3x more views from employers.',
+  'how.freeStep2Title': 'Browse & Bid on Jobs',
+  'how.freeStep2Desc':
+    'Find jobs that match your skills and submit winning proposals.',
+  'how.freeStep2Detail':
+    'Use filters to find jobs by category, budget, and experience level. Tailor each proposal to show why you are the perfect fit.',
+  'how.freeStep3Title': 'Deliver Milestone Work',
+  'how.freeStep3Desc':
+    'Work in clear milestones and keep the employer updated at every step.',
+  'how.freeStep3Detail':
+    'Use the built-in messaging and milestone tracking to collaborate seamlessly. Upload deliverables and get feedback in real time.',
+  'how.freeStep4Title': 'Get Paid & Grow',
+  'how.freeStep4Desc':
+    'Get paid per approved milestone and build a trusted reputation.',
+  'how.freeStep4Detail':
+    'Payments are released immediately after employer approval. Build your reputation with reviews and grow your freelance career.',
+
+  // Benefits
+  'how.benefitsTitle': 'Why Choose DreamMore?',
+  'how.benefitsSubtitle': 'Built for Ethiopian talent and the global market.',
+  'how.benefit1Title': 'Secure Payments',
+  'how.benefit1Desc':
+    'Escrow-based payments protect both freelancers and employers. Funds are released only when work is approved.',
+  'how.benefit2Title': 'Milestone Tracking',
+  'how.benefit2Desc':
+    'Break projects into clear milestones. Track progress, share feedback, and stay aligned every step of the way.',
+  'how.benefit3Title': 'Verified Talent',
+  'how.benefit3Desc':
+    'Every freelancer is identity-verified and skill-assessed, so you hire with confidence.',
+  'how.benefit4Title': 'Local & Global',
+  'how.benefit4Desc':
+    'Built in Ethiopia, designed for the world. Local payment support with international reach.',
+
+  // FAQ
+  'how.faqTitle': 'Frequently Asked Questions',
+  'how.faq1Q': 'How do I get started as an employer?',
+  'how.faq1A':
+    'Create a free account, post your first job with a description and budget, and start receiving proposals within hours.',
+  'how.faq2Q': 'How do payments work?',
+  'how.faq2A':
+    'Payments are held in escrow per milestone. When you approve delivered work, funds are released to the freelancer instantly.',
+  'how.faq3Q': 'What if I am not satisfied with the work?',
+  'how.faq3A':
+    'You can request revisions through the milestone system. If issues persist, our dispute resolution team will help mediate.',
+  'how.faq4Q': 'Is DreamMore available outside Ethiopia?',
+  'how.faq4A':
+    'Yes! While built for Ethiopian talent, anyone worldwide can hire freelancers or find work on the platform.',
+
+  // CTA
+  'how.pageCtaTitle': 'Ready to Get Started?',
+  'how.pageCtaDesc':
+    'Join thousands of freelancers and employers already building on DreamMore.',
+  'how.pageCtaSignUp': 'Create Your Account',
+  'how.pageCtaPostJob': 'Post a Job',
+
+  // ---- Platform Highlights ----
+  'highlights.eyebrow': 'Why DreamMore',
+  'highlights.title': 'Built Different, Built for You',
+  'highlights.subtitle':
+    'Not just another freelance platform. DreamMore is designed from the ground up for Ethiopian talent and the global market.',
+  'highlights.smartMatch.title': 'Smart Matching',
+  'highlights.smartMatch.desc':
+    'Our AI analyzes skills, availability, and past performance to connect you with the perfect match — not just the cheapest bid.',
+  'highlights.milestone.title': 'Milestone Shield',
+  'highlights.milestone.desc':
+    'Every project is protected. Funds are held in escrow and released only when you approve the work. No surprises, ever.',
+  'highlights.realtime.title': 'Real-Time Collaboration',
+  'highlights.realtime.desc':
+    'Built-in messaging, file sharing, and progress tracking. No need for Slack, email, or WhatsApp — everything happens here.',
+  'highlights.pricing.title': 'Transparent Pricing',
+  'highlights.pricing.desc':
+    'No hidden fees. No surprise charges. You see exactly what you pay before you commit.',
+  'highlights.community.title': 'Ethiopian Community',
+  'highlights.community.desc':
+    'Connect with 10,000+ skilled professionals across Addis Ababa, Bahir Dar, and beyond. Your next hire is closer than you think.',
+  'highlights.skills.title': 'Verified Skills',
+  'highlights.skills.desc':
+    'Every freelancer is identity-verified and skill-assessed. Hire with confidence, every time.',
+  'highlights.stat1Value': '10,000+',
+  'highlights.stat1Label': 'Skilled Freelancers',
+  'highlights.stat2Value': '5,000+',
+  'highlights.stat2Label': 'Jobs Completed',
+  'highlights.stat3Value': '98%',
+  'highlights.stat3Label': 'Satisfaction Rate',
+  'highlights.stat4Value': '24h',
+  'highlights.stat4Label': 'Average Response Time',
+
+  // ---- Trusted By Section ----
+  'trusted.eyebrow': 'Trusted by leading companies',
+  'trusted.title': 'Powering Success Across Ethiopia',
+  'trusted.subtitle':
+    'From startups in Addis Ababa to enterprises across East Africa, top companies trust DreamMore to find the best talent.',
+  'trusted.trustedByLabel': 'Companies using DreamMore',
+  'trusted.statJobs': 'Jobs Posted',
+  'trusted.statPaid': 'Paid to Freelancers',
+  'trusted.statRating': 'Avg Rating',
+  'trusted.statResponse': 'Response Time',
+  'trusted.testimonial1Quote':
+    'DreamMore helped us find a UI/UX designer in under 24 hours. The quality was exceptional and the milestone system gave us complete peace of mind.',
+  'trusted.testimonial1Name': 'Abebe Kebede',
+  'trusted.testimonial1Role': 'CTO, TechEthiopia',
+  'trusted.testimonial2Quote':
+    'As a freelancer, DreamMore changed my life. I went from struggling to find clients to earning a stable income within the first month.',
+  'trusted.testimonial2Name': 'Selam Tesfaye',
+  'trusted.testimonial2Role': 'Full-Stack Developer',
+  'trusted.testimonial3Quote':
+    'The transparent pricing and verified talent pool make DreamMore our go-to platform for all development projects.',
+  'trusted.testimonial3Name': 'Daniel Mulugeta',
+  'trusted.testimonial3Role': 'Head of Digital, Bank of Abyssinia',
 
   // ---- CTA ----
   'cta.title': 'Ready to build something great?',

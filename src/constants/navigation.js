@@ -196,15 +196,15 @@ export const FOOTER_COLUMNS = [
     links: [
       { labelKey: 'footer.findJobs', to: '/jobs' },
       { labelKey: 'footer.createProfile', to: '/register' },
-      { labelKey: 'footer.howItWorks', to: '/#for-freelancers' },
+      { labelKey: 'footer.howItWorks', to: '/how-it-works' },
     ],
   },
   {
     headingKey: 'footer.forEmployers',
     links: [
       { labelKey: 'footer.findTalent', to: '/freelancers' },
-      { labelKey: 'footer.postAJob', to: '/#for-employers' },
-      { labelKey: 'footer.howItWorks', to: '/#for-employers' },
+      { labelKey: 'footer.postAJob', to: '/register' },
+      { labelKey: 'footer.howItWorks', to: '/how-it-works' },
     ],
   },
   {

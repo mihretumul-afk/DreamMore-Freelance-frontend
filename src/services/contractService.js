@@ -59,6 +59,12 @@ export const contractService = {
     const response = await apiClient.post(`/contracts/${id}/dispute`, data);
     return response.data; // { success, message, data }
   },
+
+  /** Fetch activity log for a contract. */
+  getActivities: async (id, limit = 50) => {
+    const response = await apiClient.get(`/contracts/${id}/activities`, { params: { limit } });
+    return response.data; // { success, message, data }
+  },
 };
 
 export default contractService;

@@ -6,7 +6,7 @@ import CategoriesSection from '../../components/landing/CategoriesSection';
 import FeaturedJobsSection from '../../components/landing/FeaturedJobsSection';
 import FeaturedFreelancersSection from '../../components/landing/FeaturedFreelancersSection';
 import HowItWorksSection from '../../components/landing/HowItWorksSection';
-import TrustSection from '../../components/landing/TrustSection';
+import TrustedBySection from '../../components/landing/TrustedBySection';
 import CtaSection from '../../components/landing/CtaSection';
 import VideoShowcase from '../../components/landing/VideoShowcase';
 export default function LandingPage() {
@@ -32,7 +32,7 @@ export default function LandingPage() {
       <FeaturedJobsSection />
       <FeaturedFreelancersSection />
       <HowItWorksSection />
-      <TrustSection />
+      <TrustedBySection />
       <CtaSection />
       
     </>

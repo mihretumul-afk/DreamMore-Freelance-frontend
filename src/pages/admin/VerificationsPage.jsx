@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ShieldCheck, CheckCircle, XCircle, FileText, Award, Download, Eye } from 'lucide-react';
+import { ShieldCheck, CheckCircle, XCircle, RefreshCw, FileText, Award, Download, Eye } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
 import Card, { CardBody } from '../../components/ui/Card';
@@ -20,6 +20,7 @@ const STATUS_OPTIONS = [
   { value: 'pending', label: 'Pending' },
   { value: 'approved', label: 'Approved' },
   { value: 'rejected', label: 'Rejected' },
+  { value: 'resubmission_required', label: 'Resubmission Required' },
 ];
 
 const TYPE_OPTIONS = [
@@ -32,6 +33,7 @@ const STATUS_BADGE = {
   pending: 'warning',
   approved: 'success',
   rejected: 'danger',
+  resubmission_required: 'purple',
 };
 
 /** Get the MIME type from a file name extension. */
@@ -100,6 +102,9 @@ export default function AdminVerificationsPage() {
         if (actionType === 'approve') {
           await adminService.approveCredential(actionTarget.id);
           showToast('Credential approved successfully.', 'success');
+        } else if (actionType === 'resubmit') {
+          await adminService.requestCredentialResubmission(actionTarget.id, rejectReason);
+          showToast('Resubmission requested.', 'info');
         } else {
           await adminService.rejectCredential(actionTarget.id, rejectReason);
           showToast('Credential rejected.', 'success');
@@ -318,6 +323,15 @@ export default function AdminVerificationsPage() {
                           >
                             <CheckCircle className="h-3.5 w-3.5" /> Approve
                           </Button>
+                          {isCredential && (
+                            <Button
+                              variant="outline"
+                              size="xs"
+                              onClick={() => { setActionTarget(v); setActionType('resubmit'); }}
+                            >
+                              <RefreshCw className="h-3.5 w-3.5 text-amber-600" /> Request Resubmission
+                            </Button>
+                          )}
                           <Button
                             variant="danger"
                             size="xs"
@@ -340,36 +354,40 @@ export default function AdminVerificationsPage() {
       <Modal
         open={Boolean(actionTarget && actionType)}
         onClose={() => { setActionTarget(null); setActionType(null); setRejectReason(''); }}
-        title={actionType === 'approve' ? 'Approve' : 'Reject'}
+        title={actionType === 'approve' ? 'Approve' : actionType === 'resubmit' ? 'Request Resubmission' : 'Reject'}
         description={
           actionType === 'approve'
             ? `Approve the ${actionTarget?.item_type === 'credential' ? 'credential' : 'verification'} request for ${actionTarget?.user?.name ?? 'this user'}?`
+            : actionType === 'resubmit'
+            ? `Request resubmission of credential "${actionTarget?.title}" from ${actionTarget?.user?.name ?? 'this user'}.`
             : `Reject the ${actionTarget?.item_type === 'credential' ? 'credential' : 'verification'} request for ${actionTarget?.user?.name ?? 'this user'}.`
         }
         size="sm"
       >
-        {actionType === 'reject' && (
+        {(actionType === 'reject' || actionType === 'resubmit') && (
           <div className="mb-4">
             <Textarea
-              label="Rejection reason (optional)"
-              placeholder="Why is this being rejected?"
+              label={actionType === 'resubmit' ? 'Resubmission Instructions / Reason *' : 'Rejection Reason (optional)'}
+              placeholder={actionType === 'resubmit' ? 'Explain what needs correction before approval...' : 'Why is this being rejected?'}
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               rows={3}
+              required={actionType === 'resubmit'}
             />
           </div>
         )}
         <div className="flex justify-end gap-3">
-          <Button variant="outline" size="sm" onClick={() => { setActionTarget(null); setActionType(null); }}>
+          <Button variant="outline" size="sm" onClick={() => { setActionTarget(null); setActionType(null); setRejectReason(''); }}>
             Cancel
           </Button>
           <Button
-            variant={actionType === 'approve' ? 'success' : 'danger'}
+            variant={actionType === 'approve' ? 'success' : actionType === 'resubmit' ? 'primary' : 'danger'}
             size="sm"
             loading={processing}
+            disabled={actionType === 'resubmit' && !rejectReason.trim()}
             onClick={handleAction}
           >
-            {actionType === 'approve' ? 'Approve' : 'Reject'}
+            {actionType === 'approve' ? 'Approve' : actionType === 'resubmit' ? 'Submit Request' : 'Reject'}
           </Button>
         </div>
       </Modal>

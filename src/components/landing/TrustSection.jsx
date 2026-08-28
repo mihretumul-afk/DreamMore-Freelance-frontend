@@ -21,6 +21,7 @@ export default function TrustSection() {
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <Reveal>
             <SectionHeading
+              align="center"
               eyebrow={t('trust.eyebrow')}
               title={t('trust.title')}
               description={t('trust.description')}
