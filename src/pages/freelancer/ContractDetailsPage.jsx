@@ -69,7 +69,7 @@ function MilestoneProgress({ status }) {
 
 /* ─── Milestone Card ─────────────────────────────────────────────────────── */
 
-function MilestoneCard({ milestone, onAction, actionLoading }) {
+function MilestoneCard({ milestone, onAction, actionLoading, onDeleteSubmissionFile }) {
   const status = MILESTONE_STATUS[milestone.status] ?? MILESTONE_STATUS.draft;
   const StatusIcon = status.icon;
   const [expanded, setExpanded] = useState(false);
@@ -275,10 +275,16 @@ function MilestoneCard({ milestone, onAction, actionLoading }) {
                               <span className="text-xs font-medium text-ink-900 truncate">{file.name}</span>
                               <span className="text-[10px] text-gray-400">({(file.size / 1024 / 1024).toFixed(1)} MB)</span>
                             </div>
-                            <a href={getAuthenticatedFileUrl(file.path, 'submission')} target="_blank" rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 rounded-lg bg-green-500 px-2.5 py-1 text-xs font-medium text-white hover:bg-green-600 transition-colors">
-                              <Download className="h-3.5 w-3.5" /> Download
-                            </a>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <a href={getAuthenticatedFileUrl(file.path, 'submission')} target="_blank" rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 rounded-lg bg-green-500 px-2.5 py-1 text-xs font-medium text-white hover:bg-green-600 transition-colors">
+                                <Download className="h-3.5 w-3.5" /> Download
+                              </a>
+                              <button type="button" onClick={() => onDeleteSubmissionFile?.(milestone.contract_id, milestone.id, sub.id, file.path)}
+                                className="inline-flex items-center gap-1 rounded-lg bg-red-500 px-2.5 py-1 text-xs font-medium text-white hover:bg-red-600 transition-colors">
+                                <Trash2 className="h-3.5 w-3.5" /> Delete
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>
