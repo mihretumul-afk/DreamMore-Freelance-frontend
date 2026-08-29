@@ -44,6 +44,14 @@ export const contractService = {
     return response.data;
   },
 
+  /** DELETE /contracts/:cid/milestones/:mid/submissions/:sid/files — delete a submission file */
+  deleteSubmissionFile: async (contractId, milestoneId, submissionId, filePath) => {
+    const response = await apiClient.delete(`/contracts/${contractId}/milestones/${milestoneId}/submissions/${submissionId}/files`, {
+      data: { file_path: filePath },
+    });
+    return response.data;
+  },
+
   // ── Milestones ─────────────────────────────────────────────────────────
 
   /** GET /contracts/:id/milestones — list milestones */
