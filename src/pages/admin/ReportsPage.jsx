@@ -19,6 +19,7 @@ import { formatDate, formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useToast } from '../../hooks/useToast';
 import { API_BASE_URL } from '../../config/env';
+import { getAuthenticatedFileUrl } from '../../utils/fileUrl';
 
 /* ─── Constants ────────────────────────────────────────────────────────── */
 
@@ -196,7 +197,7 @@ function DisputeDetail({ report, onBack, onRefresh }) {
                             <span className="text-xs font-medium text-ink-900 truncate">{file.name}</span>
                             <span className="text-[10px] text-gray-400">({(file.size / 1024 / 1024).toFixed(1)} MB)</span>
                           </div>
-                          <a href={`${API_BASE_URL}/milestone-submissions/${file.path}`} target="_blank" rel="noopener noreferrer"
+                          <a href={getAuthenticatedFileUrl(file.path, 'submission')} target="_blank" rel="noopener noreferrer"
                             className="rounded p-1 text-brand-600 hover:bg-brand-50 transition-colors">
                             <Download className="h-3.5 w-3.5" />
                           </a>

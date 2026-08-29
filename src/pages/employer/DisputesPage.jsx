@@ -19,6 +19,7 @@ import { usePageTitle } from '../../hooks/usePageTitle';
 import { useToast } from '../../hooks/useToast';
 import { useAuth } from '../../hooks/useAuth';
 import { API_BASE_URL } from '../../config/env';
+import { getAuthenticatedFileUrl } from '../../utils/fileUrl';
 
 const STATUS_BADGE = {
   pending: 'warning',
@@ -249,7 +250,7 @@ export default function EmployerDisputesPage() {
                               <span className="text-xs font-medium text-ink-900 truncate">{file.name}</span>
                             </div>
                             <a
-                              href={`${API_BASE_URL}/milestone-submissions/${file.path}`}
+                              href={getAuthenticatedFileUrl(file.path, 'submission')}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="rounded p-1 text-brand-600 hover:bg-brand-50 transition-colors"

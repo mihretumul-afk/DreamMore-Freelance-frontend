@@ -20,6 +20,7 @@ import { formatDate, formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useToast } from '../../hooks/useToast';
 import { API_BASE_URL } from '../../config/env';
+import { getAuthenticatedFileUrl } from '../../utils/fileUrl';
 
 /* ─── Status Maps ────────────────────────────────────────────────────────── */
 
@@ -147,6 +148,28 @@ function MilestoneCard({ milestone, onAction }) {
             )}
           </div>
 
+          {/* Milestone Reference Files */}
+          {milestone.attachments && milestone.attachments.length > 0 && (
+            <div>
+              <p className="text-[10px] font-bold uppercase text-gray-400 mb-2">Reference Files</p>
+              <div className="space-y-1">
+                {milestone.attachments.map((file) => (
+                  <div key={file.id} className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FileText className="h-4 w-4 text-brand-500 shrink-0" />
+                      <span className="text-xs font-medium text-ink-900 truncate">{file.name}</span>
+                      <span className="text-[10px] text-gray-400">({file.formatted_size || (file.size / 1024 / 1024).toFixed(1) + ' MB'})</span>
+                    </div>
+                    <a href={getAuthenticatedFileUrl(file.path, 'attachment')} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 rounded-lg bg-green-500 px-2.5 py-1 text-xs font-medium text-white hover:bg-green-600 transition-colors">
+                      <Download className="h-3.5 w-3.5" /> Download
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Submissions */}
           {milestone.submissions && milestone.submissions.length > 0 && (
             <div>
@@ -180,9 +203,9 @@ function MilestoneCard({ milestone, onAction }) {
                               <span className="text-[10px] text-gray-400">({(file.size / 1024 / 1024).toFixed(1)} MB)</span>
                             </div>
                             <div className="flex items-center gap-1 shrink-0">
-                              <a href={`${API_BASE_URL}/milestone-submissions/${file.path}`} target="_blank" rel="noopener noreferrer"
-                                className="rounded p-1 text-brand-600 hover:bg-brand-50 transition-colors">
-                                <Download className="h-3.5 w-3.5" />
+                              <a href={getAuthenticatedFileUrl(file.path, 'submission')} target="_blank" rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 rounded-lg bg-green-500 px-2.5 py-1 text-xs font-medium text-white hover:bg-green-600 transition-colors">
+                                <Download className="h-3.5 w-3.5" /> Download
                               </a>
                             </div>
                           </div>
@@ -283,6 +306,7 @@ export default function EmployerContractDetailsPage() {
   // Create milestone
   const [createModal, setCreateModal] = useState(false);
   const [milestoneForm, setMilestoneForm] = useState({ title: '', description: '', deliverables: '', amount: '', due_date: '' });
+  const [milestoneFiles, setMilestoneFiles] = useState([]);
   const [creating, setCreating] = useState(false);
 
   // Revision
@@ -328,14 +352,19 @@ export default function EmployerContractDetailsPage() {
   const handleCreateMilestone = async () => {
     setCreating(true);
     try {
-      await contractService.createMilestone(id, {
-        ...milestoneForm,
-        amount: parseFloat(milestoneForm.amount),
-        due_date: milestoneForm.due_date || undefined,
-      });
+      const formData = new FormData();
+      formData.append('title', milestoneForm.title);
+      if (milestoneForm.description) formData.append('description', milestoneForm.description);
+      if (milestoneForm.deliverables) formData.append('deliverables', milestoneForm.deliverables);
+      formData.append('amount', parseFloat(milestoneForm.amount));
+      if (milestoneForm.due_date) formData.append('due_date', milestoneForm.due_date);
+      milestoneFiles.forEach((file) => formData.append('files[]', file));
+
+      await contractService.createMilestone(id, formData);
       showToast('Milestone created! Now fund it to let the freelancer start.', 'success');
       setCreateModal(false);
       setMilestoneForm({ title: '', description: '', deliverables: '', amount: '', due_date: '' });
+      setMilestoneFiles([]);
       load();
     } catch (err) {
       showToast(err.response?.data?.message || 'Failed to create milestone.', 'error');
@@ -539,6 +568,41 @@ export default function EmployerContractDetailsPage() {
             <Input label="Due Date" type="date" value={milestoneForm.due_date}
               onChange={(e) => setMilestoneForm({ ...milestoneForm, due_date: e.target.value })} />
           </div>
+
+          {/* File Upload — Reference Files */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-ink-900">Reference Files (optional)</label>
+            <div className="relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50/50 p-6 text-center hover:border-brand-400 transition-colors">
+              <input
+                type="file"
+                multiple
+                accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z,.txt,.csv"
+                onChange={(e) => setMilestoneFiles([...milestoneFiles, ...Array.from(e.target.files)])}
+                className="absolute inset-0 z-10 w-full h-full opacity-0 cursor-pointer"
+              />
+              <Upload className="mx-auto h-8 w-8 text-gray-400" />
+              <p className="mt-2 text-sm font-medium text-ink-900">Drag & drop or <span className="text-brand-600 underline">browse</span></p>
+              <p className="mt-1 text-xs text-gray-500">Photos, Videos, Documents — Max 200MB each</p>
+            </div>
+            {milestoneFiles.length > 0 && (
+              <div className="mt-3 space-y-2">
+                {milestoneFiles.map((file, i) => (
+                  <div key={i} className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-3 py-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FileText className="h-4 w-4 text-brand-500 shrink-0" />
+                      <span className="text-xs font-medium text-ink-900 truncate">{file.name}</span>
+                      <span className="text-[10px] text-gray-400">({(file.size / 1024 / 1024).toFixed(1)} MB)</span>
+                    </div>
+                    <button type="button" onClick={() => setMilestoneFiles(milestoneFiles.filter((_, j) => j !== i))} className="text-gray-400 hover:text-red-500">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="mt-1 text-[11px] text-gray-400">Photos, videos, audio, documents — up to 200MB per file.</p>
+          </div>
+
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="outline" onClick={() => setCreateModal(false)}>Cancel</Button>
             <Button variant="primary" loading={creating} onClick={handleCreateMilestone}>

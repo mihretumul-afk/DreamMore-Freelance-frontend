@@ -17,6 +17,7 @@ import { formatDate, formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useToast } from '../../hooks/useToast';
 import { API_BASE_URL } from '../../config/env';
+import { getAuthenticatedFileUrl } from '../../utils/fileUrl';
 
 /* ─── Status Maps ────────────────────────────────────────────────────────── */
 
@@ -217,6 +218,28 @@ function MilestoneCard({ milestone, onAction, actionLoading }) {
             )}
           </div>
 
+          {/* Milestone Reference Files from Employer */}
+          {milestone.attachments && milestone.attachments.length > 0 && (
+            <div>
+              <p className="text-[10px] font-bold uppercase text-gray-400 mb-2">Reference Files from Employer</p>
+              <div className="space-y-1">
+                {milestone.attachments.map((file) => (
+                  <div key={file.id} className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <FileText className="h-4 w-4 text-brand-500 shrink-0" />
+                      <span className="text-xs font-medium text-ink-900 truncate">{file.name}</span>
+                      <span className="text-[10px] text-gray-400">({file.formatted_size || (file.size / 1024 / 1024).toFixed(1) + ' MB'})</span>
+                    </div>
+                    <a href={getAuthenticatedFileUrl(file.path, 'attachment')} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 rounded-lg bg-green-500 px-2.5 py-1 text-xs font-medium text-white hover:bg-green-600 transition-colors">
+                      <Download className="h-3.5 w-3.5" /> Download
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Revision Note */}
           {milestone.status === 'revision_requested' && milestone.submissions?.length > 0 && milestone.submissions[0]?.revision_note && (
             <div className="rounded-xl border border-red-200 bg-red-50 p-3">
@@ -252,9 +275,9 @@ function MilestoneCard({ milestone, onAction, actionLoading }) {
                               <span className="text-xs font-medium text-ink-900 truncate">{file.name}</span>
                               <span className="text-[10px] text-gray-400">({(file.size / 1024 / 1024).toFixed(1)} MB)</span>
                             </div>
-                            <a href={`${API_BASE_URL}/milestone-submissions/${file.path}`} target="_blank" rel="noopener noreferrer"
-                              className="rounded p-1 text-brand-600 hover:bg-brand-50 transition-colors">
-                              <Download className="h-3.5 w-3.5" />
+                            <a href={getAuthenticatedFileUrl(file.path, 'submission')} target="_blank" rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 rounded-lg bg-green-500 px-2.5 py-1 text-xs font-medium text-white hover:bg-green-600 transition-colors">
+                              <Download className="h-3.5 w-3.5" /> Download
                             </a>
                           </div>
                         ))}
@@ -583,18 +606,18 @@ export default function FreelancerContractDetailsPage() {
 
           {/* File Upload */}
           <div>
-            <label className="mb-1 block text-sm font-medium text-ink-900">Upload Files (Photos, PDFs)</label>
+            <label className="mb-1 block text-sm font-medium text-ink-900">Upload Work Files</label>
             <div className="relative rounded-xl border-2 border-dashed border-gray-300 bg-gray-50/50 p-6 text-center hover:border-brand-400 transition-colors">
               <input
                 type="file"
                 multiple
-                accept="image/*,.pdf,.doc,.docx,.zip"
+                accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.7z,.txt,.csv"
                 onChange={(e) => setSubmitFiles([...submitFiles, ...Array.from(e.target.files)])}
                 className="absolute inset-0 z-10 w-full h-full opacity-0 cursor-pointer"
               />
               <Upload className="mx-auto h-8 w-8 text-gray-400" />
               <p className="mt-2 text-sm font-medium text-ink-900">Drag & drop or <span className="text-brand-600 underline">browse</span></p>
-              <p className="mt-1 text-xs text-gray-500">Photos, PDFs, Documents — Max 10MB each</p>
+              <p className="mt-1 text-xs text-gray-500">Photos, Videos, Audio, Documents — Max 400MB each</p>
             </div>
             {submitFiles.length > 0 && (
               <div className="mt-3 space-y-2">

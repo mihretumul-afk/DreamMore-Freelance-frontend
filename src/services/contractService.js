@@ -30,6 +30,20 @@ export const contractService = {
     return response.data;
   },
 
+  /** DELETE /contracts/:id — delete contract from history */
+  deleteContract: async (id) => {
+    const response = await apiClient.delete(`/contracts/${id}`);
+    return response.data;
+  },
+
+  // ── File Attachments ────────────────────────────────────────────────────
+
+  /** DELETE /milestone-attachments/:id — delete a milestone attachment */
+  deleteAttachment: async (attachmentId) => {
+    const response = await apiClient.delete(`/milestone-attachments/${attachmentId}`);
+    return response.data;
+  },
+
   // ── Milestones ─────────────────────────────────────────────────────────
 
   /** GET /contracts/:id/milestones — list milestones */
@@ -44,9 +58,10 @@ export const contractService = {
     return response.data;
   },
 
-  /** POST /contracts/:id/milestones — create milestone */
+  /** POST /contracts/:id/milestones — create milestone (supports FormData for file uploads) */
   createMilestone: async (contractId, payload) => {
-    const response = await apiClient.post(`/contracts/${contractId}/milestones`, payload);
+    const config = payload instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
+    const response = await apiClient.post(`/contracts/${contractId}/milestones`, payload, config);
     return response.data;
   },
 
@@ -68,9 +83,10 @@ export const contractService = {
     return response.data;
   },
 
-  /** POST /contracts/:id/milestones/:milestoneId/submit — submit work */
+  /** POST /contracts/:id/milestones/:milestoneId/submit — submit work (supports FormData for file uploads) */
   submitWork: async (contractId, milestoneId, payload = {}) => {
-    const response = await apiClient.post(`/contracts/${contractId}/milestones/${milestoneId}/submit`, payload);
+    const config = payload instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
+    const response = await apiClient.post(`/contracts/${contractId}/milestones/${milestoneId}/submit`, payload, config);
     return response.data;
   },
 

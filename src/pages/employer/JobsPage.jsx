@@ -241,11 +241,9 @@ export default function EmployerJobsPage() {
                       <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" /> Reopen
                     </Button>
                   )}
-                  {job.status === 'draft' && (
-                    <Button variant="ghost" size="xs" onClick={() => openAction(job, 'delete')}>
-                      <Trash2 className="h-3.5 w-3.5 text-danger-500" aria-hidden="true" /> Delete
-                    </Button>
-                  )}
+                  <Button variant="ghost" size="xs" onClick={() => openAction(job, 'delete')}>
+                    <Trash2 className="h-3.5 w-3.5 text-danger-500" aria-hidden="true" /> Delete
+                  </Button>
                 </div>
               </div>
             </Card>
