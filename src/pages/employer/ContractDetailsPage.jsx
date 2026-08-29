@@ -72,7 +72,7 @@ function MilestoneProgress({ status }) {
 
 /* ─── Milestone Card ─────────────────────────────────────────────────────── */
 
-function MilestoneCard({ milestone, onAction }) {
+function MilestoneCard({ milestone, onAction, onDeleteAttachment, onDeleteSubmissionFile }) {
   const status = MILESTONE_STATUS[milestone.status] ?? MILESTONE_STATUS.draft;
   const StatusIcon = status.icon;
   const [expanded, setExpanded] = useState(false);
@@ -160,10 +160,16 @@ function MilestoneCard({ milestone, onAction }) {
                       <span className="text-xs font-medium text-ink-900 truncate">{file.name}</span>
                       <span className="text-[10px] text-gray-400">({file.formatted_size || (file.size / 1024 / 1024).toFixed(1) + ' MB'})</span>
                     </div>
-                    <a href={getAuthenticatedFileUrl(file.path, 'attachment')} target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 rounded-lg bg-green-500 px-2.5 py-1 text-xs font-medium text-white hover:bg-green-600 transition-colors">
-                      <Download className="h-3.5 w-3.5" /> Download
-                    </a>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <a href={getAuthenticatedFileUrl(file.path, 'attachment')} target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 rounded-lg bg-green-500 px-2.5 py-1 text-xs font-medium text-white hover:bg-green-600 transition-colors">
+                        <Download className="h-3.5 w-3.5" /> Download
+                      </a>
+                      <button type="button" onClick={() => onDeleteAttachment?.(file.id)}
+                        className="inline-flex items-center gap-1 rounded-lg bg-red-500 px-2.5 py-1 text-xs font-medium text-white hover:bg-red-600 transition-colors">
+                        <Trash2 className="h-3.5 w-3.5" /> Delete
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -207,6 +213,10 @@ function MilestoneCard({ milestone, onAction }) {
                                 className="inline-flex items-center gap-1 rounded-lg bg-green-500 px-2.5 py-1 text-xs font-medium text-white hover:bg-green-600 transition-colors">
                                 <Download className="h-3.5 w-3.5" /> Download
                               </a>
+                              <button type="button" onClick={() => onDeleteSubmissionFile?.(milestone.contract_id, milestone.id, sub.id, file.path)}
+                                className="inline-flex items-center gap-1 rounded-lg bg-red-500 px-2.5 py-1 text-xs font-medium text-white hover:bg-red-600 transition-colors">
+                                <Trash2 className="h-3.5 w-3.5" /> Delete
+                              </button>
                             </div>
                           </div>
                         ))}
@@ -445,6 +455,28 @@ export default function EmployerContractDetailsPage() {
     }
   };
 
+  const handleDeleteAttachment = async (attachmentId) => {
+    if (!window.confirm('Are you sure you want to delete this file?')) return;
+    try {
+      await contractService.deleteAttachment(attachmentId);
+      showToast('File deleted.', 'success');
+      load();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to delete file.', 'error');
+    }
+  };
+
+  const handleDeleteSubmissionFile = async (contractId, milestoneId, submissionId, filePath) => {
+    if (!window.confirm('Are you sure you want to delete this submission file?')) return;
+    try {
+      await contractService.deleteSubmissionFile(contractId, milestoneId, submissionId, filePath);
+      showToast('File deleted.', 'success');
+      load();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to delete file.', 'error');
+    }
+  };
+
   /* ── Loading / Error ──────────────────────────────────────────────────── */
   if (loading) {
     return (
@@ -547,7 +579,7 @@ export default function EmployerContractDetailsPage() {
         ) : (
           <div className="space-y-3">
             {contract.milestones.map((m) => (
-              <MilestoneCard key={m.id} milestone={m} onAction={handleAction} />
+              <MilestoneCard key={m.id} milestone={m} onAction={handleAction} onDeleteAttachment={handleDeleteAttachment} onDeleteSubmissionFile={handleDeleteSubmissionFile} />
             ))}
           </div>
         )}
