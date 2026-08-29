@@ -1,69 +1,107 @@
 import apiClient from '../api/client';
 
 /**
- * Contract service — the ONLY module responsible for contract API requests.
- *
- * Endpoints confirmed from the Laravel backend (routes/api.php + ContractController):
- *   GET  /contracts                    contracts where the user is employer OR freelancer
- *                                     (full collection — NOT paginated)
- *   GET  /contracts/{id}               single contract (owner/admin only)
- *   POST /contracts/{id}/pause         employer: active → paused
- *   POST /contracts/{id}/resume        employer: paused → active
- *   POST /contracts/{id}/complete      employer: active → completed (all milestones approved/paid)
- *   POST /contracts/{id}/cancel        employer: active/paused → cancelled
- *
- * Milestone endpoints live in milestoneService.js (they are a separate backend
- * resource under /contracts/{contract}/milestones).
- *
- * Response shape: { success, message, data } (no pagination meta).
+ * Contract service — manages contracts and milestones.
  */
 export const contractService = {
-  /** Fetch contracts the authenticated user is part of (employer or freelancer). */
-  getMyContracts: async () => {
-    const response = await apiClient.get('/contracts');
-    return response.data; // { success, message, data }
+  // ── Contracts ──────────────────────────────────────────────────────────
+
+  /** GET /contracts — list user's contracts */
+  getContracts: async (params = {}) => {
+    const response = await apiClient.get('/contracts', { params });
+    return response.data;
   },
 
-  /** Fetch a single contract (owner/admin only). Includes job, employer, freelancer, milestones. */
+  /** GET /contracts/:id — single contract with milestones */
   getContract: async (id) => {
     const response = await apiClient.get(`/contracts/${id}`);
-    return response.data; // { success, message, data }
+    return response.data;
   },
 
-  /** Employer pauses an active contract. */
-  pauseContract: async (id) => {
-    const response = await apiClient.post(`/contracts/${id}/pause`);
-    return response.data; // { success, message, data }
+  /** POST /contracts/:id/freelancer/accept — freelancer accepts contract */
+  acceptContract: async (id) => {
+    const response = await apiClient.post(`/contracts/${id}/freelancer/accept`);
+    return response.data;
   },
 
-  /** Employer resumes a paused contract. */
-  resumeContract: async (id) => {
-    const response = await apiClient.post(`/contracts/${id}/resume`);
-    return response.data; // { success, message, data }
+  /** POST /contracts/:id/freelancer/decline — freelancer declines contract */
+  declineContract: async (id, reason = '') => {
+    const response = await apiClient.post(`/contracts/${id}/freelancer/decline`, { reason });
+    return response.data;
   },
 
-  /** Employer completes an active contract (all milestones must be approved/paid). */
-  completeContract: async (id) => {
-    const response = await apiClient.post(`/contracts/${id}/complete`);
-    return response.data; // { success, message, data }
+  // ── Milestones ─────────────────────────────────────────────────────────
+
+  /** GET /contracts/:id/milestones — list milestones */
+  getMilestones: async (contractId) => {
+    const response = await apiClient.get(`/contracts/${contractId}/milestones`);
+    return response.data;
   },
 
-  /** Employer cancels an active or paused contract. */
-  cancelContract: async (id) => {
-    const response = await apiClient.post(`/contracts/${id}/cancel`);
-    return response.data; // { success, message, data }
+  /** GET /contracts/:id/milestones/:milestoneId — single milestone */
+  getMilestone: async (contractId, milestoneId) => {
+    const response = await apiClient.get(`/contracts/${contractId}/milestones/${milestoneId}`);
+    return response.data;
   },
 
-  /** Employer or Freelancer raises a dispute on a contract. */
-  disputeContract: async (id, data) => {
-    const response = await apiClient.post(`/contracts/${id}/dispute`, data);
-    return response.data; // { success, message, data }
+  /** POST /contracts/:id/milestones — create milestone */
+  createMilestone: async (contractId, payload) => {
+    const response = await apiClient.post(`/contracts/${contractId}/milestones`, payload);
+    return response.data;
   },
 
-  /** Fetch activity log for a contract. */
-  getActivities: async (id, limit = 50) => {
-    const response = await apiClient.get(`/contracts/${id}/activities`, { params: { limit } });
-    return response.data; // { success, message, data }
+  /** PUT /contracts/:id/milestones/:milestoneId — update milestone */
+  updateMilestone: async (contractId, milestoneId, payload) => {
+    const response = await apiClient.put(`/contracts/${contractId}/milestones/${milestoneId}`, payload);
+    return response.data;
+  },
+
+  /** DELETE /contracts/:id/milestones/:milestoneId — delete milestone */
+  deleteMilestone: async (contractId, milestoneId) => {
+    const response = await apiClient.delete(`/contracts/${contractId}/milestones/${milestoneId}`);
+    return response.data;
+  },
+
+  /** POST /contracts/:id/milestones/:milestoneId/start — start work */
+  startWork: async (contractId, milestoneId) => {
+    const response = await apiClient.post(`/contracts/${contractId}/milestones/${milestoneId}/start`);
+    return response.data;
+  },
+
+  /** POST /contracts/:id/milestones/:milestoneId/submit — submit work */
+  submitWork: async (contractId, milestoneId, payload = {}) => {
+    const response = await apiClient.post(`/contracts/${contractId}/milestones/${milestoneId}/submit`, payload);
+    return response.data;
+  },
+
+  /** POST /contracts/:id/milestones/:milestoneId/approve — approve work */
+  approveMilestone: async (contractId, milestoneId) => {
+    const response = await apiClient.post(`/contracts/${contractId}/milestones/${milestoneId}/approve`);
+    return response.data;
+  },
+
+  /** POST /contracts/:id/milestones/:milestoneId/revision — request revision */
+  requestRevision: async (contractId, milestoneId, revisionNote) => {
+    const response = await apiClient.post(`/contracts/${contractId}/milestones/${milestoneId}/revision`, {
+      revision_note: revisionNote,
+    });
+    return response.data;
+  },
+
+  /** POST /contracts/:id/milestones/:milestoneId/dispute — open dispute */
+  openDispute: async (contractId, milestoneId, reason) => {
+    const response = await apiClient.post(`/contracts/${contractId}/milestones/${milestoneId}/dispute`, {
+      reason,
+    });
+    return response.data;
+  },
+
+  /** DELETE /contracts/:id/milestones/:milestoneId/submissions/:submissionId/files — delete a file */
+  deleteSubmissionFile: async (contractId, milestoneId, submissionId, filePath) => {
+    const response = await apiClient.delete(`/contracts/${contractId}/milestones/${milestoneId}/submissions/${submissionId}/files`, {
+      data: { file_path: filePath },
+    });
+    return response.data;
   },
 };
 

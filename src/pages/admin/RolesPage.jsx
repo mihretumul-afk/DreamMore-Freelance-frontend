@@ -19,7 +19,6 @@ import { cn } from '../../utils/cn';
 const SYSTEM_ROLE_META = {
   super_admin:   { tone: 'primary',  label: 'Super Admin',   desc: 'Unrestricted access to all platform capabilities.' },
   support_admin: { tone: 'info',     label: 'Support Admin', desc: 'Users, verifications, disputes and job moderation.' },
-  finance_admin: { tone: 'success',  label: 'Finance Admin', desc: 'Payments, milestones and transaction management.' },
   dispute_admin: { tone: 'warning',  label: 'Dispute Admin', desc: 'Dispute review, resolution and escalation.' },
 };
 

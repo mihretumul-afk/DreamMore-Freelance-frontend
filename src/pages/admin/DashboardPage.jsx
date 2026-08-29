@@ -155,24 +155,6 @@ export default function AdminDashboardPage() {
             tone="brand"
           />
         )}
-        {(can('milestones.view') || can('disputes.view')) && (
-          <StatCard
-            icon={Handshake}
-            label="Active Contracts"
-            value={s.activeContracts.toLocaleString()}
-            hint={`${s.completedContracts} completed`}
-            tone="emerald"
-          />
-        )}
-        {can('transactions.view') && (
-          <StatCard
-            icon={Banknote}
-            label="Total Revenue"
-            value={formatETB(s.totalRevenue)}
-            hint="Platform-wide"
-            tone="emerald"
-          />
-        )}
         {can('users.verify') && (
           <StatCard
             icon={ShieldCheck}
@@ -199,15 +181,13 @@ export default function AdminDashboardPage() {
             hint={`${s.totalCategories} categories · ${s.totalSkills} skills`}
           />
         )}
-        {can('transactions.view') && (
-          <StatCard
-            icon={TrendingUp}
-            label="Total Proposals"
-            value={s.totalProposals.toLocaleString()}
-            hint="All time"
-            tone="brand"
-          />
-        )}
+        <StatCard
+          icon={TrendingUp}
+          label="Total Proposals"
+          value={s.totalProposals.toLocaleString()}
+          hint="All time"
+          tone="brand"
+        />
       </div>
 
       {/* Quick actions */}
@@ -223,11 +203,10 @@ export default function AdminDashboardPage() {
       )}
 
       {/* System status strip */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {[
           { icon: Activity,      label: 'API',        status: 'Operational', tone: 'success' },
           { icon: CheckCircle2,  label: 'Database',   status: 'Healthy',     tone: 'success' },
-          { icon: CreditCard,    label: 'Payments',   status: 'Active',      tone: 'success' },
           { icon: Milestone,     label: 'Queue',      status: 'Running',     tone: 'success' },
         ].map(({ icon: Icon, label, status, tone }) => (
           <div

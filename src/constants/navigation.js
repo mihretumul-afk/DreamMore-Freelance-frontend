@@ -23,10 +23,10 @@ import {
   Key,
   ScrollText,
   CreditCard,
-  Milestone,
-  ArrowLeftRight,
+  Wallet,
+  ArrowDownRight,
+  DollarSign,
   UserCog,
-  Banknote,
 } from 'lucide-react';
 
 /**
@@ -51,13 +51,16 @@ export const FREELANCER_NAV_LINKS = [
   { key: 'nav.dashboard', label: 'Dashboard', to: '/freelancer/dashboard', icon: LayoutDashboard, end: true },
   { key: 'nav.myProfile', label: 'My Profile', to: '/freelancer/profile', icon: User, end: true },
   { key: 'nav.findJobs', label: 'Find Jobs', to: '/freelancer/jobs', icon: Briefcase, end: true },
+  { key: 'nav.contracts', label: 'Contracts', to: '/freelancer/contracts', icon: Handshake, end: false },
+  { label: 'Disputes', to: '/freelancer/disputes', icon: Flag, end: false },
+  { key: 'nav.earnings', label: 'Earnings', to: '/freelancer/earnings', icon: Wallet, end: true },
+  { key: 'nav.withdrawals', label: 'Withdrawals', to: '/freelancer/withdrawals', icon: ArrowDownRight, end: true },
+  { key: 'nav.paymentMethods', label: 'Payment Methods', to: '/freelancer/settings/payment-methods', icon: CreditCard, end: true },
   { key: 'nav.savedJobs', label: 'Saved Jobs', to: '/freelancer/saved-jobs', icon: Bookmark, end: true },
   { key: 'nav.credentials', label: 'Credentials', to: '/freelancer/credentials', icon: Award, end: true },
   { key: 'nav.proposals', label: 'Proposals', to: '/freelancer/proposals', icon: FileText, end: false },
-  { key: 'nav.contracts', label: 'Contracts', to: '/freelancer/contracts', icon: Handshake, end: true },
   { key: 'nav.messages', label: 'Messages', to: '/freelancer/messages', icon: MessageSquare, end: true },
   { key: 'nav.notifications', label: 'Notifications', to: '/freelancer/notifications', icon: Bell, end: true },
-  { key: 'nav.payments', label: 'Payments', to: '/freelancer/payments', icon: CreditCard, end: true },
 ];
 
 /** Sidebar navigation for the employer dashboard. */
@@ -65,12 +68,13 @@ export const EMPLOYER_NAV_LINKS = [
   { key: 'nav.dashboard', label: 'Dashboard', to: '/employer/dashboard', icon: LayoutDashboard, end: true },
   { key: 'nav.companyProfile', label: 'Company Profile', to: '/employer/profile', icon: Building2, end: true },
   { key: 'nav.myJobs', label: 'My Jobs', to: '/employer/jobs', icon: ClipboardList, end: false },
+  { key: 'nav.contracts', label: 'Contracts', to: '/employer/contracts', icon: Handshake, end: false },
+  { label: 'Disputes', to: '/employer/disputes', icon: Flag, end: false },
+  { key: 'nav.paymentMethods', label: 'Payment Methods', to: '/employer/settings/payment-methods', icon: CreditCard, end: true },
   { key: 'nav.postJob', label: 'Post a Job', to: '/employer/jobs/create', icon: PlusCircle, end: true },
   { key: 'nav.savedTalent', label: 'Saved Talent', to: '/employer/saved-freelancers', icon: Bookmark, end: true },
-  { key: 'nav.contracts', label: 'Contracts', to: '/employer/contracts', icon: Handshake, end: true },
   { key: 'nav.messages', label: 'Messages', to: '/employer/messages', icon: MessageSquare, end: true },
   { key: 'nav.notifications', label: 'Notifications', to: '/employer/notifications', icon: Bell, end: true },
-  { key: 'nav.payments', label: 'Payments', to: '/employer/payments', icon: CreditCard, end: true },
 ];
 
 /**
@@ -109,27 +113,6 @@ export const ADMIN_NAV_LINKS = [
     permission: 'jobs.view', group: 'marketplace',
   },
 
-  // ── Finance ───────────────────────────────────────────────────────────
-  {
-    key: 'nav.payments', label: 'Payments',
-    to: '/admin/payments', icon: CreditCard, end: true,
-    permission: 'payments.view', group: 'finance',
-  },
-  {
-    key: 'nav.milestones', label: 'Milestones',
-    to: '/admin/milestones', icon: Milestone, end: true,
-    permission: 'milestones.view', group: 'finance',
-  },
-  {
-    key: 'nav.transactions', label: 'Transactions',
-    to: '/admin/transactions', icon: ArrowLeftRight, end: true,
-    permission: 'transactions.view', group: 'finance',
-  },
-  {
-    key: 'nav.withdrawals', label: 'Withdrawals',
-    to: '/admin/withdrawals', icon: Banknote, end: true,
-    permission: 'withdrawals.view', group: 'finance',
-  },
 
   // ── Moderation ────────────────────────────────────────────────────────
   {
@@ -168,6 +151,11 @@ export const ADMIN_NAV_LINKS = [
 
   // ── System ────────────────────────────────────────────────────────────
   {
+    key: 'nav.finance', label: 'Finance',
+    to: '/admin/finance', icon: DollarSign, end: true,
+    permission: 'finance.view', group: 'system',
+  },
+  {
     key: 'nav.settings', label: 'Settings',
     to: '/admin/settings', icon: Settings, end: true,
     permission: 'settings.view', group: 'system',
@@ -179,7 +167,6 @@ export const ADMIN_NAV_GROUPS = {
   overview:     { label: null },           // no label for the first group
   people:       { label: 'People' },
   marketplace:  { label: 'Marketplace' },
-  finance:      { label: 'Finance' },
   moderation:   { label: 'Moderation' },
   admin:        { label: 'Administration' },
   system:       { label: 'System' },
@@ -210,18 +197,18 @@ export const FOOTER_COLUMNS = [
   {
     headingKey: 'footer.company',
     links: [
-      { labelKey: 'footer.about', to: '/#about' },
-      { labelKey: 'footer.contact', to: '/#contact' },
-      { labelKey: 'footer.careers', to: '/#careers' },
+      { labelKey: 'footer.about', to: '/about' },
+      { labelKey: 'footer.contact', to: '/contact' },
+      { labelKey: 'footer.careers', to: '/careers' },
     ],
   },
   {
     headingKey: 'footer.support',
     links: [
-      { labelKey: 'footer.helpCenter', to: '/#help' },
-      { labelKey: 'footer.safety', to: '/#safety' },
-      { labelKey: 'footer.terms', to: '/#terms' },
-      { labelKey: 'footer.privacy', to: '/#privacy' },
+      { labelKey: 'footer.helpCenter', to: '/help' },
+      { labelKey: 'footer.safety', to: '/safety' },
+      { labelKey: 'footer.terms', to: '/terms' },
+      { labelKey: 'footer.privacy', to: '/privacy' },
     ],
   },
 ];

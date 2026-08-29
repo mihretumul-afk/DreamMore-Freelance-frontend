@@ -17,8 +17,7 @@ import { formatDate } from '../../utils/format';
 const statusTone = { active: 'success', suspended: 'danger', pending_verification: 'warning' };
 
 const GROUP_LABELS = {
-  users: 'Users', jobs: 'Jobs', payments: 'Payments', milestones: 'Milestones',
-  transactions: 'Transactions', disputes: 'Disputes', admins: 'Administrators',
+  users: 'Users', jobs: 'Jobs', disputes: 'Disputes', admins: 'Administrators',
   roles: 'Roles', audit: 'Audit Logs', settings: 'Settings',
 };
 

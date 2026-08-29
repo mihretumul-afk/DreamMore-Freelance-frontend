@@ -10,12 +10,13 @@ import Badge from '../../components/ui/Badge';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Pagination from '../../components/marketplace/Pagination';
-import SearchBar from '../../components/marketplace/SearchBar';
 import FilterButton from '../../components/marketplace/FilterButton';
+import HorizontalFilterBar from '../../components/marketplace/HorizontalFilterBar';
 import Modal from '../../components/ui/Modal';
 import { freelancerService } from '../../services/freelancerService';
 import { savedService } from '../../services/savedService';
 import { categoryService } from '../../services/categoryService';
+import { skillService } from '../../services/skillService';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../../i18n';
 import { getErrorMessage } from '../../utils/errors';
@@ -39,8 +40,8 @@ function FreelancerCard({ freelancer, savedIds, onToggleSave, savingId }) {
   const { user } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
-  const isSaved = savedIds.has(freelancer.id);
-  const isSaving = savingId === freelancer.id;
+  const isSaved = savedIds.has(String(freelancer.id));
+  const isSaving = String(savingId) === String(freelancer.id);
 
   const handleToggleSave = (e) => {
     e.preventDefault();
@@ -53,7 +54,7 @@ function FreelancerCard({ freelancer, savedIds, onToggleSave, savingId }) {
   };
 
   return (
-    <Card className="group relative overflow-hidden transition-shadow hover:shadow-lg">
+    <Card className="group relative flex flex-col justify-between overflow-hidden transition-shadow hover:shadow-lg">
       <div className="p-5">
         <div className="flex items-start gap-4">
           <Avatar
@@ -120,9 +121,11 @@ function FreelancerCard({ freelancer, savedIds, onToggleSave, savingId }) {
             )}
           </div>
         )}
+      </div>
 
-        {/* Footer */}
-        <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
+      {/* Footer */}
+      <div className="px-5 pb-5">
+        <div className="flex items-center justify-between border-t border-gray-100 pt-3">
           <div className="flex items-center gap-3 text-xs text-gray-400">
             {freelancer.completed_jobs_count > 0 && (
               <span>
@@ -180,6 +183,7 @@ export default function FreelancersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [skills, setSkills] = useState([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [savedIds, setSavedIds] = useState(new Set());
   const [savingId, setSavingId] = useState(null);
@@ -187,19 +191,29 @@ export default function FreelancersPage() {
   const { user } = useAuth();
 
   const [searchInput, setSearchInput] = useState(searchParams.get('search') ?? '');
+  const [locationInput, setLocationInput] = useState(searchParams.get('location') ?? '');
 
   const page = Math.max(1, Number(searchParams.get('page')) || 1);
 
   useEffect(() => {
     setSearchInput(searchParams.get('search') ?? '');
+    setLocationInput(searchParams.get('location') ?? '');
   }, [searchParams]);
 
-  // Load categories for filter panel
+  // Load categories and skills for filter panel
   useEffect(() => {
     categoryService
       .getCategories()
       .then((res) => {
         if (res.success) setCategories(res.data ?? []);
+      })
+      .catch(() => {});
+
+    skillService
+      .getSkills()
+      .then((res) => {
+        const list = res?.data ?? (Array.isArray(res) ? res : []);
+        setSkills(list.filter((s) => s.is_active !== false));
       })
       .catch(() => {});
   }, []);
@@ -210,10 +224,13 @@ export default function FreelancersPage() {
     try {
       const res = await savedService.getSavedFreelancers({ per_page: 100 });
       if (res.success) {
-        setSavedIds(new Set((res.data ?? []).map((s) => s.freelancer_profile_id)));
+        const ids = (res.data ?? []).map(
+          (s) => String(s.freelancer_profile_id ?? s.freelancer_id ?? s.freelancer?.id ?? s.id)
+        );
+        setSavedIds(new Set(ids));
       }
     } catch {
-      // Silently ignore — save state is non-critical.
+      // Silently ignore
     }
   }, [user]);
 
@@ -222,21 +239,21 @@ export default function FreelancersPage() {
   }, [loadSavedState]);
 
   const handleToggleSave = useCallback(async (freelancerId, isCurrentlySaved) => {
-    setSavingId(freelancerId);
+    const targetId = String(freelancerId);
+    setSavingId(targetId);
     try {
       if (isCurrentlySaved) {
-        await savedService.unsaveFreelancer(freelancerId);
+        await savedService.unsaveFreelancer(targetId);
         setSavedIds((prev) => {
           const next = new Set(prev);
-          next.delete(freelancerId);
+          next.delete(targetId);
           return next;
         });
       } else {
-        await savedService.saveFreelancer(freelancerId);
-        setSavedIds((prev) => new Set(prev).add(freelancerId));
+        await savedService.saveFreelancer(targetId);
+        setSavedIds((prev) => new Set(prev).add(targetId));
       }
     } catch {
-      // Restore optimistic state on error.
       loadSavedState();
     } finally {
       setSavingId(null);
@@ -294,7 +311,25 @@ export default function FreelancersPage() {
     [setSearchParams],
   );
 
-  const clearAll = () => setSearchParams({});
+  const applyTextFilters = () => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (searchInput.trim()) next.set('search', searchInput.trim());
+      else next.delete('search');
+      if (locationInput.trim()) next.set('location', locationInput.trim());
+      else next.delete('location');
+      next.delete('page');
+      return next;
+    });
+    setFiltersOpen(false);
+  };
+
+  const clearAll = () => {
+    setSearchInput('');
+    setLocationInput('');
+    setSearchParams({});
+  };
+
   const goToPage = (nextPage) => updateParams({ page: nextPage }, { resetPage: false });
 
   const activeFilters = [...searchParams.entries()]
@@ -319,374 +354,187 @@ export default function FreelancersPage() {
         breadcrumbs={[{ label: t('nav.homeShort'), to: '/' }, { label: t('freelancers.title') }]}
       />
 
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-        {/* Desktop filter sidebar */}
-        <aside className="hidden w-64 shrink-0 lg:block" aria-label="Freelancer filters">
-          <div className="space-y-5 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                Search
-              </label>
-              <input
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') updateParams({ search: searchInput.trim() });
-                }}
-                placeholder="Name, skill, or headline…"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-ink-900 placeholder-gray-400 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
-              />
-            </div>
+      {/* Guru.com Style Top Horizontal Search & Filter Bar */}
+      <div className="mb-6">
+        <HorizontalFilterBar
+          type="freelancers"
+          values={{
+            search: searchInput,
+            category_id: searchParams.get('category_id') ?? '',
+            skill_id: searchParams.get('skill_id') ?? '',
+            location: locationInput,
+            experience_level: searchParams.get('experience_level') ?? '',
+            availability_status: searchParams.get('availability_status') ?? '',
+            sort: searchParams.get('sort') ?? '',
+          }}
+          categories={categories}
+          skills={skills}
+          onChange={(key, value) => {
+            if (key === 'search') setSearchInput(value);
+            else if (key === 'location') setLocationInput(value);
+            else updateParams({ [key]: value });
+          }}
+          onApply={applyTextFilters}
+          onClear={clearAll}
+        />
+      </div>
 
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                Category
-              </label>
-              <select
-                value={searchParams.get('category_id') ?? ''}
-                onChange={(e) => updateParams({ category_id: e.target.value })}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-ink-900 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
-              >
-                <option value="">All categories</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+      {/* Results Header Toolbar (Total count & active filter pills) */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4">
+        <div className="flex items-center gap-3">
+          <p className="text-sm font-medium text-gray-600" aria-live="polite">
+            {loading
+              ? t('freelancers.loading')
+              : total != null
+                ? t('freelancers.foundCount', { count: total })
+                : ''}
+          </p>
+        </div>
 
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                Experience
-              </label>
-              <select
-                value={searchParams.get('experience_level') ?? ''}
-                onChange={(e) => updateParams({ experience_level: e.target.value })}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-ink-900 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
-              >
-                <option value="">Any level</option>
-                <option value="entry">Entry</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="expert">Expert</option>
-              </select>
-            </div>
+        <FilterButton
+          active={activeFilters.length > 0}
+          icon={Users}
+          label={t('common.filter')}
+          onClick={() => setFiltersOpen(true)}
+          className="md:hidden"
+        />
+      </div>
 
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                Availability
-              </label>
-              <select
-                value={searchParams.get('availability_status') ?? ''}
-                onChange={(e) => updateParams({ availability_status: e.target.value })}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-ink-900 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
-              >
-                <option value="">Any</option>
-                <option value="available">Available</option>
-                <option value="busy">Busy</option>
-                <option value="not_available">Unavailable</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                Sort by
-              </label>
-              <select
-                value={searchParams.get('sort') ?? ''}
-                onChange={(e) => updateParams({ sort: e.target.value })}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-ink-900 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
-              >
-                <option value="">Highest rated</option>
-                <option value="hourly_rate">Hourly rate</option>
-                <option value="completed_jobs">Experience</option>
-                <option value="newest">Newest</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                Location
-              </label>
-              <input
-                type="text"
-                value={searchParams.get('location') ?? ''}
-                onChange={(e) => updateParams({ location: e.target.value })}
-                placeholder="e.g. Addis Ababa"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-ink-900 placeholder-gray-400 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <span className="block text-xs font-semibold uppercase tracking-wide text-gray-500">
-                Hourly rate (ETB)
-              </span>
-              <div className="grid grid-cols-2 gap-3">
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={searchParams.get('min_hourly_rate') ?? ''}
-                  onChange={(e) => updateParams({ min_hourly_rate: e.target.value })}
-                  placeholder="Min"
-                  aria-label="Minimum hourly rate"
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-ink-900 placeholder-gray-400 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
-                />
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={searchParams.get('max_hourly_rate') ?? ''}
-                  onChange={(e) => updateParams({ max_hourly_rate: e.target.value })}
-                  placeholder="Max"
-                  aria-label="Maximum hourly rate"
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-ink-900 placeholder-gray-400 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
-                />
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                clearAll();
-                setSearchInput('');
-              }}
-              className="w-full text-center text-sm font-semibold text-brand-600 hover:text-brand-700"
+      {/* Active filter chips */}
+      {activeFilters.length > 0 && (
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+          {activeFilters.map((filter) => (
+            <span
+              key={filter.key}
+              className="inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50/50 py-1 pl-3 pr-1.5 text-xs font-medium text-brand-900 shadow-2xs"
             >
-              Clear all filters
-            </button>
-          </div>
-        </aside>
-
-        {/* Results column */}
-        <div className="min-w-0 flex-1">
-          {/* Toolbar */}
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="w-full sm:w-auto sm:min-w-72 sm:max-w-md">
-              <SearchBar
-                value={searchInput}
-                onChange={(value) => {
-                  setSearchInput(value);
-                  if (value === '') updateParams({ search: '' });
-                }}
-                onSubmit={() => updateParams({ search: searchInput.trim() })}
-                placeholder={t('hero.searchPlaceholder')}
-                label={t('common.search')}
-              />
-            </div>
-            <div className="flex items-center gap-3">
-              <p className="text-sm text-gray-500" aria-live="polite">
-                {loading
-                  ? t('freelancers.loading')
-                  : total != null
-                    ? t('freelancers.foundCount', { count: total })
-                    : ''}
-              </p>
-              <FilterButton
-                active={activeFilters.length > 0}
-                icon={Users}
-                label={t('common.filter')}
-                onClick={() => setFiltersOpen(true)}
-                className="lg:hidden"
-              />
-            </div>
-          </div>
-
-          {/* Active filter chips */}
-          {activeFilters.length > 0 && (
-            <div className="mb-4 flex flex-wrap items-center gap-2">
-              {activeFilters.map((filter) => (
-                <span
-                  key={filter.key}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white py-1 pl-3 pr-1.5 text-xs font-medium text-ink-700 shadow-sm"
-                >
-                  <span className="max-w-48 truncate">{filter.label}</span>
-                  <button
-                    type="button"
-                    onClick={() => updateParams({ [filter.key]: '' })}
-                    aria-label={`Remove ${filter.label} filter`}
-                    className="rounded-full p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-ink-900"
-                  >
-                    <X className="h-3 w-3" aria-hidden="true" />
-                  </button>
-                </span>
-              ))}
+              <span className="max-w-48 truncate">{filter.label}</span>
               <button
                 type="button"
-                onClick={clearAll}
-                className="text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
+                onClick={() => updateParams({ [filter.key]: '' })}
+                aria-label={`Remove ${filter.label} filter`}
+                className="rounded-full p-0.5 text-brand-500 transition-colors hover:bg-brand-100 hover:text-brand-900"
               >
-                {t('common.clearFilters')}
+                <X className="h-3 w-3" aria-hidden="true" />
               </button>
-            </div>
-          )}
-
-          {/* Results */}
-          {loading && (
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              {Array.from({ length: 6 }, (_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <div className="p-5">
-                    <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 rounded-full bg-gray-200" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 w-32 rounded bg-gray-200" />
-                        <div className="h-3 w-48 rounded bg-gray-200" />
-                      </div>
-                    </div>
-                    <div className="mt-3 flex gap-2">
-                      {Array.from({ length: 3 }, (_, j) => (
-                        <div key={j} className="h-5 w-16 rounded-full bg-gray-200" />
-                      ))}
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {error && (
-            <ErrorState
-              title={t('common.errorOccurred')}
-              description={error}
-              onRetry={loadFreelancers}
-            />
-          )}
-
-          {!loading && !error && freelancers?.length === 0 && (
-            <EmptyState
-              icon={SearchX}
-              title={t('common.noResults')}
-              description={t('jobs.noJobs')}
-              action={
-                <button
-                  type="button"
-                  onClick={clearAll}
-                  className="text-sm font-semibold text-brand-600 hover:text-brand-700"
-                >
-                  {t('common.clearFilters')}
-                </button>
-              }
-            />
-          )}
-
-          {!loading && !error && freelancers?.length > 0 && (
-            <>
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                {freelancers.map((freelancer) => (
-                  <FreelancerCard
-                    key={freelancer.id}
-                    freelancer={freelancer}
-                    savedIds={savedIds}
-                    onToggleSave={handleToggleSave}
-                    savingId={savingId}
-                  />
-                ))}
-              </div>
-              <Pagination
-                page={page}
-                totalPages={totalPages}
-                onChange={goToPage}
-                className="mt-8"
-              />
-            </>
-          )}
+            </span>
+          ))}
+          <button
+            type="button"
+            onClick={clearAll}
+            className="text-xs font-semibold text-brand-600 transition-colors hover:text-brand-700"
+          >
+            {t('common.clearFilters')}
+          </button>
         </div>
-      </div>
+      )}
+
+      {/* Results Grid - Spans Full Width */}
+      {loading && (
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }, (_, i) => (
+            <Card key={i} className="animate-pulse">
+              <div className="p-5">
+                <div className="flex items-start gap-4">
+                  <div className="h-12 w-12 rounded-full bg-gray-200" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-32 rounded bg-gray-200" />
+                    <div className="h-3 w-48 rounded bg-gray-200" />
+                  </div>
+                </div>
+                <div className="mt-3 flex gap-2">
+                  {Array.from({ length: 3 }, (_, j) => (
+                    <div key={j} className="h-5 w-16 rounded-full bg-gray-200" />
+                  ))}
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {error && (
+        <ErrorState
+          title={t('common.errorOccurred')}
+          description={error}
+          onRetry={loadFreelancers}
+        />
+      )}
+
+      {!loading && !error && freelancers?.length === 0 && (
+        <EmptyState
+          icon={SearchX}
+          title={t('common.noResults')}
+          description={t('freelancers.noFreelancers')}
+          action={
+            <button
+              type="button"
+              onClick={clearAll}
+              className="text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
+            >
+              {t('common.clearFilters')}
+            </button>
+          }
+        />
+      )}
+
+      {!loading && !error && freelancers?.length > 0 && (
+        <>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {freelancers.map((freelancer) => (
+              <FreelancerCard
+                key={freelancer.id}
+                freelancer={freelancer}
+                savedIds={savedIds}
+                onToggleSave={handleToggleSave}
+                savingId={savingId}
+              />
+            ))}
+          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onChange={goToPage}
+            className="mt-8"
+          />
+        </>
+      )}
 
       {/* Mobile filter modal */}
       <Modal
         open={filtersOpen}
         onClose={() => setFiltersOpen(false)}
-        title="Filters"
-        description="Refine the freelancers you see."
+        title={t('common.filter')}
+        description={t('categories.description')}
       >
         <div className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Category
-            </label>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Search</label>
+            <input
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Name or skills…"
+              className="w-full rounded-lg border border-gray-300 p-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-medium text-gray-700">Category</label>
             <select
               value={searchParams.get('category_id') ?? ''}
               onChange={(e) => updateParams({ category_id: e.target.value })}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-gray-300 p-2 text-sm"
             >
               <option value="">All categories</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
                 </option>
               ))}
             </select>
           </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Experience
-            </label>
-            <select
-              value={searchParams.get('experience_level') ?? ''}
-              onChange={(e) => updateParams({ experience_level: e.target.value })}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-            >
-              <option value="">Any level</option>
-              <option value="entry">Entry</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="expert">Expert</option>
-            </select>
-          </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Availability
-            </label>
-            <select
-              value={searchParams.get('availability_status') ?? ''}
-              onChange={(e) => updateParams({ availability_status: e.target.value })}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-            >
-              <option value="">Any</option>
-              <option value="available">Available</option>
-              <option value="busy">Busy</option>
-              <option value="not_available">Unavailable</option>
-            </select>
-          </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Sort by
-            </label>
-            <select
-              value={searchParams.get('sort') ?? ''}
-              onChange={(e) => updateParams({ sort: e.target.value })}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-            >
-              <option value="">Highest rated</option>
-              <option value="hourly_rate">Hourly rate</option>
-              <option value="completed_jobs">Experience</option>
-              <option value="newest">Newest</option>
-            </select>
-          </div>
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
-              Location
-            </label>
-            <input
-              type="text"
-              value={searchParams.get('location') ?? ''}
-              onChange={(e) => updateParams({ location: e.target.value })}
-              placeholder="e.g. Addis Ababa"
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
-            />
-          </div>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              clearAll();
-              setSearchInput('');
-              setFiltersOpen(false);
-            }}
-          >
-            Clear all filters
+          <Button onClick={applyTextFilters} className="w-full">
+            Apply Filters
           </Button>
         </div>
       </Modal>

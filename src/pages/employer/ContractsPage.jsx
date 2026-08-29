@@ -1,89 +1,148 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ClipboardList, Handshake } from 'lucide-react';
-import ErrorState from '../../components/common/ErrorState';
-import EmptyState from '../../components/common/EmptyState';
-import PageHeader from '../../components/marketplace/PageHeader';
+import { Handshake, Clock, CheckCircle2, AlertTriangle, Filter } from 'lucide-react';
 import Card, { CardBody } from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import { ContractListSkeleton } from '../../components/contracts/ContractSkeleton';
-import ContractCard from '../../components/contracts/ContractCard';
+import Badge from '../../components/ui/Badge';
+import Select from '../../components/ui/Select';
+import EmptyState from '../../components/common/EmptyState';
+import ErrorState from '../../components/common/ErrorState';
 import { contractService } from '../../services/contractService';
-import { normalizeContract } from '../../utils/contractMapper';
-import { getErrorMessage } from '../../utils/errors';
+import { formatDate, formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
+const STATUS_MAP = {
+  pending_acceptance: { tone: 'warning', icon: Clock, label: 'Pending Acceptance' },
+  active:            { tone: 'success', icon: CheckCircle2, label: 'Active' },
+  completed:         { tone: 'success', icon: CheckCircle2, label: 'Completed' },
+  paused:            { tone: 'neutral', icon: Clock, label: 'Paused' },
+  cancelled:         { tone: 'danger', icon: AlertTriangle, label: 'Cancelled' },
+  disputed:          { tone: 'danger', icon: AlertTriangle, label: 'Disputed' },
+};
+
+const STATUS_OPTIONS = [
+  { value: '', label: 'All Statuses' },
+  { value: 'pending_acceptance', label: 'Pending' },
+  { value: 'active', label: 'Active' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'cancelled', label: 'Cancelled' },
+];
+
+function ContractCard({ contract }) {
+  const status = STATUS_MAP[contract.status] ?? { tone: 'neutral', label: contract.status };
+  const Icon = status.icon ?? Handshake;
+
+  return (
+    <Link
+      to={`/employer/contracts/${contract.id}`}
+      className="group block rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:border-brand-300 hover:shadow-md cursor-pointer"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-base font-bold text-ink-900 group-hover:text-brand-600 truncate">
+            {contract.title}
+          </h3>
+          <p className="mt-1 text-sm text-gray-500 truncate">
+            {contract.job?.title ?? 'Job'}
+          </p>
+        </div>
+        <Badge tone={status.tone} size="sm">
+          <Icon className="mr-1 h-3 w-3" />
+          {status.label}
+        </Badge>
+      </div>
+      <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-500">
+        <div className="flex items-center gap-1.5">
+          <span className="font-semibold text-ink-900">{formatETB(contract.total_amount)}</span>
+        </div>
+        {contract.freelancer && (
+          <div className="flex items-center gap-1.5">
+            <span className="text-gray-400">Freelancer:</span>
+            <span className="font-medium text-ink-800">{contract.freelancer.name}</span>
+          </div>
+        )}
+        <div className="flex items-center gap-1.5">
+          <span className="text-gray-400">Created:</span>
+          <span>{formatDate(contract.created_at)}</span>
+        </div>
+        {contract.milestones && (
+          <div className="flex items-center gap-1.5">
+            <span className="text-gray-400">Milestones:</span>
+            <span className="font-medium text-ink-800">{contract.milestones.length}</span>
+          </div>
+        )}
+      </div>
+    </Link>
+  );
+}
+
 export default function EmployerContractsPage() {
-  usePageTitle('Contracts');
+  usePageTitle('My Contracts — Employer');
 
   const [contracts, setContracts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [meta, setMeta] = useState({ current_page: 1, last_page: 1, total: 0 });
+  const [page, setPage] = useState(1);
 
-  const loadContracts = useCallback(async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await contractService.getMyContracts();
-      const rawContracts = Array.isArray(res.data)
-        ? res.data
-        : (res.data?.data ?? (Array.isArray(res) ? res : []));
-      setContracts(rawContracts.map(normalizeContract).filter(Boolean));
+      const params = { page };
+      if (statusFilter) params.status = statusFilter;
+      const res = await contractService.getContracts(params);
+      const data = res.data ?? res;
+      setContracts(Array.isArray(data) ? data : (data.data ?? []));
+      setMeta(res.meta ?? data.meta ?? { current_page: 1, last_page: 1, total: 0 });
     } catch (err) {
-      setError(getErrorMessage(err, 'Unable to load your contracts. Please try again.'));
+      setError(err.response?.data?.message || 'Failed to load contracts.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, statusFilter]);
 
-  useEffect(() => {
-    loadContracts();
-  }, [loadContracts]);
-
-  if (loading) return <ContractListSkeleton />;
-
-  if (error) {
-    return (
-      <ErrorState title="Unable to load your contracts" description={error} onRetry={loadContracts} />
-    );
-  }
-
-  const activeCount = contracts.filter(
-    (contract) => contract.status === 'active' || contract.status === 'paused',
-  ).length;
+  useEffect(() => { load(); }, [load]);
+  useEffect(() => { setPage(1); }, [statusFilter]);
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="Employer"
-        title="Contracts"
-        description={
-          contracts.length > 0
-            ? `${contracts.length} contract${contracts.length === 1 ? '' : 's'} · ${activeCount} active`
-            : 'Your contracts appear here once you accept a proposal.'
-        }
-        breadcrumbs={[{ label: 'Dashboard', to: '/employer/dashboard' }, { label: 'Contracts' }]}
-      />
+    <div className="space-y-6 animate-fade-in">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-ink-900">My Contracts</h1>
+        <p className="mt-0.5 text-sm text-gray-500">Manage your contracts with freelancers.</p>
+      </div>
 
-      {contracts.length === 0 ? (
-        <Card>
-          <CardBody>
-            <EmptyState
-              icon={Handshake}
-              title="You don't have any contracts yet"
-              description="When you accept a proposal, a contract is created and will appear here with milestones to manage."
-              action={
-                <Button as={Link} to="/employer/jobs">
-                  <ClipboardList className="h-4 w-4" aria-hidden="true" /> Manage Jobs
-                </Button>
-              }
-            />
-          </CardBody>
-        </Card>
+      <Card>
+        <CardBody className="py-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <Filter className="h-4 w-4 text-gray-400" />
+            <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-44">
+              {STATUS_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </Select>
+          </div>
+        </CardBody>
+      </Card>
+
+      {error ? (
+        <ErrorState title="Failed to load contracts" description={error} onRetry={load} />
+      ) : loading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-32 animate-pulse rounded-2xl border border-gray-200 bg-white" />
+          ))}
+        </div>
+      ) : contracts.length === 0 ? (
+        <EmptyState
+          icon={Handshake}
+          title="No contracts yet"
+          description={statusFilter ? 'No contracts match this filter.' : 'Accept a proposal to create a contract.'}
+        />
       ) : (
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-          {contracts.map((contract) => (
-            <ContractCard key={contract.id} contract={contract} role="employer" />
+        <div className="space-y-4">
+          {contracts.map((c) => (
+            <ContractCard key={c.id} contract={c} />
           ))}
         </div>
       )}

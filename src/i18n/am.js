@@ -283,7 +283,7 @@ export const am = {
 
   // ---- Trusted By Section ----
   'trusted.eyebrow': 'በ蹙 የተቀበሉ ዋና ኩባንያዎች',
-  'trusted.title': 'በመላው ኢትዮጵያ ስኬት እያቀረቡ',
+  'trusted.title': 'በDreamMore የተረጋገጡ ውጤቶች',
   'trusted.subtitle':
     'ከአዲስ አበባ ስታርትአፕዎች እስከ በምስራቅ አፍሪካ ያሉ ትልልል ኩባንያዎች — ምርጥ ባለሙያ ለማግኘት በረበት ኩባንያዎች ድሪም ሞር ይመገባሉ።',
   'trusted.trustedByLabel': 'ድሪም ሞር የሚጠቀሙ ኩባንያዎች',
@@ -388,6 +388,10 @@ export const am = {
   'nav.roles': 'ሚናዎች',
   'nav.auditLogs': 'የግልጽ ሎግ',
   'nav.payments': 'ክፍያዎች',
+  'nav.paymentMethods': 'የክፍያ ዘዴዎች',
+  'nav.earnings': 'ግቢዎች',
+  'nav.withdrawals': 'ማውጫዎች',
+  'nav.finance': 'ፋይናንስ',
   'nav.milestones': 'ማይልስቶኖች',
   'nav.transactions': 'ግንኙነቶች',
   'nav.allJobs': 'ሁሉም ስራዎች',

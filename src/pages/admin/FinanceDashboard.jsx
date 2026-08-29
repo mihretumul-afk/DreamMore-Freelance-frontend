@@ -1,112 +1,123 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import {
-  CreditCard, Banknote, TrendingUp, ArrowRight, Milestone,
-  AlertTriangle, CheckCircle2, Clock, Wallet,
-} from 'lucide-react';
-import ErrorState from '../../components/common/ErrorState';
+import { DollarSign, TrendingUp, Wallet, AlertTriangle, CreditCard, ArrowDownRight, CheckCircle2, Clock } from 'lucide-react';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
-import Badge from '../../components/ui/Badge';
-import StatCard from '../../components/dashboard/StatCard';
-import QuickActions from '../../components/dashboard/QuickActions';
-import DashboardSkeleton from '../../components/dashboard/DashboardSkeleton';
-import { adminService } from '../../services/adminService';
-import { getErrorMessage } from '../../utils/errors';
-import { formatETB, formatDate, timeAgo } from '../../utils/format';
-import { useAuth } from '../../hooks/useAuth';
+import ErrorState from '../../components/common/ErrorState';
+import { financialService } from '../../services/financialService';
+import { formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
+function StatCard({ icon: Icon, label, value, sublabel, color = 'gray' }) {
+  const colors = {
+    emerald: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+    blue: 'border-blue-200 bg-blue-50 text-blue-700',
+    amber: 'border-amber-200 bg-amber-50 text-amber-700',
+    red: 'border-red-200 bg-red-50 text-red-700',
+    gray: 'border-gray-200 bg-gray-50 text-gray-700',
+  };
+
+  return (
+    <div className={`rounded-2xl border p-5 ${colors[color]}`}>
+      <div className="flex items-center gap-2 text-xs font-semibold">
+        <Icon className="h-4 w-4" /> {label}
+      </div>
+      <p className="mt-2 text-2xl font-extrabold text-ink-900">{value}</p>
+      {sublabel && <p className="mt-0.5 text-[11px] text-gray-500">{sublabel}</p>}
+    </div>
+  );
+}
+
 export default function FinanceDashboard() {
-  usePageTitle('Finance Dashboard');
-  const { user } = useAuth();
+  usePageTitle('Finance Dashboard — Admin');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const loadDashboard = useCallback(async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await adminService.getDashboard();
-      setData(response.data ?? response);
+      const res = await financialService.getFinanceDashboard();
+      setData(res.data ?? res);
     } catch (err) {
-      setError(getErrorMessage(err, 'Unable to load dashboard.'));
+      setError(err.response?.data?.message || 'Failed to load finance dashboard.');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { loadDashboard(); }, [loadDashboard]);
+  useEffect(() => { load(); }, [load]);
 
-  if (loading) return <DashboardSkeleton />;
-  if (error || !data) return <ErrorState title="Unable to load dashboard" description={error} onRetry={loadDashboard} />;
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-8 w-48 rounded bg-gray-200" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => <div key={i} className="h-28 rounded-2xl border border-gray-200 bg-white" />)}
+        </div>
+      </div>
+    );
+  }
 
-  const firstName = (user?.name || 'Finance Admin').split(' ')[0];
+  if (error) return <ErrorState title="Failed to load" description={error} onRetry={load} />;
 
-  const s = {
-    totalRevenue: data.total_revenue ?? 0,
-    activeContracts: data.active_contracts ?? 0,
-    completedContracts: data.completed_contracts ?? 0,
-    totalContracts: data.total_contracts ?? 0,
-    totalJobs: data.total_jobs ?? 0,
-    openJobs: data.open_jobs ?? 0,
-    completedJobs: data.completed_jobs ?? 0,
-    pendingReports: data.pending_reports ?? 0,
-  };
+  const d = data || {};
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-ink-900">
-            Welcome back, {firstName} 👋
-          </h1>
-          <p className="text-sm text-gray-500">
-            Monitor payments, transactions, and financial health.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" aria-hidden="true" />
-          Finance Panel
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-ink-900">Finance Dashboard</h1>
+        <p className="mt-0.5 text-sm text-gray-500">Platform financial overview and key metrics.</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <StatCard icon={Banknote} label="Total Revenue" value={formatETB(s.totalRevenue)} hint="Platform-wide" tone="emerald" />
-        <StatCard icon={Milestone} label="Active Contracts" value={s.activeContracts.toLocaleString()} hint={`${s.completedContracts} completed`} tone="brand" />
-        <StatCard icon={CreditCard} label="Total Jobs" value={s.totalJobs.toLocaleString()} hint={`${s.openJobs} open · ${s.completedJobs} completed`} />
-        <StatCard icon={TrendingUp} label="Contract Value" value={formatETB(s.totalRevenue)} hint="All time" tone="emerald" />
+      {/* Payment Volume */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard icon={DollarSign} label="Total Payment Volume" value={formatETB(d.payment_volume?.total || 0)} sublabel={`This month: ${formatETB(d.payment_volume?.monthly || 0)}`} color="emerald" />
+        <StatCard icon={TrendingUp} label="Platform Revenue" value={formatETB(d.platform_revenue?.total || 0)} sublabel={`This month: ${formatETB(d.platform_revenue?.monthly || 0)}`} color="blue" />
+        <StatCard icon={Wallet} label="Held Funds (Escrow)" value={formatETB(d.held_funds || 0)} sublabel="Awaiting release" color="amber" />
+        <StatCard icon={CheckCircle2} label="Released Funds" value={formatETB(d.released_funds || 0)} sublabel="Paid to freelancers" color="emerald" />
       </div>
 
-      {/* Quick Actions */}
-      <QuickActions items={[
-        { label: 'Payments', description: 'View payment records', to: '/admin/payments', icon: CreditCard },
-        { label: 'Transactions', description: 'Transaction history', to: '/admin/transactions', icon: ArrowRight },
-        { label: 'Milestones', description: 'Milestone management', to: '/admin/milestones', icon: Milestone },
-        { label: 'Reports', description: `${s.pendingReports} pending`, to: '/admin/reports', icon: AlertTriangle },
-      ]} />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard icon={AlertTriangle} label="Total Refunds" value={formatETB(d.total_refunds || 0)} color="red" />
+        <StatCard icon={ArrowDownRight} label="Completed Withdrawals" value={formatETB(d.withdrawals?.completed || 0)} color="emerald" />
+        <StatCard icon={Clock} label="Pending Withdrawals" value={String(d.withdrawals?.pending || 0)} color="amber" />
+        <StatCard icon={CreditCard} label="Failed Payments" value={String(d.failed_payments || 0)} color="red" />
+      </div>
 
-      {/* System Status */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {[
-          { icon: CreditCard, label: 'Payments', status: 'Active', tone: 'success' },
-          { icon: Wallet, label: 'Escrow', status: 'Operational', tone: 'success' },
-          { icon: TrendingUp, label: 'Revenue', status: 'Growing', tone: 'success' },
-          { icon: CheckCircle2, label: 'Settlements', status: 'Running', tone: 'success' },
-        ].map(({ icon: Icon, label, status, tone }) => (
-          <div key={label} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 shadow-card">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-success-50">
-              <Icon className="h-4 w-4 text-success-600" aria-hidden="true" />
+      {/* Wallet Summary */}
+      <Card>
+        <CardHeader title="Freelancer Wallets" description="Aggregate wallet balances" />
+        <CardBody>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="rounded-xl border border-gray-200 p-4">
+              <p className="text-xs font-bold uppercase text-gray-400">Total Earned</p>
+              <p className="mt-1 text-xl font-bold text-ink-900">{formatETB(d.wallets?.total_earned || 0)}</p>
             </div>
-            <div>
-              <p className="text-xs font-semibold text-ink-900">{label}</p>
-              <p className="text-[11px] text-success-600">{status}</p>
+            <div className="rounded-xl border border-gray-200 p-4">
+              <p className="text-xs font-bold uppercase text-gray-400">Available Balance</p>
+              <p className="mt-1 text-xl font-bold text-emerald-600">{formatETB(d.wallets?.total_available || 0)}</p>
+            </div>
+            <div className="rounded-xl border border-gray-200 p-4">
+              <p className="text-xs font-bold uppercase text-gray-400">Pending Balance</p>
+              <p className="mt-1 text-xl font-bold text-amber-600">{formatETB(d.wallets?.total_pending || 0)}</p>
             </div>
           </div>
-        ))}
-      </div>
+        </CardBody>
+      </Card>
+
+      {d.disputed_funds > 0 && (
+        <Card className="border-amber-200 bg-amber-50/50">
+          <CardBody>
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
+              <div>
+                <p className="font-semibold text-amber-900">Disputed Funds</p>
+                <p className="text-sm text-amber-700">{formatETB(d.disputed_funds)} held in disputed milestones. Resolve disputes to release or refund these funds.</p>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+      )}
     </div>
   );
 }

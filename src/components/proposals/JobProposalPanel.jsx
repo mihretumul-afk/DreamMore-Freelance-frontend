@@ -8,6 +8,7 @@ import StatusBadge from '../marketplace/StatusBadge';
 import ProposalForm from './ProposalForm';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../../i18n';
+import { useToast } from '../../hooks/useToast';
 import { proposalService } from '../../services/proposalService';
 import { normalizeProposal, proposalFormToPayload } from '../../utils/proposalMapper';
 import { getErrorMessage, getFieldErrors } from '../../utils/errors';
@@ -20,6 +21,7 @@ const BLOCKING_STATUSES = ['pending', 'shortlisted', 'accepted'];
 export default function JobProposalPanel({ job, onProposalSubmitted }) {
   const { user } = useAuth();
   const { t } = useI18n();
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -88,9 +90,12 @@ export default function JobProposalPanel({ job, onProposalSubmitted }) {
       setSubmitted(normalized);
       setExisting(normalized);
       onProposalSubmitted?.(normalized);
+      addToast('Proposal submitted successfully!', 'success');
     } catch (err) {
       setFieldErrors(getFieldErrors(err));
-      setGeneralError(getErrorMessage(err, 'Failed to submit proposal. Please try again.'));
+      const errorMsg = getErrorMessage(err, 'Failed to submit proposal. Please try again.');
+      setGeneralError(errorMsg);
+      addToast(errorMsg, 'error');
     } finally {
       setSubmitting(false);
     }

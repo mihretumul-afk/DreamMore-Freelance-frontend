@@ -1,404 +1,261 @@
 import { useCallback, useEffect, useState } from 'react';
-import {
-  Wallet, CreditCard, ArrowDownToLine, Clock, CheckCircle2,
-  XCircle, AlertCircle, ChevronLeft, ChevronRight, RefreshCw, Filter, X,
-} from 'lucide-react';
-import Card, { CardBody, CardHeader, CardFooter } from '../../components/ui/Card';
+import { Link } from 'react-router-dom';
+import { ArrowDownRight, Clock, CheckCircle2, AlertTriangle, ChevronLeft, ChevronRight, Wallet, CreditCard, Plus } from 'lucide-react';
+import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
-import Modal from '../../components/ui/Modal';
 import Input from '../../components/ui/Input';
-import StatCard from '../../components/dashboard/StatCard';
+import Select from '../../components/ui/Select';
+import Modal from '../../components/ui/Modal';
 import EmptyState from '../../components/common/EmptyState';
 import ErrorState from '../../components/common/ErrorState';
-import paymentService from '../../services/paymentService';
-import { useAuth } from '../../hooks/useAuth';
+import { financialService } from '../../services/financialService';
+import { formatETB, formatDate } from '../../utils/format';
 import { useToast } from '../../hooks/useToast';
 import { usePageTitle } from '../../hooks/usePageTitle';
-import { getErrorMessage } from '../../utils/errors';
-import { formatCurrency, formatDate, timeAgo } from '../../utils/format';
-import { cn } from '../../utils/cn';
 
-const STATUS_CONFIG = {
-  requested:  { tone: 'warning', label: 'Requested',  icon: Clock },
-  processing: { tone: 'info',    label: 'Processing', icon: RefreshCw },
-  completed:  { tone: 'success', label: 'Completed',  icon: CheckCircle2 },
-  failed:     { tone: 'danger',  label: 'Failed',     icon: XCircle },
-  rejected:   { tone: 'danger',  label: 'Rejected',   icon: XCircle },
-  cancelled:  { tone: 'neutral', label: 'Cancelled',  icon: XCircle },
+const STATUS_MAP = {
+  requested:  { tone: 'warning', icon: Clock, label: 'Requested' },
+  processing: { tone: 'info', icon: Clock, label: 'Processing' },
+  completed:  { tone: 'success', icon: CheckCircle2, label: 'Completed' },
+  failed:     { tone: 'danger', icon: AlertTriangle, label: 'Failed' },
+  cancelled:  { tone: 'neutral', icon: AlertTriangle, label: 'Cancelled' },
 };
 
-function WithdrawalStatusBadge({ status }) {
-  const config = STATUS_CONFIG[status] ?? { tone: 'neutral', label: status };
-  return <Badge tone={config.tone} size="xs" dot>{config.label}</Badge>;
-}
-
-function StatSkeleton() {
-  return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 animate-pulse">
-      {[...Array(3)].map((_, i) => (
-        <div key={i} className="rounded-card border border-gray-200 bg-white p-5 space-y-3">
-          <div className="h-3 w-20 rounded bg-gray-200" />
-          <div className="h-7 w-32 rounded bg-gray-200" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function TableSkeleton() {
-  return (
-    <div className="animate-pulse divide-y divide-gray-100">
-      {[...Array(5)].map((_, i) => (
-        <div key={i} className="flex items-center gap-4 px-5 py-4">
-          <div className="flex-1 space-y-2">
-            <div className="h-3.5 w-1/3 rounded bg-gray-200" />
-            <div className="h-3 w-1/2 rounded bg-gray-100" />
-          </div>
-          <div className="h-5 w-20 rounded bg-gray-200" />
-          <div className="h-5 w-24 rounded bg-gray-100" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function WithdrawalsPage() {
-  usePageTitle('Withdrawals');
-  const { user } = useAuth();
+  usePageTitle('Withdrawals — Freelancer');
   const { showToast } = useToast();
-
-  // Balance
-  const [balance, setBalance] = useState(null);
-  const [balanceLoading, setBL] = useState(true);
-
-  // Withdrawals list
+  const [earnings, setEarnings] = useState(null);
+  const [methods, setMethods] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
-  const [meta, setMeta] = useState({ current_page: 1, last_page: 1, total: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [meta, setMeta] = useState({ current_page: 1, last_page: 1, total: 0 });
   const [page, setPage] = useState(1);
-
-  // Payment methods
-  const [methods, setMethods] = useState([]);
-
-  // Withdrawal form modal
-  const [formOpen, setFormOpen] = useState(false);
+  const [showWithdraw, setShowWithdraw] = useState(false);
   const [amount, setAmount] = useState('');
-  const [selectedMethod, setSelectedMethod] = useState(null);
-  const [fees, setFees] = useState(null);
+  const [methodId, setMethodId] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState(null);
 
-  // Cancel confirm
-  const [cancelTarget, setCancelTarget] = useState(null);
-  const [cancelling, setCancelling] = useState(false);
-
-  // ── Load balance ──────────────────────────────────────────────────
-  const loadBalance = useCallback(async () => {
-    setBL(true);
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const res = await paymentService.getBalance();
-      setBalance(res.data ?? res);
-    } catch { /* non-critical */ }
-    finally { setBL(false); }
-  }, []);
-
-  // ── Load payment methods ──────────────────────────────────────────
-  const loadMethods = useCallback(async () => {
-    try {
-      const res = await paymentService.getPaymentMethods();
-      setMethods(res.data ?? res ?? []);
-    } catch { /* non-critical */ }
-  }, []);
-
-  // ── Load withdrawals ──────────────────────────────────────────────
-  const loadWithdrawals = useCallback(async () => {
-    setLoading(true); setError(null);
-    try {
-      const params = { page };
-      if (statusFilter) params.status = statusFilter;
-      const res = await paymentService.getMyWithdrawals(params);
-      const data = res.data ?? res;
-      setWithdrawals(Array.isArray(data) ? data : data.data ?? []);
-      if (res.meta) setMeta(res.meta);
+      const [earnRes, methodRes, wdRes] = await Promise.all([
+        financialService.getEarnings(),
+        financialService.getPaymentMethods(),
+        financialService.getWithdrawals({ page }),
+      ]);
+      setEarnings(earnRes.data ?? null);
+      setMethods(methodRes.data ?? []);
+      const wdData = wdRes.data ?? [];
+      setWithdrawals(Array.isArray(wdData) ? wdData : (wdData.data ?? []));
+      setMeta(wdRes.meta ?? wdData.meta ?? { current_page: 1, last_page: 1, total: 0 });
     } catch (err) {
-      setError(getErrorMessage(err, 'Failed to load withdrawals.'));
-    } finally { setLoading(false); }
-  }, [page, statusFilter]);
+      setError(err.response?.data?.message || 'Failed to load withdrawals.');
+    } finally {
+      setLoading(false);
+    }
+  }, [page]);
 
-  useEffect(() => { loadBalance(); loadMethods(); }, [loadBalance, loadMethods]);
-  useEffect(() => { loadWithdrawals(); }, [loadWithdrawals]);
-  useEffect(() => { setPage(1); }, [statusFilter]);
+  useEffect(() => { load(); }, [load]);
 
-  // ── Calculate fees when amount changes ────────────────────────────
-  useEffect(() => {
-    if (!amount || parseFloat(amount) <= 0) { setFees(null); return; }
-    const timer = setTimeout(async () => {
-      try {
-        const res = await paymentService.calculateFees(parseFloat(amount));
-        setFees(res.data ?? res);
-      } catch { setFees(null); }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [amount]);
-
-  // ── Open withdrawal form ──────────────────────────────────────────
-  const openForm = () => {
-    setAmount('');
-    setSelectedMethod(methods.find(m => m.is_default) || methods[0] || null);
-    setFees(null);
-    setFormError(null);
-    setFormOpen(true);
+  const handleWithdraw = async () => {
+    if (!amount || !methodId) { showToast('Please enter amount and select a method.', 'error'); return; }
+    setSubmitting(true);
+    try {
+      await financialService.requestWithdrawal(parseFloat(amount), parseInt(methodId));
+      showToast('Withdrawal request submitted successfully.', 'success');
+      setShowWithdraw(false);
+      setAmount('');
+      setMethodId('');
+      load();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to submit withdrawal.', 'error');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  // ── Submit withdrawal ─────────────────────────────────────────────
-  const handleSubmit = async () => {
-    const amt = parseFloat(amount);
-    if (!amt || amt <= 0) return;
-
-    setSubmitting(true); setFormError(null);
+  const handleCancel = async (id) => {
     try {
-      await paymentService.requestWithdrawal({
-        amount: amt,
-        payment_method_id: selectedMethod?.id || undefined,
-      });
-      showToast('Withdrawal request submitted.', 'success');
-      setFormOpen(false);
-      loadBalance(); loadWithdrawals();
-    } catch (err) {
-      setFormError(getErrorMessage(err, 'Failed to submit withdrawal request.'));
-    } finally { setSubmitting(false); }
-  };
-
-  // ── Cancel withdrawal ─────────────────────────────────────────────
-  const handleCancel = async () => {
-    if (!cancelTarget) return;
-    setCancelling(true);
-    try {
-      await paymentService.cancelWithdrawal(cancelTarget.id);
+      await financialService.cancelWithdrawal(id);
       showToast('Withdrawal cancelled.', 'success');
-      setCancelTarget(null);
-      loadBalance(); loadWithdrawals();
+      load();
     } catch (err) {
-      showToast(getErrorMessage(err, 'Failed to cancel withdrawal.'), 'error');
-    } finally { setCancelling(false); }
+      showToast(err.response?.data?.message || 'Failed to cancel.', 'error');
+    }
   };
 
-  const currency = balance?.currency ?? 'ETB';
-  const available = balance?.available_earnings ?? 0;
-  const minWithdrawal = 100;
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="h-32 rounded-2xl border border-gray-200 bg-white" />
+        <div className="h-64 rounded-2xl border border-gray-200 bg-white" />
+      </div>
+    );
+  }
+
+  if (error) return <ErrorState title="Failed to load" description={error} onRetry={load} />;
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-ink-900">Withdrawals</h1>
-          <p className="mt-0.5 text-sm text-gray-500">Request and manage your earnings withdrawals.</p>
+          <p className="mt-0.5 text-sm text-gray-500">Request withdrawals and track their status.</p>
         </div>
-        <Button onClick={openForm} disabled={available < minWithdrawal}>
-          <ArrowDownToLine className="h-4 w-4" /> Request Withdrawal
-        </Button>
+        {earnings && earnings.available_balance > 0 && (
+          <Button variant="primary" size="sm" onClick={() => setShowWithdraw(true)}>
+            <ArrowDownRight className="h-4 w-4" /> Withdraw
+          </Button>
+        )}
       </div>
 
-      {/* Balance stats */}
-      {balanceLoading ? <StatSkeleton /> : balance ? (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-          <StatCard icon={Wallet} label="Available Earnings" value={formatCurrency(available, currency)} hint="Ready to withdraw" tone="emerald" />
-          <StatCard icon={Clock} label="Pending Earnings" value={formatCurrency(balance.pending_earnings ?? 0, currency)} hint="In escrow" tone="brand" />
-          <StatCard icon={ArrowDownToLine} label="Total Withdrawn" value={formatCurrency(balance.withdrawn ?? 0, currency)} hint="All time" />
-        </div>
-      ) : null}
-
-      {/* Withdrawals list */}
-      <Card>
-        <CardHeader
-          title="Withdrawal History"
-          description={`${meta.total} total withdrawal${meta.total !== 1 ? 's' : ''}`}
-          action={
-            <div className="flex items-center gap-2">
-              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-                className="h-9 rounded-input border border-gray-300 bg-white px-3 text-sm text-ink-900 focus:border-brand-500 focus:outline-none">
-                <option value="">All statuses</option>
-                {['requested', 'processing', 'completed', 'failed', 'rejected', 'cancelled'].map(s => (
-                  <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
-                ))}
-              </select>
-              <button type="button" onClick={loadWithdrawals}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 bg-white hover:bg-gray-50">
-                <RefreshCw className="h-3.5 w-3.5" />
-              </button>
+      {/* Balance Summary */}
+      {earnings && (
+        <div className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 p-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100">
+              <Wallet className="h-6 w-6 text-emerald-600" />
             </div>
-          }
-        />
+            <div>
+              <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">Available for Withdrawal</p>
+              <p className="text-3xl font-extrabold text-emerald-900">{formatETB(earnings.available_balance)}</p>
+            </div>
+          </div>
+          <p className="mt-2 text-xs text-emerald-600">Minimum withdrawal: {formatETB(100)} · Fee: 1.5%</p>
 
-        {error ? (
-          <CardBody><ErrorState title="Failed to load" description={error} onRetry={loadWithdrawals} /></CardBody>
-        ) : loading ? <TableSkeleton /> : withdrawals.length === 0 ? (
-          <CardBody>
-            <EmptyState
-              icon={ArrowDownToLine}
-              title={statusFilter ? 'No withdrawals match filters' : 'No withdrawals yet'}
-              description={statusFilter ? 'Try clearing filters.' : 'Your withdrawal history will appear here.'}
-              action={!statusFilter && available >= minWithdrawal ? <Button size="sm" onClick={openForm}><ArrowDownToLine className="h-4 w-4" />Request Withdrawal</Button> : null}
-            />
-          </CardBody>
-        ) : (
-          <>
+          {methods.length === 0 && earnings.available_balance > 0 && (
+            <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 flex items-center gap-3">
+              <CreditCard className="h-5 w-5 text-amber-500 shrink-0" />
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-amber-800">No payment method added yet</p>
+                <p className="text-[11px] text-amber-600">Add one to withdraw your earnings.</p>
+              </div>
+              <Link to="/freelancer/settings/payment-methods">
+                <Button variant="outline" size="xs"><Plus className="h-3 w-3" /> Add</Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Withdrawal History */}
+      <Card>
+        <CardHeader title="Withdrawal History" />
+        <CardBody>
+          {withdrawals.length === 0 ? (
+            <EmptyState icon={ArrowDownRight} title="No withdrawals yet" description="Request a withdrawal when you have available balance." />
+          ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50 text-left">
-                    {['Reference', 'Amount', 'Fee', 'Net', 'Status', 'Date', ''].map(h => (
-                      <th key={h} className="px-5 py-3 text-xs font-bold uppercase tracking-wide text-gray-400">{h}</th>
-                    ))}
+                  <tr className="border-b border-gray-100 text-left">
+                    <th className="pb-3 text-xs font-bold uppercase text-gray-400">Reference</th>
+                    <th className="pb-3 text-xs font-bold uppercase text-gray-400">Amount</th>
+                    <th className="pb-3 text-xs font-bold uppercase text-gray-400">Fee</th>
+                    <th className="pb-3 text-xs font-bold uppercase text-gray-400">Net</th>
+                    <th className="pb-3 text-xs font-bold uppercase text-gray-400">Status</th>
+                    <th className="pb-3 text-xs font-bold uppercase text-gray-400">Date</th>
+                    <th className="pb-3 text-xs font-bold uppercase text-gray-400"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {withdrawals.map(w => (
-                    <tr key={w.id} className="hover:bg-gray-50/60">
-                      <td className="px-5 py-3">
-                        <p className="font-mono text-xs font-semibold text-ink-800">{w.reference}</p>
-                        <p className="text-[10px] text-gray-400">{w.payment_method?.display_label ?? '—'}</p>
-                      </td>
-                      <td className="px-5 py-3 font-bold text-ink-900">{formatCurrency(w.amount, w.currency ?? currency)}</td>
-                      <td className="px-5 py-3 text-gray-500">{formatCurrency(w.fee, w.currency ?? currency)}</td>
-                      <td className="px-5 py-3 font-semibold text-success-600">{formatCurrency(w.net_amount, w.currency ?? currency)}</td>
-                      <td className="px-5 py-3"><WithdrawalStatusBadge status={w.status} /></td>
-                      <td className="whitespace-nowrap px-5 py-3 text-xs text-gray-400" title={formatDate(w.created_at)}>
-                        {timeAgo(w.created_at)}
-                      </td>
-                      <td className="px-5 py-3">
-                        {w.status === 'requested' && (
-                          <button type="button" onClick={() => setCancelTarget(w)}
-                            className="rounded p-1.5 text-gray-400 hover:bg-danger-50 hover:text-danger-500 text-xs font-medium cursor-pointer">
-                            Cancel
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                <tbody className="divide-y divide-gray-50">
+                  {withdrawals.map((w) => {
+                    const s = STATUS_MAP[w.status] || { tone: 'neutral', label: w.status };
+                    return (
+                      <tr key={w.id} className="hover:bg-gray-50/50">
+                        <td className="py-3 font-mono text-xs text-gray-600">{w.reference}</td>
+                        <td className="py-3 font-semibold text-ink-900">{formatETB(w.amount)}</td>
+                        <td className="py-3 text-gray-500">{formatETB(w.fee)}</td>
+                        <td className="py-3 font-semibold text-emerald-600">{formatETB(w.net_amount)}</td>
+                        <td className="py-3"><Badge tone={s.tone} size="xs">{s.label}</Badge></td>
+                        <td className="py-3 text-xs text-gray-400">{formatDate(w.created_at)}</td>
+                        <td className="py-3">
+                          {w.status === 'requested' && (
+                            <Button variant="ghost" size="xs" onClick={() => handleCancel(w.id)}>Cancel</Button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
+          )}
 
-            {meta.last_page > 1 && (
-              <CardFooter>
-                <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-gray-500">
-                  <span>Page {meta.current_page} of {meta.last_page} · {meta.total} total</span>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" disabled={meta.current_page <= 1} onClick={() => setPage(p => p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
-                    <Button variant="outline" size="sm" disabled={meta.current_page >= meta.last_page} onClick={() => setPage(p => p + 1)}><ChevronRight className="h-4 w-4" /></Button>
-                  </div>
-                </div>
-              </CardFooter>
-            )}
-          </>
-        )}
+          {meta.last_page > 1 && (
+            <div className="mt-4 flex items-center justify-between">
+              <p className="text-xs text-gray-400">Page {meta.current_page} of {meta.last_page}</p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="xs" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                  <ChevronLeft className="h-3 w-3" /> Prev
+                </Button>
+                <Button variant="outline" size="xs" disabled={page >= meta.last_page} onClick={() => setPage((p) => p + 1)}>
+                  Next <ChevronRight className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardBody>
       </Card>
 
-      {/* ── Request Withdrawal Modal ─────────────────────────────────── */}
-      <Modal open={formOpen} onClose={() => setFormOpen(false)} title="Request Withdrawal" size="md">
-        <div className="space-y-5">
-          {/* Available balance */}
-          <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
-            <p className="text-xs text-gray-500">Available for withdrawal</p>
-            <p className="text-xl font-bold text-ink-900">{formatCurrency(available, currency)}</p>
-          </div>
-
-          {/* Amount */}
-          <div>
-            <Input
-              label="Withdrawal Amount (ETB)"
-              type="number"
-              min={minWithdrawal}
-              max={available}
-              step="0.01"
-              placeholder={`Min ${minWithdrawal}`}
-              value={amount}
-              onChange={e => setAmount(e.target.value)}
-            />
-            <p className="mt-1 text-xs text-gray-400">Minimum withdrawal: {formatCurrency(minWithdrawal, currency)}</p>
-          </div>
-
-          {/* Payment method */}
-          {methods.length > 0 && (
-            <div>
-              <label className="mb-2 block text-sm font-medium text-ink-900">Withdraw to</label>
-              <div className="space-y-2">
-                {methods.map(m => (
-                  <button key={m.id} type="button"
-                    onClick={() => setSelectedMethod(m)}
-                    className={cn(
-                      'flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors cursor-pointer',
-                      selectedMethod?.id === m.id
-                        ? 'border-brand-400 bg-brand-50'
-                        : 'border-gray-200 bg-white hover:border-gray-300',
-                    )}>
-                    <CreditCard className={cn('h-5 w-5', selectedMethod?.id === m.id ? 'text-brand-600' : 'text-gray-400')} />
-                    <div>
-                      <p className="text-sm font-semibold text-ink-900">{m.display_label || m.nickname || 'Payment Method'}</p>
-                      <p className="text-xs text-gray-400">{m.type === 'card' ? `Card •••• ${m.card_last_four || '****'}` : m.type === 'bank_account' ? m.bank_name || 'Bank Account' : m.mobile_provider || 'Mobile Money'}</p>
-                    </div>
-                    {m.is_default && <Badge tone="primary" size="xs">Default</Badge>}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Fee breakdown */}
-          {fees && parseFloat(amount) > 0 && (
-            <div className="rounded-xl border border-gray-100 bg-white divide-y divide-gray-100">
-              <div className="flex items-center justify-between px-4 py-2.5">
-                <span className="text-sm text-gray-600">Withdrawal Amount</span>
-                <span className="text-sm font-semibold text-ink-900">{formatCurrency(parseFloat(amount), currency)}</span>
-              </div>
-              <div className="flex items-center justify-between px-4 py-2.5">
-                <span className="text-sm text-gray-600">Withdrawal Fee</span>
-                <span className="text-sm font-semibold text-ink-900">-{formatCurrency(fees.processing_fee ?? fees.total_fee ?? 0, currency)}</span>
-              </div>
-              <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50">
-                <span className="text-sm font-bold text-ink-900">You will receive</span>
-                <span className="text-base font-bold text-success-600">{formatCurrency(fees.net ?? parseFloat(amount), currency)}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Error */}
-          {formError && (
-            <div className="flex items-start gap-2.5 rounded-xl border border-danger-200 bg-danger-50 p-3 text-sm text-danger-700">
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-              <p>{formError}</p>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-2">
-            <Button variant="outline" onClick={() => setFormOpen(false)} disabled={submitting}>Cancel</Button>
-            <Button
-              loading={submitting}
-              onClick={handleSubmit}
-              disabled={!amount || parseFloat(amount) < minWithdrawal || parseFloat(amount) > available}
-            >
-              <ArrowDownToLine className="h-4 w-4" /> Request Withdrawal
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* ── Cancel Confirmation ──────────────────────────────────────── */}
-      <Modal open={Boolean(cancelTarget)} onClose={() => setCancelTarget(null)} title="Cancel Withdrawal" size="sm">
+      {/* Withdraw Modal */}
+      <Modal open={showWithdraw} onClose={() => setShowWithdraw(false)} title="Request Withdrawal" size="md">
         <div className="space-y-4">
-          <p className="text-sm text-gray-600">
-            Cancel withdrawal <strong>{cancelTarget?.reference}</strong> for {formatCurrency(cancelTarget?.amount ?? 0, currency)}?
-            The reserved amount will be returned to your available balance.
-          </p>
-          <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={() => setCancelTarget(null)} disabled={cancelling}>Keep Request</Button>
-            <Button variant="danger" loading={cancelling} onClick={handleCancel}>Cancel Withdrawal</Button>
+          {/* Balance */}
+          <div className="rounded-xl bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 p-5 text-center">
+            <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Available Balance</p>
+            <p className="mt-1 text-3xl font-extrabold text-emerald-700">{formatETB(earnings?.available_balance || 0)}</p>
+          </div>
+
+          {/* No payment methods warning */}
+          {methods.length === 0 && (
+            <div className="rounded-xl border-2 border-dashed border-amber-300 bg-amber-50 p-5 text-center">
+              <CreditCard className="mx-auto h-8 w-8 text-amber-400" />
+              <p className="mt-2 text-sm font-semibold text-amber-800">No Payment Methods</p>
+              <p className="mt-1 text-xs text-amber-600">Add a payment method to receive your withdrawals.</p>
+              <Link to="/freelancer/settings/payment-methods">
+                <Button variant="outline" size="sm" className="mt-3">
+                  <Plus className="h-3 w-3" /> Add Payment Method
+                </Button>
+              </Link>
+            </div>
+          )}
+
+          <Input label="Amount (ETB)" type="number" min="100" step="0.01" value={amount}
+            onChange={(e) => setAmount(e.target.value)} placeholder="Minimum 100 ETB" required />
+
+          {methods.length > 0 ? (
+            <Select label="Withdraw To" value={methodId} onChange={(e) => setMethodId(e.target.value)}>
+              <option value="">Select where to withdraw</option>
+              {methods.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.display_label || m.nickname || m.bank_name || m.mobile_provider || `Method #${m.id}`}
+                </option>
+              ))}
+            </Select>
+          ) : (
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 text-center">
+              <p className="text-sm text-gray-500">Please add a payment method first.</p>
+            </div>
+          )}
+
+          {amount && parseFloat(amount) > 0 && (
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm space-y-1.5">
+              <div className="flex justify-between"><span className="text-gray-500">Amount</span><span className="font-semibold">{formatETB(parseFloat(amount) || 0)}</span></div>
+              <div className="flex justify-between"><span className="text-gray-500">Fee (1.5%)</span><span className="text-red-600">-{formatETB((parseFloat(amount) || 0) * 0.015)}</span></div>
+              <div className="border-t border-gray-200 pt-1.5 flex justify-between font-bold"><span>Net Amount</span><span className="text-emerald-600">{formatETB((parseFloat(amount) || 0) * 0.985)}</span></div>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3 pt-1">
+            <Button variant="outline" onClick={() => setShowWithdraw(false)}>Cancel</Button>
+            <Button variant="primary" loading={submitting} onClick={handleWithdraw}
+              disabled={!amount || !methodId || methods.length === 0}>
+              <ArrowDownRight className="h-4 w-4" /> Request Withdrawal
+            </Button>
           </div>
         </div>
       </Modal>

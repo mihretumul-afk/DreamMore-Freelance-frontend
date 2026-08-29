@@ -28,8 +28,8 @@ function flattenSettings(grouped) {
     default_currency:     grouped.payments?.default_currency ?? 'ETB',
     min_proposal_amount:  grouped.payments?.min_proposal_amount ?? '',
     max_proposal_amount:  grouped.payments?.max_proposal_amount ?? '',
-    platform_fee_percent: grouped.platform_fee_percent ?? grouped.payments?.platform_fee_percent ?? '8',
-    auto_approve_days:    grouped.auto_approve_days ?? grouped.payments?.auto_approve_days ?? '5',
+    platform_fee_percent: grouped.platform_fee_percent ?? '8',
+    auto_approve_days:    grouped.auto_approve_days ?? '5',
     registration_open:    String(grouped.access?.registration_open ?? 'true'),
     maintenance_mode:     String(grouped.access?.maintenance_mode ?? 'false'),
   };
@@ -197,41 +197,6 @@ export default function AdminSettingsPage() {
                 <option value="ETB">ETB (Ethiopian Birr)</option>
                 <option value="USD">USD (US Dollar)</option>
               </Select>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* ── Escrow & Platform Fee ───────────────────────────────────── */}
-        <Card>
-          <CardHeader
-            title="Escrow & Platform Fee"
-            description="Configure the platform commission percentage deducted upon milestone release and auto-approval timer."
-          />
-          <CardBody className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Input
-                label="Platform Fee Percentage (%)"
-                type="number"
-                step="0.1"
-                min="0"
-                max="50"
-                value={form.platform_fee_percent}
-                onChange={update('platform_fee_percent')}
-                error={fieldErrors.platform_fee_percent}
-                hint="Deducted automatically from freelancer payout (0% to 50%). Default: 8%"
-                required
-              />
-              <Input
-                label="Auto-Approve Submitted Milestones (Days)"
-                type="number"
-                min="1"
-                max="30"
-                value={form.auto_approve_days}
-                onChange={update('auto_approve_days')}
-                error={fieldErrors.auto_approve_days}
-                hint="Days before submitted deliverables auto-release if unreviewed. Default: 5 days"
-                required
-              />
             </div>
           </CardBody>
         </Card>

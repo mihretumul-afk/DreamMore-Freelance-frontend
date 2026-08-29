@@ -9,7 +9,6 @@ import {
   Clock,
   FileText,
   FolderOpen,
-  Handshake,
   MapPin,
   Pencil,
   Send,
@@ -20,7 +19,6 @@ import {
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
-import WalletCard from '../../components/common/WalletCard';
 import Avatar from '../../components/marketplace/Avatar';
 import RatingDisplay from '../../components/marketplace/RatingDisplay';
 import StatusBadge from '../../components/marketplace/StatusBadge';
@@ -28,11 +26,9 @@ import Card, { CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { freelancerService } from '../../services/freelancerService';
 import { proposalService } from '../../services/proposalService';
-import { contractService } from '../../services/contractService';
 import { recommendationService } from '../../services/recommendationService';
 import { normalizeFreelancer } from '../../utils/freelancerMapper';
 import { normalizeProposal } from '../../utils/proposalMapper';
-import { normalizeContract } from '../../utils/contractMapper';
 import { getErrorMessage } from '../../utils/errors';
 import { formatETB } from '../../utils/format';
 import { useAuth } from '../../hooks/useAuth';
@@ -44,11 +40,11 @@ function Skeleton() {
   return (
     <div className="animate-pulse space-y-6">
       <div className="h-40 rounded-2xl bg-gray-200" />
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        {[...Array(4)].map((_, i) => <div key={i} className="h-28 rounded-2xl bg-gray-200" />)}
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
+        {[...Array(3)].map((_, i) => <div key={i} className="h-28 rounded-2xl bg-gray-200" />)}
       </div>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {[...Array(3)].map((_, i) => <div key={i} className="h-64 rounded-2xl bg-gray-200" />)}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {[...Array(2)].map((_, i) => <div key={i} className="h-64 rounded-2xl bg-gray-200" />)}
       </div>
     </div>
   );
@@ -128,27 +124,21 @@ export default function FreelancerDashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const [profileRes, proposalsRes, contractsRes] = await Promise.all([
+      const [profileRes, proposalsRes] = await Promise.all([
         freelancerService.getMyProfile(),
         proposalService.getMyProposals({ page: 1 }),
-        contractService.getMyContracts(),
       ]);
 
       const rawProposals = Array.isArray(proposalsRes.data)
         ? proposalsRes.data
         : (proposalsRes.data?.data ?? []);
-      const rawContracts = Array.isArray(contractsRes.data)
-        ? contractsRes.data
-        : (contractsRes.data?.data ?? []);
 
       const proposals = rawProposals.map(normalizeProposal);
-      const contracts = rawContracts.map(normalizeContract);
 
       setData({
         profile: normalizeFreelancer(profileRes.data),
         proposals,
         proposalsTotal: proposalsRes.meta?.total ?? proposalsRes.data?.meta?.total ?? proposals.length,
-        contracts,
       });
 
       recommendationService
@@ -171,11 +161,9 @@ export default function FreelancerDashboardPage() {
     );
   }
 
-  const { profile, proposals, proposalsTotal, contracts } = data;
+  const { profile, proposals, proposalsTotal } = data;
   const firstName = (user?.name || profile?.name || 'there').split(' ')[0];
-  const activeContracts = contracts.filter((c) => c.status === 'active' || c.status === 'paused');
   const recentProposals = proposals.slice(0, 5);
-  const recentContracts = contracts.slice(0, 5);
 
   const now = new Date();
   const hour = now.getHours();
@@ -230,20 +218,14 @@ export default function FreelancerDashboardPage() {
 
         {/* ── Approval / credential status banners ──────────────── */}
         {(() => {
-          // Primary truth: use is_fully_approved which matches the backend's
-          // EnsureVerifiedFreelancer dual-check (profile approved + credentials approved).
           const isFullyApproved = user?.is_fully_approved ?? false;
-
-          // Verification status for showing specific pending/rejected banners.
           const verificationStatus =
             (isFullyApproved ? 'approved' : null) ||
-            user?.verification_status ||           // 'pending' | 'rejected' | 'unverified'
-            profile.approvalStatus;               // fallback from profile API
+            user?.verification_status ||
+            profile.approvalStatus;
 
-          // If approved by any signal → show nothing
           if (verificationStatus === 'approved' || isFullyApproved) return null;
 
-          // Pending review
           if (verificationStatus === 'pending') {
             return (
               <div className="mt-5 flex items-center gap-2.5 rounded-xl border border-amber-400/30 bg-amber-500/15 px-4 py-3">
@@ -256,7 +238,6 @@ export default function FreelancerDashboardPage() {
             );
           }
 
-          // Rejected
           if (verificationStatus === 'rejected') {
             return (
               <div className="mt-5 flex items-center gap-2.5 rounded-xl border border-red-400/30 bg-red-500/15 px-4 py-3">
@@ -270,7 +251,6 @@ export default function FreelancerDashboardPage() {
             );
           }
 
-          // Not yet submitted (unverified / null)
           return (
             <div className="mt-5 flex flex-col gap-4 rounded-xl border border-amber-400/30 bg-amber-500/15 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-2.5">
@@ -306,11 +286,8 @@ export default function FreelancerDashboardPage() {
         })()}
       </div>
 
-      {/* ── Wallet balance & test withdrawal card ─────────────────────── */}
-      <WalletCard userRole="freelancer" />
-
       {/* ── Stat cards ───────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StatCard
           icon={Send}
           label="Proposals sent"
@@ -319,38 +296,23 @@ export default function FreelancerDashboardPage() {
           color="brand"
         />
         <StatCard
-          icon={Handshake}
-          label="Active contracts"
-          value={activeContracts.length}
-          hint="Active or paused"
-          color="violet"
-        />
-        <StatCard
           icon={ClipboardList}
           label="Jobs completed"
           value={profile.completedJobsCount}
-          hint="Across all contracts"
+          hint="Total completed"
           color="amber"
-        />
-        <StatCard
-          icon={Banknote}
-          label="Total earnings"
-          value={formatETB(profile.totalEarnings)}
-          hint="Confirmed earnings"
-          color="emerald"
         />
       </div>
 
       {/* ── Quick actions ─────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <QuickAction icon={Briefcase}   label="Find Jobs"      description="Browse openings"       to="/freelancer/jobs"          color="brand"   />
         <QuickAction icon={FileText}    label="My Proposals"   description="Track submissions"     to="/freelancer/proposals"     color="violet"  />
-        <QuickAction icon={Handshake}   label="Contracts"      description="Active agreements"     to="/freelancer/contracts"     color="emerald" />
         <QuickAction icon={Pencil}      label="Edit Profile"   description="Update public page"    to="/freelancer/profile/edit"  color="amber"   />
       </div>
 
-      {/* ── Main 3-column bento ──────────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      {/* ── Main 2-column bento ──────────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
         {/* Recommended jobs */}
         <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
@@ -406,51 +368,6 @@ export default function FreelancerDashboardPage() {
               icon={Send}
               title="No proposals yet"
               description="Apply to jobs to see your proposals here."
-              className="py-8" />
-          )}
-        </div>
-
-        {/* Active contracts */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-          <SectionHeader title="Contracts" viewAllTo={contracts.length > 0 ? '/freelancer/contracts' : undefined} />
-          {recentContracts.length > 0 ? (
-            <ul className="divide-y divide-gray-50">
-              {recentContracts.map((contract) => (
-                <li key={contract.id} className="py-3 first:pt-0 last:pb-0">
-                  <div className="flex items-center justify-between gap-3">
-                    <Link
-                      to={`/freelancer/contracts/${contract.id}`}
-                      className="min-w-0 text-sm font-semibold text-ink-900 hover:text-brand-600 line-clamp-1"
-                    >
-                      {contract.title}
-                    </Link>
-                    <StatusBadge status={contract.status} size="xs" />
-                  </div>
-                  <p className="mt-0.5 text-xs text-gray-400">
-                    {formatETB(contract.totalAmount)}
-                    {contract.createdAtLabel ? ` · ${contract.createdAtLabel}` : ''}
-                  </p>
-                  {contract.summary?.progressPercent != null && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
-                        <div
-                          className="h-full rounded-full bg-brand-500 transition-all"
-                          style={{ width: `${Math.min(100, Math.max(0, contract.summary.progressPercent))}%` }}
-                        />
-                      </div>
-                      <span className="text-[11px] font-semibold text-gray-400">
-                        {contract.summary.progressPercent}%
-                      </span>
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <EmptyState
-              icon={Handshake}
-              title="No contracts yet"
-              description="Once an employer accepts your proposal, it appears here."
               className="py-8" />
           )}
         </div>

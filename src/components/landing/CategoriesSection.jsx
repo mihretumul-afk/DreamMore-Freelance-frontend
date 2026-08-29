@@ -134,7 +134,7 @@ export default function CategoriesSection() {
   }, []);
 
   return (
-    <section className="bg-white py-12 lg:py-16 border-b border-gray-100" aria-labelledby="categories-heading">
+    <section className="bg-white py-8 lg:py-10 border-b border-gray-100" aria-labelledby="categories-heading">
       <Container>
         <HorizontalScrollRow
           scrollStep={300}

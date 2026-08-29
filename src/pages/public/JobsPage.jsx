@@ -8,17 +8,21 @@ import PageHeader from '../../components/marketplace/PageHeader';
 import JobCard from '../../components/marketplace/JobCard';
 import Pagination from '../../components/marketplace/Pagination';
 import FilterButton from '../../components/marketplace/FilterButton';
-import SearchBar from '../../components/marketplace/SearchBar';
+import HorizontalFilterBar from '../../components/marketplace/HorizontalFilterBar';
 import Modal from '../../components/ui/Modal';
 import JobFiltersPanel from '../../components/jobs/JobFiltersPanel';
 import JobCardSkeleton from '../../components/jobs/JobCardSkeleton';
 import { jobService } from '../../services/jobService';
 import { savedService } from '../../services/savedService';
+import { categoryService } from '../../services/categoryService';
+import { skillService } from '../../services/skillService';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../../i18n';
 import { normalizeJob } from '../../utils/jobMapper';
 import { getErrorMessage } from '../../utils/errors';
-import { usePageTitle } from '../../hooks/usePageTitle';  const FILTER_LABELS = {
+import { usePageTitle } from '../../hooks/usePageTitle';
+
+const FILTER_LABELS = {
   search: 'Search',
   category_id: 'Category',
   skill_id: 'Skill',
@@ -38,6 +42,8 @@ export default function JobsPage() {
 
   const [jobs, setJobs] = useState(null);
   const [meta, setMeta] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [skills, setSkills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -46,12 +52,8 @@ export default function JobsPage() {
 
   const { user } = useAuth();
 
-  // Text filter drafts — the URL stays the source of truth; these are applied
-  // on submit/apply so typing does not rewrite the URL on every keystroke.
   const [searchInput, setSearchInput] = useState(searchParams.get('search') ?? '');
   const [locationInput, setLocationInput] = useState(searchParams.get('location') ?? '');
-  const [minBudget, setMinBudget] = useState(searchParams.get('min_budget') ?? '');
-  const [maxBudget, setMaxBudget] = useState(searchParams.get('max_budget') ?? '');
 
   const page = Math.max(1, Number(searchParams.get('page')) || 1);
 
@@ -59,9 +61,21 @@ export default function JobsPage() {
   useEffect(() => {
     setSearchInput(searchParams.get('search') ?? '');
     setLocationInput(searchParams.get('location') ?? '');
-    setMinBudget(searchParams.get('min_budget') ?? '');
-    setMaxBudget(searchParams.get('max_budget') ?? '');
   }, [searchParams]);
+
+  // Load categories & skills for filter dropdowns
+  useEffect(() => {
+    categoryService.getCategories()
+      .then((res) => setCategories(res?.data ?? (Array.isArray(res) ? res : [])))
+      .catch(() => {});
+
+    skillService.getSkills()
+      .then((res) => {
+        const list = res?.data ?? (Array.isArray(res) ? res : []);
+        setSkills(list.filter((s) => s.is_active !== false));
+      })
+      .catch(() => {});
+  }, []);
 
   // Load saved state for authenticated users.
   const loadSavedState = useCallback(async () => {
@@ -72,7 +86,7 @@ export default function JobsPage() {
         setSavedIds(new Set((res.data ?? []).map((s) => s.job_id)));
       }
     } catch {
-      // Silently ignore — save state is non-critical.
+      // Silently ignore
     }
   }, [user]);
 
@@ -164,37 +178,34 @@ export default function JobsPage() {
   );
 
   const applyTextFilters = () => {
-    // Commit ALL current filter values atomically — text drafts + already-set
-    // dropdown values — so the Apply button always reflects the complete state.
     setSearchParams((prev) => {
-      const next = new URLSearchParams();
-      // Carry over dropdown/select values already committed to the URL.
-      const selectKeys = [
-        'category_id', 'skill_id', 'budget_type',
-        'experience_level', 'location_type', 'sort',
-      ];
-      selectKeys.forEach((key) => {
-        const v = prev.get(key);
-        if (v) next.set(key, v);
-      });
-      // Flush text input drafts.
+      const next = new URLSearchParams(prev);
       if (searchInput.trim()) next.set('search', searchInput.trim());
+      else next.delete('search');
       if (locationInput.trim()) next.set('location', locationInput.trim());
-      if (minBudget) next.set('min_budget', minBudget);
-      if (maxBudget) next.set('max_budget', maxBudget);
-      // Always reset to page 1.
+      else next.delete('location');
       next.delete('page');
       return next;
     });
     setFiltersOpen(false);
   };
 
-  const clearAll = () => setSearchParams({});
+  const clearAll = () => {
+    setSearchInput('');
+    setLocationInput('');
+    setSearchParams({});
+  };
   const goToPage = (nextPage) => updateParams({ page: nextPage }, { resetPage: false });
 
   const activeFilters = [...searchParams.entries()]
     .filter(([key]) => key !== 'page')
-    .map(([key, value]) => ({ key, value, label: `${FILTER_LABELS[key] ?? key}: ${value}` }));
+    .map(([key, value]) => {
+      if (key === 'category_id') {
+        const cat = categories.find((c) => String(c.id) === String(value));
+        return { key, value, label: `Category: ${cat?.name ?? value}` };
+      }
+      return { key, value, label: `${FILTER_LABELS[key] ?? key}: ${value}` };
+    });
 
   const total = meta?.total;
   const totalPages = meta?.last_page ?? 1;
@@ -211,158 +222,139 @@ export default function JobsPage() {
         breadcrumbs={[{ label: t('nav.homeShort'), to: '/' }, { label: t('jobs.title') }]}
       />
 
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-        {/* Desktop filter sidebar */}
-        <aside className="hidden w-64 shrink-0 lg:block" aria-label="Job filters">
-          <JobFiltersPanel
-            values={{
-              search: searchInput,
-              category_id: searchParams.get('category_id') ?? '',
-              skill_id: searchParams.get('skill_id') ?? '',
-              location: locationInput,
-              min_budget: minBudget,
-              max_budget: maxBudget,
-              budget_type: searchParams.get('budget_type') ?? '',
-              experience_level: searchParams.get('experience_level') ?? '',
-              location_type: searchParams.get('location_type') ?? '',
-              sort: searchParams.get('sort') ?? '',
-            }}
-            onChange={(key, value) => {
-              if (['search', 'location', 'min_budget', 'max_budget'].includes(key)) {
-                if (key === 'search') setSearchInput(value);
-                if (key === 'location') setLocationInput(value);
-                if (key === 'min_budget') setMinBudget(value);
-                if (key === 'max_budget') setMaxBudget(value);
-              } else {
-                updateParams({ [key]: value });
-              }
-            }}
-            onApply={applyTextFilters}
-            onClear={clearAll}
-          />
-        </aside>
+      {/* Guru.com Style Top Horizontal Search & Filter Bar */}
+      <div className="mb-6">
+        <HorizontalFilterBar
+          type="jobs"
+          values={{
+            search: searchInput,
+            category_id: searchParams.get('category_id') ?? '',
+            skill_id: searchParams.get('skill_id') ?? '',
+            location: locationInput,
+            budget_type: searchParams.get('budget_type') ?? '',
+            experience_level: searchParams.get('experience_level') ?? '',
+            location_type: searchParams.get('location_type') ?? '',
+            sort: searchParams.get('sort') ?? '',
+          }}
+          categories={categories}
+          skills={skills}
+          onChange={(key, value) => {
+            if (key === 'search') setSearchInput(value);
+            else if (key === 'location') setLocationInput(value);
+            else updateParams({ [key]: value });
+          }}
+          onApply={applyTextFilters}
+          onClear={clearAll}
+        />
+      </div>
 
-        {/* Results column */}
-        <div className="min-w-0 flex-1">
-          {/* Toolbar */}
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="w-full sm:w-auto sm:min-w-72 sm:max-w-md">
-              <SearchBar
-                value={searchInput}
-                onChange={(value) => {
-                  setSearchInput(value);
-                  if (value === '') updateParams({ search: '' });
-                }}
-                onSubmit={applyTextFilters}
-                placeholder={t('hero.searchPlaceholder')}
-                label={t('common.search')}
-              />
-            </div>
-            <div className="flex items-center gap-3">
-              <p className="text-sm text-gray-500" aria-live="polite">
-                {showSkeletons
-                  ? t('jobs.loading')
-                  : total != null
-                    ? t('jobs.foundCount', { count: total })
-                    : ''}
-              </p>
-              <FilterButton
-                active={activeFilters.length > 0}
-                icon={SlidersHorizontal}
-                label={t('common.filter')}
-                onClick={() => setFiltersOpen(true)}
-                className="lg:hidden"
-              />
-            </div>
-          </div>
+      {/* Results Header Toolbar (Total count & active filter pills) */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-4">
+        <div className="flex items-center gap-3">
+          <p className="text-sm font-medium text-gray-600" aria-live="polite">
+            {showSkeletons
+              ? t('jobs.loading')
+              : total != null
+                ? t('jobs.foundCount', { count: total })
+                : ''}
+          </p>
+        </div>
 
-          {/* Active filter chips */}
-          {activeFilters.length > 0 && (
-            <div className="mb-4 flex flex-wrap items-center gap-2">
-              {activeFilters.map((filter) => (
-                <span
-                  key={filter.key}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white py-1 pl-3 pr-1.5 text-xs font-medium text-ink-700 shadow-sm"
-                >
-                  <span className="max-w-48 truncate">{filter.label}</span>
-                  <button
-                    type="button"
-                    onClick={() => updateParams({ [filter.key]: '' })}
-                    aria-label={`Remove ${filter.label} filter`}
-                    className="rounded-full p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-ink-900"
-                  >
-                    <X className="h-3 w-3" aria-hidden="true" />
-                  </button>
-                </span>
-              ))}
+        {/* Mobile filter toggle */}
+        <FilterButton
+          active={activeFilters.length > 0}
+          icon={SlidersHorizontal}
+          label={t('common.filter')}
+          onClick={() => setFiltersOpen(true)}
+          className="md:hidden"
+        />
+      </div>
+
+      {/* Active filter chips */}
+      {activeFilters.length > 0 && (
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+          {activeFilters.map((filter) => (
+            <span
+              key={filter.key}
+              className="inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50/50 py-1 pl-3 pr-1.5 text-xs font-medium text-brand-900 shadow-2xs"
+            >
+              <span className="max-w-48 truncate">{filter.label}</span>
               <button
                 type="button"
-                onClick={clearAll}
-                className="text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
+                onClick={() => updateParams({ [filter.key]: '' })}
+                aria-label={`Remove ${filter.label} filter`}
+                className="rounded-full p-0.5 text-brand-500 transition-colors hover:bg-brand-100 hover:text-brand-900"
               >
-                {t('common.clearFilters')}
+                <X className="h-3 w-3" aria-hidden="true" />
               </button>
-            </div>
-          )}
-
-          {/* Results */}
-          {showSkeletons && (
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-2">
-              {Array.from({ length: 6 }, (_, index) => (
-                <JobCardSkeleton key={index} />
-              ))}
-            </div>
-          )}
-
-          {showError && (
-            <ErrorState
-              title={t('common.errorOccurred')}
-              description={error}
-              onRetry={loadJobs}
-            />
-          )}
-
-          {showEmpty && (
-            <EmptyState
-              icon={SearchX}
-              title={t('common.noResults')}
-              description={t('jobs.noJobs')}
-              action={
-                <button
-                  type="button"
-                  onClick={clearAll}
-                  className="text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
-                >
-                  {t('common.clearFilters')}
-                </button>
-              }
-            />
-          )}
-
-          {!showSkeletons && !showError && jobs?.length > 0 && (
-            <>
-              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                {jobs.map((job) => (
-                  <JobCard
-                    key={job.id}
-                    job={{ ...job, saved: savedIds.has(job.id) }}
-                    savable
-                    onSave={handleSaveJob}
-                    onUnsave={handleUnsaveJob}
-                    saving={savingId === job.id}
-                  />
-                ))}
-              </div>
-              <Pagination
-                page={page}
-                totalPages={totalPages}
-                onChange={goToPage}
-                className="mt-8"
-              />
-            </>
-          )}
+            </span>
+          ))}
+          <button
+            type="button"
+            onClick={clearAll}
+            className="text-xs font-semibold text-brand-600 transition-colors hover:text-brand-700"
+          >
+            {t('common.clearFilters')}
+          </button>
         </div>
-      </div>
+      )}
+
+      {/* Results Grid - Spans Full Width */}
+      {showSkeletons && (
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }, (_, index) => (
+            <JobCardSkeleton key={index} />
+          ))}
+        </div>
+      )}
+
+      {showError && (
+        <ErrorState
+          title={t('common.errorOccurred')}
+          description={error}
+          onRetry={loadJobs}
+        />
+      )}
+
+      {showEmpty && (
+        <EmptyState
+          icon={SearchX}
+          title={t('common.noResults')}
+          description={t('jobs.noJobs')}
+          action={
+            <button
+              type="button"
+              onClick={clearAll}
+              className="text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
+            >
+              {t('common.clearFilters')}
+            </button>
+          }
+        />
+      )}
+
+      {!showSkeletons && !showError && jobs?.length > 0 && (
+        <>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {jobs.map((job) => (
+              <JobCard
+                key={job.id}
+                job={{ ...job, saved: savedIds.has(job.id) }}
+                savable
+                onSave={handleSaveJob}
+                onUnsave={handleUnsaveJob}
+                saving={savingId === job.id}
+              />
+            ))}
+          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onChange={goToPage}
+            className="mt-8"
+          />
+        </>
+      )}
 
       {/* Mobile filter modal */}
       <Modal
@@ -377,22 +369,15 @@ export default function JobsPage() {
             category_id: searchParams.get('category_id') ?? '',
             skill_id: searchParams.get('skill_id') ?? '',
             location: locationInput,
-            min_budget: minBudget,
-            max_budget: maxBudget,
             budget_type: searchParams.get('budget_type') ?? '',
             experience_level: searchParams.get('experience_level') ?? '',
             location_type: searchParams.get('location_type') ?? '',
             sort: searchParams.get('sort') ?? '',
           }}
           onChange={(key, value) => {
-            if (['search', 'location', 'min_budget', 'max_budget'].includes(key)) {
-              if (key === 'search') setSearchInput(value);
-              if (key === 'location') setLocationInput(value);
-              if (key === 'min_budget') setMinBudget(value);
-              if (key === 'max_budget') setMaxBudget(value);
-            } else {
-              updateParams({ [key]: value });
-            }
+            if (key === 'search') setSearchInput(value);
+            else if (key === 'location') setLocationInput(value);
+            else updateParams({ [key]: value });
           }}
           onApply={applyTextFilters}
           onClear={() => {

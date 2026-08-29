@@ -143,11 +143,20 @@ export const adminService = {
     return response.data;
   },
 
-  /** PUT /admin/reports/:id/resolve — mark a report as resolved. */
-  resolveReport: async (id, resolution = '', paymentAction = 'hold') => {
+  /** PUT /admin/reports/:id/resolve — resolve a dispute (release or refund). */
+  resolveReport: async (id, resolution = '', resolutionType = 'release_to_freelancer') => {
     const response = await apiClient.put(`/admin/reports/${id}/resolve`, {
       resolution,
-      payment_action: paymentAction,
+      resolution_type: resolutionType,
+    });
+    return response.data;
+  },
+
+  /** POST /admin/reports/:id/notes — add admin note to a dispute. */
+  addReportNote: async (id, note, recipientType = 'both') => {
+    const response = await apiClient.post(`/admin/reports/${id}/notes`, {
+      note,
+      recipient_type: recipientType,
     });
     return response.data;
   },

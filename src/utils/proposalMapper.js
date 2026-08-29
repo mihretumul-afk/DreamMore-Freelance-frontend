@@ -61,6 +61,7 @@ export function normalizeProposal(proposal) {
     })),
     proposedMilestones: proposal.proposed_milestones || proposal.proposedMilestones || [],
     contract: proposal.contract ? { id: proposal.contract.id, status: proposal.contract.status } : null,
+    contractId: proposal.contract?.id ?? null,
 
     createdAt: proposal.created_at,
     createdAtLabel: timeAgo(proposal.created_at),

@@ -309,7 +309,7 @@ export const en = {
 
   // ---- Trusted By Section ----
   'trusted.eyebrow': 'Trusted by leading companies',
-  'trusted.title': 'Powering Success Across Ethiopia',
+  'trusted.title': 'Proven results on DreamMore',
   'trusted.subtitle':
     'From startups in Addis Ababa to enterprises across East Africa, top companies trust DreamMore to find the best talent.',
   'trusted.trustedByLabel': 'Companies using DreamMore',
@@ -415,6 +415,10 @@ export const en = {
   'nav.roles': 'Roles',
   'nav.auditLogs': 'Audit Logs',
   'nav.payments': 'Payments',
+  'nav.paymentMethods': 'Payment Methods',
+  'nav.earnings': 'Earnings',
+  'nav.withdrawals': 'Withdrawals',
+  'nav.finance': 'Finance',
   'nav.milestones': 'Milestones',
   'nav.transactions': 'Transactions',
   'nav.allJobs': 'All Jobs',

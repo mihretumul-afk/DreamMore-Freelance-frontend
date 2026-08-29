@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { MessageSquare, Send, ArrowLeft, Loader2, Wifi, WifiOff } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
@@ -14,6 +15,9 @@ import { useRealtimeMessages } from '../../hooks/useRealtimeMessages';
 
 export default function EmployerMessagesPage() {
   usePageTitle('Messages');
+  const [searchParams] = useSearchParams();
+  const targetUserId = searchParams.get('user_id') ?? searchParams.get('user') ?? searchParams.get('recipient_id');
+  const targetName = searchParams.get('name');
 
   const { user } = useAuth();
   const [conversations, setConversations] = useState([]);
@@ -46,6 +50,23 @@ export default function EmployerMessagesPage() {
   useEffect(() => {
     loadConversations();
   }, [loadConversations]);
+
+  // Handle opening targeted user conversation from query params
+  useEffect(() => {
+    if (!targetUserId || loading) return;
+    const existing = conversations.find(
+      (c) => String(c.id) === String(targetUserId) || String(c.user_id) === String(targetUserId)
+    );
+
+    if (existing) {
+      openConversation(existing);
+    } else {
+      openConversation({
+        id: Number(targetUserId) || targetUserId,
+        name: targetName || 'Talent',
+      });
+    }
+  }, [targetUserId, loading, conversations]);
 
   // Subscribe to real-time incoming messages
   useEffect(() => {

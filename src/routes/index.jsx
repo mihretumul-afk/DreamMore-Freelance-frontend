@@ -19,6 +19,13 @@ const FreelancersPage = lazy(() => import('../pages/public/FreelancersPage'));
 const FreelancerDetailsPage = lazy(() => import('../pages/public/FreelancerDetailsPage'));
 const CategoriesPage = lazy(() => import('../pages/public/CategoriesPage'));
 const HowItWorksPage = lazy(() => import('../pages/public/HowItWorksPage'));
+const AboutPage = lazy(() => import('../pages/public/AboutPage'));
+const ContactPage = lazy(() => import('../pages/public/ContactPage'));
+const TermsPage = lazy(() => import('../pages/public/TermsPage'));
+const PrivacyPage = lazy(() => import('../pages/public/PrivacyPage'));
+const HelpCenterPage = lazy(() => import('../pages/public/HelpCenterPage'));
+const SafetyPage = lazy(() => import('../pages/public/SafetyPage'));
+const CareersPage = lazy(() => import('../pages/public/CareersPage'));
 
 const LoginPage = lazy(() => import('../pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'));
@@ -31,13 +38,16 @@ const FreelancerJobsPage = lazy(() => import('../pages/freelancer/JobsPage'));
 const FreelancerProposalsPage = lazy(() => import('../pages/freelancer/ProposalsPage'));
 const FreelancerSubmitProposalPage = lazy(() => import('../pages/freelancer/FreelancerSubmitProposalPage'));
 const FreelancerProposalDetailsPage = lazy(() => import('../pages/freelancer/ProposalDetailsPage'));
-const FreelancerContractsPage = lazy(() => import('../pages/freelancer/ContractsPage'));
-const FreelancerContractDetailsPage = lazy(() => import('../pages/freelancer/ContractDetailsPage'));
 const FreelancerMessagesPage = lazy(() => import('../pages/freelancer/MessagesPage'));
 const FreelancerNotificationsPage = lazy(() => import('../pages/freelancer/NotificationsPage'));
 const FreelancerSavedJobsPage = lazy(() => import('../pages/freelancer/SavedJobsPage'));
 const FreelancerCredentialsPage = lazy(() => import('../pages/freelancer/CredentialsPage'));
+const FreelancerContractsPage = lazy(() => import('../pages/freelancer/ContractsPage'));
+const FreelancerContractDetailsPage = lazy(() => import('../pages/freelancer/ContractDetailsPage'));
+const FreelancerDisputesPage = lazy(() => import('../pages/freelancer/DisputesPage'));
+const FreelancerEarningsPage = lazy(() => import('../pages/freelancer/EarningsPage'));
 const FreelancerWithdrawalsPage = lazy(() => import('../pages/freelancer/WithdrawalsPage'));
+const PaymentMethodsPage = lazy(() => import('../pages/shared/PaymentMethodsPage'));
 
 const EmployerDashboardPage = lazy(() => import('../pages/employer/DashboardPage'));
 const EmployerProfilePage = lazy(() => import('../pages/employer/ProfilePage'));
@@ -47,18 +57,17 @@ const EmployerJobCreatePage = lazy(() => import('../pages/employer/JobCreatePage
 const EmployerJobDetailsPage = lazy(() => import('../pages/employer/JobDetailsPage'));
 const EmployerJobEditPage = lazy(() => import('../pages/employer/JobEditPage'));
 const EmployerJobProposalsPage = lazy(() => import('../pages/employer/JobProposalsPage'));
-const EmployerContractsPage = lazy(() => import('../pages/employer/ContractsPage'));
-const EmployerContractDetailsPage = lazy(() => import('../pages/employer/ContractDetailsPage'));
-const EmployerCheckoutPage = lazy(() => import('../pages/employer/CheckoutPage'));
 const EmployerMessagesPage = lazy(() => import('../pages/employer/MessagesPage'));
 const EmployerNotificationsPage = lazy(() => import('../pages/employer/NotificationsPage'));
 const EmployerSavedFreelancersPage = lazy(() => import('../pages/employer/SavedFreelancersPage'));
+const EmployerContractsPage = lazy(() => import('../pages/employer/ContractsPage'));
+const EmployerContractDetailsPage = lazy(() => import('../pages/employer/ContractDetailsPage'));
+const EmployerDisputesPage = lazy(() => import('../pages/employer/DisputesPage'));
+const EmployerPaymentMethodsPage = lazy(() => import('../pages/shared/PaymentMethodsPage'));
 
 const AdminLayout = lazy(() => import('../layouts/AdminLayout'));
 const AdminDashboardPage = lazy(() => import('../pages/admin/DashboardPage'));
 const SupportDashboard = lazy(() => import('../pages/admin/SupportDashboard'));
-const FinanceDashboard = lazy(() => import('../pages/admin/FinanceDashboard'));
-const DisputeDashboard = lazy(() => import('../pages/admin/DisputeDashboard'));
 const VerificationDashboard = lazy(() => import('../pages/admin/VerificationDashboard'));
 const AdminUsersPage = lazy(() => import('../pages/admin/UsersPage'));
 const AdminUserDetailPage = lazy(() => import('../pages/admin/UserDetailPage'));
@@ -76,13 +85,8 @@ const AdminDetailPage = lazy(() => import('../pages/admin/AdminDetailPage'));
 const RolesPage = lazy(() => import('../pages/admin/RolesPage'));
 const RoleFormPage = lazy(() => import('../pages/admin/RoleFormPage'));
 const AuditLogsPage = lazy(() => import('../pages/admin/AuditLogsPage'));
-const PaymentsPage = lazy(() => import('../pages/admin/PaymentsPage'));
-const MilestonesAdminPage = lazy(() => import('../pages/admin/MilestonesAdminPage'));
-const TransactionsPage = lazy(() => import('../pages/admin/TransactionsPage'));
-const AdminWithdrawalsPage = lazy(() => import('../pages/admin/AdminWithdrawalsPage'));
+const FinanceDashboard = lazy(() => import('../pages/admin/FinanceDashboard'));
 // Stage 1 Payment — user-facing
-const PaymentCenterPage = lazy(() => import('../pages/shared/PaymentCenterPage'));
-const PaymentMethodsPage = lazy(() => import('../pages/shared/PaymentMethodsPage'));
 const MaintenancePage = lazy(() => import('../pages/public/MaintenancePage'));
 
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
@@ -124,6 +128,13 @@ export const router = createBrowserRouter([
           { path: 'freelancers/:id', element: lazyPage(<FreelancerDetailsPage />) },
           { path: 'categories', element: lazyPage(<CategoriesPage />) },
           { path: 'how-it-works', element: lazyPage(<HowItWorksPage />) },
+          { path: 'about', element: lazyPage(<AboutPage />) },
+          { path: 'contact', element: lazyPage(<ContactPage />) },
+          { path: 'terms', element: lazyPage(<TermsPage />) },
+          { path: 'privacy', element: lazyPage(<PrivacyPage />) },
+          { path: 'help', element: lazyPage(<HelpCenterPage />) },
+          { path: 'safety', element: lazyPage(<SafetyPage />) },
+          { path: 'careers', element: lazyPage(<CareersPage />) },
         ],
       },
     ],
@@ -144,14 +155,13 @@ export const router = createBrowserRouter([
           { index: true, element: <AdminRedirect /> },
           { path: 'dashboard', element: lazyPage(<AdminDashboardPage />) },
           { path: 'support/dashboard', element: lazyPage(<SupportDashboard />) },
-          { path: 'finance/dashboard', element: lazyPage(<FinanceDashboard />) },
-          { path: 'disputes/dashboard', element: lazyPage(<DisputeDashboard />) },
           { path: 'verification/dashboard', element: lazyPage(<VerificationDashboard />) },
           { path: 'users', element: lazyPage(<AdminUsersPage />) },
           { path: 'users/:id', element: lazyPage(<AdminUserDetailPage />) },
           { path: 'verifications', element: lazyPage(<AdminVerificationsPage />) },
           { path: 'jobs', element: lazyPage(<AdminJobsPage />) },
           { path: 'reports', element: lazyPage(<AdminReportsPage />) },
+          { path: 'reports/:id', element: lazyPage(<AdminReportsPage />) },
           { path: 'categories', element: lazyPage(<AdminCategoriesPage />) },
           { path: 'skills', element: lazyPage(<AdminSkillsPage />) },
           { path: 'freelancers', element: lazyPage(<AdminFreelancerApprovalPage />) },
@@ -164,11 +174,8 @@ export const router = createBrowserRouter([
           { path: 'roles/create', element: lazyPage(<RoleFormPage />) },
           { path: 'roles/:id', element: lazyPage(<RoleFormPage />) },
           { path: 'roles/:id/edit', element: lazyPage(<RoleFormPage />) },
+          { path: 'finance', element: lazyPage(<FinanceDashboard />) },
           { path: 'audit-logs', element: lazyPage(<AuditLogsPage />) },
-          { path: 'payments', element: lazyPage(<PaymentsPage />) },
-          { path: 'milestones', element: lazyPage(<MilestonesAdminPage />) },
-          { path: 'transactions', element: lazyPage(<TransactionsPage />) },
-          { path: 'withdrawals', element: lazyPage(<AdminWithdrawalsPage />) },
         ],
       },
     ],
@@ -196,13 +203,15 @@ export const router = createBrowserRouter([
           { path: 'proposals/:id', element: lazyPage(<FreelancerProposalDetailsPage />) },
           { path: 'contracts', element: lazyPage(<FreelancerContractsPage />) },
           { path: 'contracts/:id', element: lazyPage(<FreelancerContractDetailsPage />) },
+          { path: 'disputes', element: lazyPage(<FreelancerDisputesPage />) },
+          { path: 'disputes/:id', element: lazyPage(<FreelancerDisputesPage />) },
+          { path: 'earnings', element: lazyPage(<FreelancerEarningsPage />) },
+          { path: 'withdrawals', element: lazyPage(<FreelancerWithdrawalsPage />) },
+          { path: 'settings/payment-methods', element: lazyPage(<PaymentMethodsPage />) },
           { path: 'saved-jobs', element: lazyPage(<FreelancerSavedJobsPage />) },
           { path: 'credentials', element: lazyPage(<FreelancerCredentialsPage />) },
           { path: 'messages', element: lazyPage(<FreelancerMessagesPage />) },
           { path: 'notifications', element: lazyPage(<FreelancerNotificationsPage />) },
-          { path: 'payments', element: lazyPage(<PaymentCenterPage />) },
-          { path: 'payment-methods', element: lazyPage(<PaymentMethodsPage />) },
-          { path: 'withdrawals', element: lazyPage(<FreelancerWithdrawalsPage />) },
         ],
       },
       {
@@ -224,12 +233,12 @@ export const router = createBrowserRouter([
           { path: 'jobs/:id/proposals', element: lazyPage(<EmployerJobProposalsPage />) },
           { path: 'contracts', element: lazyPage(<EmployerContractsPage />) },
           { path: 'contracts/:id', element: lazyPage(<EmployerContractDetailsPage />) },
-          { path: 'contracts/:contractId/milestones/:milestoneId/checkout', element: lazyPage(<EmployerCheckoutPage />) },
+          { path: 'disputes', element: lazyPage(<EmployerDisputesPage />) },
+          { path: 'disputes/:id', element: lazyPage(<EmployerDisputesPage />) },
+          { path: 'settings/payment-methods', element: lazyPage(<EmployerPaymentMethodsPage />) },
           { path: 'saved-freelancers', element: lazyPage(<EmployerSavedFreelancersPage />) },
           { path: 'messages', element: lazyPage(<EmployerMessagesPage />) },
           { path: 'notifications', element: lazyPage(<EmployerNotificationsPage />) },
-          { path: 'payments', element: lazyPage(<PaymentCenterPage />) },
-          { path: 'payment-methods', element: lazyPage(<PaymentMethodsPage />) },
         ],
       },
     ],

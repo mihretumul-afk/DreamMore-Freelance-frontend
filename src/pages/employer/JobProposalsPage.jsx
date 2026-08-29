@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { CheckCircle2, Clock, Inbox, Star, XCircle, ShieldCheck, Briefcase, ExternalLink } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
@@ -39,8 +39,8 @@ const ACTION_DIALOGS = {
   accept: {
     title: 'Accept proposal?',
     description:
-      'Accepting creates a contract, rejects remaining proposals, and moves the job to in-progress.',
-    confirmLabel: 'Accept & Create Contract',
+      'Accepting hires the freelancer, rejects remaining proposals, and moves the job to in-progress.',
+    confirmLabel: 'Accept Proposal',
     tone: 'success',
   },
 };
@@ -48,6 +48,7 @@ const ACTION_DIALOGS = {
 export default function EmployerJobProposalsPage() {
   usePageTitle('Job Proposals');
   const { id: jobId } = useParams();
+  const navigate = useNavigate();
   const { showToast } = useToast();
 
   const [page, setPage] = useState(1);
@@ -67,16 +68,24 @@ export default function EmployerJobProposalsPage() {
       if (!silent) setLoading(true);
       setError(null);
       try {
-        const [jobRes, proposalsRes] = await Promise.all([
+        const [jobRes, proposalsRes] = await Promise.allSettled([
           jobService.getJob(jobId),
           proposalService.getJobProposals(jobId, { page }),
         ]);
-        setJob(normalizeJob(jobRes.data));
-        const rawProposals = Array.isArray(proposalsRes.data)
-          ? proposalsRes.data
-          : (proposalsRes.data?.data ?? []);
-        setProposals(rawProposals.map(normalizeProposal));
-        setMeta(proposalsRes.meta ?? proposalsRes.data?.meta ?? null);
+        // Job may fail if status changed (e.g. to in_progress after acceptance)
+        if (jobRes.status === 'fulfilled') {
+          setJob(normalizeJob(jobRes.value.data));
+        }
+        // Proposals
+        if (proposalsRes.status === 'fulfilled') {
+          const rawProposals = Array.isArray(proposalsRes.value.data)
+            ? proposalsRes.value.data
+            : (proposalsRes.value.data?.data ?? []);
+          setProposals(rawProposals.map(normalizeProposal));
+          setMeta(proposalsRes.value.meta ?? proposalsRes.value.data?.meta ?? null);
+        } else {
+          setError(getErrorMessage(proposalsRes.reason, 'Unable to load proposals. Please try again.'));
+        }
       } catch (err) {
         setError(getErrorMessage(err, 'Unable to load proposals. Please try again.'));
       } finally {
@@ -103,16 +112,30 @@ export default function EmployerJobProposalsPage() {
             ? proposalService.rejectProposal
             : proposalService.acceptProposal;
       const res = await call(jobId, proposal.id);
-      const msg = res.message || 'Proposal updated.';
+      const defaultMsg =
+        kind === 'accept'
+          ? 'Proposal accepted successfully. A contract has been created.'
+          : kind === 'shortlist'
+            ? 'Freelancer has been added to your shortlist.'
+            : 'Proposal rejected successfully.';
+      const msg = res.message || defaultMsg;
       setNotice(msg);
       showToast(msg, 'success');
       setActionTarget(null);
+      // After accepting, the job moves to in_progress and contract is created.
+      // Redirect to the contracts page so the employer can manage the new contract.
+      if (kind === 'accept') {
+        navigate('/employer/contracts');
+        return;
+      }
       await fetchAll(true);
     } catch (err) {
       const msg = getErrorMessage(err, 'Unable to update this proposal. Please try again.');
       setActionError(msg);
       showToast(msg, 'error');
       setActing(false);
+      // Refresh data in case the backend partially succeeded (e.g., accept worked but broadcast failed)
+      await fetchAll(true);
     }
   };
 

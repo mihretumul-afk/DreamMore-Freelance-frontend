@@ -21,6 +21,7 @@ import { normalizeProposal, proposalFormToPayload } from '../../utils/proposalMa
 import { getErrorMessage, getFieldErrors } from '../../utils/errors';
 import { formatDate, formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { useToast } from '../../hooks/useToast';
 
 /** Statuses in which the freelancer may still edit/withdraw (backend rule). */
 const EDITABLE_STATUSES = ['pending', 'shortlisted'];
@@ -28,6 +29,7 @@ const EDITABLE_STATUSES = ['pending', 'shortlisted'];
 export default function FreelancerProposalDetailsPage() {
   usePageTitle('Proposal Details');
   const { id } = useParams();
+  const { addToast } = useToast();
 
   const [proposal, setProposal] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -84,12 +86,13 @@ export default function FreelancerProposalDetailsPage() {
       setProposal(normalizeProposal(res.data?.proposal ?? res.data));
       setEditing(false);
       setNotice('Proposal updated successfully.');
+      addToast('Proposal updated successfully.', 'success');
     } catch (err) {
       setFieldErrors(getFieldErrors(err));
       const hasFieldErrors = Object.keys(getFieldErrors(err)).length > 0;
-      setGeneralError(
-        hasFieldErrors ? null : getErrorMessage(err, 'Unable to update your proposal. Please try again.'),
-      );
+      const errMsg = getErrorMessage(err, 'Unable to update your proposal. Please try again.');
+      setGeneralError(hasFieldErrors ? null : errMsg);
+      addToast(errMsg, 'error');
       setActing(false);
     }
   };
@@ -102,8 +105,11 @@ export default function FreelancerProposalDetailsPage() {
       setProposal(normalizeProposal(res.data?.proposal ?? res.data));
       setWithdrawOpen(false);
       setNotice('Proposal withdrawn.');
+      addToast('Proposal withdrawn successfully.', 'info');
     } catch (err) {
-      setGeneralError(getErrorMessage(err, 'Unable to withdraw your proposal. Please try again.'));
+      const errMsg = getErrorMessage(err, 'Unable to withdraw your proposal. Please try again.');
+      setGeneralError(errMsg);
+      addToast(errMsg, 'error');
       setActing(false);
     }
   };
@@ -129,8 +135,32 @@ export default function FreelancerProposalDetailsPage() {
     portfolioItemIds: (proposal.portfolioItems || []).map((i) => i.id),
   };
 
+  const isAccepted = proposal.status === 'accepted';
+
   return (
     <div className="space-y-6">
+      {/* Accepted Banner */}
+      {isAccepted && (
+        <div className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50 p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100">
+              <CheckCircle2 className="h-6 w-6 text-emerald-600" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-extrabold text-emerald-900">Proposal Accepted! 🎉</h2>
+              <p className="mt-1 text-sm text-emerald-700">
+                The employer has accepted your proposal. A contract has been created. Go to your Contracts page to accept it and start working.
+              </p>
+              <div className="mt-3 flex gap-2">
+                <Button as={Link} to="/freelancer/contracts" variant="success" size="sm">
+                  <Handshake className="h-4 w-4" /> View Contracts
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <PageHeader
         eyebrow="Freelancer"
         title="Proposal Details"
@@ -157,12 +187,19 @@ export default function FreelancerProposalDetailsPage() {
             <CardHeader title="Job" />
             <CardBody>
               {proposal.jobTitle ? (
-                <Link
-                  to={`/jobs/${proposal.jobId}`}
-                  className="text-base font-bold text-ink-900 transition-colors hover:text-brand-600"
-                >
-                  {proposal.jobTitle}
-                </Link>
+                <div className="flex items-center gap-3">
+                  <Link
+                    to={`/jobs/${proposal.jobId}`}
+                    className="text-base font-bold text-ink-900 transition-colors hover:text-brand-600"
+                  >
+                    {proposal.jobTitle}
+                  </Link>
+                  {isAccepted && proposal.contractId && (
+                    <Button as={Link} to={`/freelancer/contracts/${proposal.contractId}`} size="xs" variant="success">
+                      <Handshake className="h-3.5 w-3.5" /> View Contract
+                    </Button>
+                  )}
+                </div>
               ) : (
                 <p className="text-sm text-gray-500">This job is no longer available.</p>
               )}
@@ -186,34 +223,6 @@ export default function FreelancerProposalDetailsPage() {
           {/* Attached Portfolio Projects */}
           {proposal.portfolioItems && proposal.portfolioItems.length > 0 && (
             <ProposalPortfolioGallery items={proposal.portfolioItems} />
-          )}
-
-          {/* Contract, when the backend created one */}
-          {proposal.contract && (
-            <Card>
-              <CardHeader
-                title="Contract"
-                description="Created from this proposal after acceptance."
-              />
-              <CardBody>
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-success-50">
-                      <Handshake className="h-4 w-4 text-success-600" aria-hidden="true" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-ink-900">
-                        Contract #{proposal.contract.id}
-                      </p>
-                      <p className="text-xs text-gray-500">{proposal.contract.status}</p>
-                    </div>
-                  </div>
-                  <Button as={Link} to="/freelancer/contracts" variant="outline" size="sm">
-                    View Contracts
-                  </Button>
-                </div>
-              </CardBody>
-            </Card>
           )}
         </div>
 
@@ -263,6 +272,16 @@ export default function FreelancerProposalDetailsPage() {
               )}
             </CardBody>
             <div className="space-y-2 border-t border-gray-100 px-5 py-4">
+              {isAccepted && proposal.contractId && (
+                <Button as={Link} to={`/freelancer/contracts/${proposal.contractId}`} className="w-full" size="sm" variant="success">
+                  <Handshake className="h-4 w-4" /> View Contract
+                </Button>
+              )}
+              {isAccepted && (
+                <Button as={Link} to="/freelancer/contracts" className="w-full" size="sm" variant="outline">
+                  All Contracts
+                </Button>
+              )}
               {editable && !editing && (
                 <>
                   <Button className="w-full" size="sm" onClick={() => setEditing(true)}>

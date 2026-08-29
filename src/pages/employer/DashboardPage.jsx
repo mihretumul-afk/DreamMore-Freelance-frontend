@@ -5,7 +5,6 @@ import {
   Briefcase,
   Building2,
   ClipboardList,
-  Handshake,
   MapPin,
   Pencil,
   PlusCircle,
@@ -15,17 +14,14 @@ import {
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
-import WalletCard from '../../components/common/WalletCard';
 import Avatar from '../../components/marketplace/Avatar';
 import RatingDisplay from '../../components/marketplace/RatingDisplay';
 import StatusBadge from '../../components/marketplace/StatusBadge';
 import Button from '../../components/ui/Button';
 import { employerService } from '../../services/employerService';
-import { contractService } from '../../services/contractService';
 import { recommendationService } from '../../services/recommendationService';
 import { normalizeEmployer } from '../../utils/employerMapper';
 import { normalizeJob } from '../../utils/jobMapper';
-import { normalizeContract } from '../../utils/contractMapper';
 import { getErrorMessage } from '../../utils/errors';
 import { formatETB } from '../../utils/format';
 import { useAuth } from '../../hooks/useAuth';
@@ -37,11 +33,11 @@ function Skeleton() {
   return (
     <div className="animate-pulse space-y-6">
       <div className="h-40 rounded-2xl bg-gray-200" />
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        {[...Array(4)].map((_, i) => <div key={i} className="h-28 rounded-2xl bg-gray-200" />)}
+      <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
+        {[...Array(3)].map((_, i) => <div key={i} className="h-28 rounded-2xl bg-gray-200" />)}
       </div>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {[...Array(3)].map((_, i) => <div key={i} className="h-64 rounded-2xl bg-gray-200" />)}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {[...Array(2)].map((_, i) => <div key={i} className="h-64 rounded-2xl bg-gray-200" />)}
       </div>
     </div>
   );
@@ -120,25 +116,18 @@ export default function EmployerDashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const [profileRes, jobsRes, contractsRes] = await Promise.all([
+      const [profileRes, jobsRes] = await Promise.all([
         employerService.getMyProfile(),
         employerService.getMyJobs({ page: 1 }),
-        contractService.getMyContracts(),
       ]);
 
       const rawJobs = Array.isArray(jobsRes.data) ? jobsRes.data : (jobsRes.data?.data ?? []);
-      const rawContracts = Array.isArray(contractsRes.data)
-        ? contractsRes.data
-        : (contractsRes.data?.data ?? []);
-
       const jobs = rawJobs.map(normalizeJob);
-      const contracts = rawContracts.map(normalizeContract);
 
       setData({
         profile: normalizeEmployer(profileRes.data),
         jobs,
         jobsTotal: jobsRes.meta?.total ?? jobsRes.data?.meta?.total ?? jobs.length,
-        contracts,
       });
 
       recommendationService
@@ -161,13 +150,11 @@ export default function EmployerDashboardPage() {
     );
   }
 
-  const { profile, jobs, jobsTotal, contracts } = data;
+  const { profile, jobs, jobsTotal } = data;
   const displayName = profile.companyName || user?.name || profile.name || 'there';
   const firstName = displayName.split(' ')[0];
   const proposalsReceived = jobs.reduce((sum, job) => sum + (job.proposalsCount ?? 0), 0);
-  const activeContracts = contracts.filter((c) => c.status === 'active' || c.status === 'paused');
   const recentJobs = jobs.slice(0, 5);
-  const recentContracts = contracts.slice(0, 5);
 
   const now = new Date();
   const hour = now.getHours();
@@ -208,11 +195,8 @@ export default function EmployerDashboardPage() {
         </div>
       </div>
 
-      {/* ── Wallet balance & test withdrawal card ─────────────────────── */}
-      <WalletCard userRole="employer" />
-
       {/* ── Stat cards ───────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <StatCard
           icon={ClipboardList}
           label="Active jobs"
@@ -227,32 +211,17 @@ export default function EmployerDashboardPage() {
           hint="Across all jobs"
           color="violet"
         />
-        <StatCard
-          icon={Handshake}
-          label="Active contracts"
-          value={activeContracts.length}
-          hint="Active or paused"
-          color="amber"
-        />
-        <StatCard
-          icon={Banknote}
-          label="Total spent"
-          value={formatETB(profile.totalSpent ?? 0)}
-          hint="Confirmed payments"
-          color="emerald"
-        />
       </div>
 
       {/* ── Quick actions ─────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <QuickAction icon={PlusCircle}   label="Post a Job"      description="Hire top talent"         to="/employer/jobs/create"         color="brand"   />
         <QuickAction icon={ClipboardList} label="My Jobs"        description="Manage your listings"    to="/employer/jobs"                color="violet"  />
-        <QuickAction icon={Handshake}    label="Contracts"       description="Active agreements"       to="/employer/contracts"           color="emerald" />
         <QuickAction icon={Pencil}       label="Edit Profile"    description="Update company info"     to="/employer/profile/edit"        color="amber"   />
       </div>
 
-      {/* ── 3-column bento grid ──────────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      {/* ── 2-column bento grid ──────────────────────────────────────── */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
         {/* Posted jobs */}
         <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
@@ -297,52 +266,6 @@ export default function EmployerDashboardPage() {
                   <PlusCircle className="h-3.5 w-3.5" /> Post a Job
                 </Link>
               }
-            />
-          )}
-        </div>
-
-        {/* Active contracts */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-          <SectionHeader title="Contracts" viewAllTo={contracts.length > 0 ? '/employer/contracts' : undefined} />
-          {recentContracts.length > 0 ? (
-            <ul className="divide-y divide-gray-50">
-              {recentContracts.map((contract) => (
-                <li key={contract.id} className="py-3 first:pt-0 last:pb-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <Link
-                      to={`/employer/contracts/${contract.id}`}
-                      className="min-w-0 text-sm font-semibold text-ink-900 hover:text-brand-600 line-clamp-1"
-                    >
-                      {contract.title}
-                    </Link>
-                    <StatusBadge status={contract.status} size="xs" />
-                  </div>
-                  <p className="mt-0.5 text-xs text-gray-400">
-                    {formatETB(contract.totalAmount)}
-                    {contract.createdAtLabel ? ` · ${contract.createdAtLabel}` : ''}
-                  </p>
-                  {contract.summary?.progressPercent != null && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
-                        <div
-                          className="h-full rounded-full bg-emerald-500 transition-all"
-                          style={{ width: `${Math.min(100, Math.max(0, contract.summary.progressPercent))}%` }}
-                        />
-                      </div>
-                      <span className="text-[11px] font-semibold text-gray-400">
-                        {contract.summary.progressPercent}%
-                      </span>
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <EmptyState
-              icon={Handshake}
-              title="No contracts yet"
-              description="Accept a proposal to start a contract with a freelancer."
-              className="py-8"
             />
           )}
         </div>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { MapPin, ShieldCheck, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { MapPin, ShieldCheck, TrendingUp, CheckCircle2, Bookmark } from 'lucide-react';
 import Card from '../ui/Card';
 import RatingDisplay from './RatingDisplay';
 import PriceDisplay from './PriceDisplay';
@@ -16,38 +16,59 @@ const PORTRAIT_FALLBACKS = [
 
 /**
  * FreelancerCard — Toptal-style talent profile card with large portrait photo,
- * verification badge overlay, sub-role title, and EXPERTISE skill pills.
- *
- * Supports both real backend API freelancer models and enriched landing previews.
+ * verification badge overlay, sub-role title, expertise skill pills, and bookmark save control.
  */
-export default function FreelancerCard({ freelancer, to, className, index = 0 }) {
+export default function FreelancerCard({
+  freelancer,
+  to,
+  className,
+  index = 0,
+  savable = false,
+  isSaved = false,
+  onToggleSave,
+  saving = false,
+}) {
   const { t } = useI18n();
   const href = to ?? (freelancer?.id ? `/freelancers/${freelancer.id}` : '/freelancers');
 
   const name = freelancer?.name ?? freelancer?.user?.name ?? 'Registered Freelancer';
-  
+
   // Portrait image resolution
   const rawAvatar = freelancer?.avatar ?? freelancer?.user?.avatar;
-  const portrait = (rawAvatar && typeof rawAvatar === 'string' && rawAvatar.startsWith('http'))
-    ? rawAvatar
-    : PORTRAIT_FALLBACKS[index % PORTRAIT_FALLBACKS.length];
+  const portrait =
+    rawAvatar && typeof rawAvatar === 'string' && rawAvatar.startsWith('http')
+      ? rawAvatar
+      : PORTRAIT_FALLBACKS[index % PORTRAIT_FALLBACKS.length];
 
-  const categoryName = freelancer?.categoryName || freelancer?.category?.name || 'Verified Specialty';
-  const roleTitle = freelancer?.roleTitle || freelancer?.headline || 'Certified Freelance Expert';
+  const categoryName =
+    freelancer?.categoryName || freelancer?.category?.name || 'Verified Specialty';
+  const roleTitle =
+    freelancer?.roleTitle || freelancer?.headline || 'Certified Freelance Expert';
   const location = freelancer?.location || 'Ethiopia';
   const hourlyRate = freelancer?.hourlyRate ?? freelancer?.hourly_rate ?? 45;
   const rating = freelancer?.rating ?? 5.0;
-  const reviews = freelancer?.reviews ?? freelancer?.completedJobsCount ?? freelancer?.completed_jobs_count ?? 12;
+  const reviews =
+    freelancer?.reviews ?? freelancer?.completedJobsCount ?? freelancer?.completed_jobs_count ?? 12;
 
   // Credential verification status from Laravel backend profile
-  const isApproved = freelancer?.approvalStatus === 'approved' || freelancer?.approval_status === 'approved' || freelancer?.approvedAt != null;
-  const isVerified = freelancer?.verified ?? (isApproved || (freelancer?.verified_credentials?.length > 0));
+  const isApproved =
+    freelancer?.approvalStatus === 'approved' ||
+    freelancer?.approval_status === 'approved' ||
+    freelancer?.approvedAt != null;
+  const isVerified =
+    freelancer?.verified ?? (isApproved || freelancer?.verified_credentials?.length > 0);
 
   // Skills array normalization
   const rawSkills = freelancer?.skills ?? ['Verified Expertise', 'Client Relations'];
   const skills = Array.isArray(rawSkills)
     ? rawSkills.map((s) => (typeof s === 'string' ? s : s?.name)).filter(Boolean)
     : [];
+
+  const handleBookmarkClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onToggleSave?.(freelancer?.id, isSaved);
+  };
 
   return (
     <Card
@@ -73,8 +94,30 @@ export default function FreelancerCard({ freelancer, to, className, index = 0 })
         {isVerified && (
           <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 rounded-md bg-white/95 px-2 py-1 shadow-md border border-gray-100 backdrop-blur-xs">
             <ShieldCheck className="h-4 w-4 text-blue-600 fill-blue-50" />
-            <span className="text-[10px] font-bold text-blue-900 tracking-wider uppercase">Verified Expert</span>
+            <span className="text-[10px] font-bold text-blue-900 tracking-wider uppercase">
+              Verified Expert
+            </span>
           </div>
+        )}
+
+        {/* Top-Right Bookmark Button */}
+        {savable && (
+          <button
+            type="button"
+            onClick={handleBookmarkClick}
+            disabled={saving}
+            aria-pressed={isSaved}
+            aria-label={isSaved ? 'Remove from saved' : 'Save freelancer'}
+            title={isSaved ? 'Remove from saved' : 'Save freelancer'}
+            className="absolute top-2.5 right-2.5 z-10 rounded-xl bg-white/90 p-2 shadow-md backdrop-blur-xs transition-all hover:bg-white hover:scale-110 disabled:opacity-50"
+          >
+            <Bookmark
+              className={cn(
+                'h-4 w-4 transition-colors',
+                isSaved ? 'fill-brand-600 text-brand-600' : 'text-gray-600 hover:text-brand-600',
+              )}
+            />
+          </button>
         )}
       </div>
 
@@ -132,5 +175,3 @@ export default function FreelancerCard({ freelancer, to, className, index = 0 })
     </Card>
   );
 }
-
-

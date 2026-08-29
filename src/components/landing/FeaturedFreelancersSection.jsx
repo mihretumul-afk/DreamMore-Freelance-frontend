@@ -201,10 +201,10 @@ export default function FeaturedFreelancersSection() {
   });
 
   return (
-    <section className="bg-slate-50/60 py-12 lg:py-16 border-b border-gray-100" aria-labelledby="featured-freelancers-heading">
+    <section className="bg-white py-8 lg:py-10 border-b border-gray-100" aria-labelledby="featured-freelancers-heading">
       <Container>
         {/* Section Heading Header */}
-        <div className="mb-6 flex flex-col items-center gap-4 text-center">
+        <div className="mb-5 flex flex-col items-center gap-3 text-center">
           <SectionHeading
             align="center"
             eyebrow={t('featuredFreelancers.eyebrow') || 'Verified Ethiopian Talent'}
@@ -216,7 +216,7 @@ export default function FeaturedFreelancersSection() {
           />
           <Link
             to="/freelancers"
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-brand-200 bg-brand-50/60 px-3.5 py-2 text-xs sm:text-sm font-semibold text-brand-600 shadow-2xs transition-all duration-200 hover:border-brand-300 hover:bg-brand-100/70 hover:text-brand-700"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-brand-200 bg-brand-50/60 px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-brand-600 shadow-2xs transition-all duration-200 hover:border-brand-300 hover:bg-brand-100/70 hover:text-brand-700"
           >
             {t('featuredFreelancers.viewAll') || 'View All Talent'}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -224,7 +224,7 @@ export default function FeaturedFreelancersSection() {
         </div>
 
         {/* Top Category Filter Tab Bar with Left/Right Arrow Scroll Controls */}
-        <div className="relative mb-8 rounded-2xl border border-gray-200/80 bg-white p-2 shadow-xs">
+        <div className="relative mb-5 rounded-2xl border border-gray-200/80 bg-white p-2 shadow-xs">
           <div className="flex items-center gap-1">
             {/* Scroll Left Side Arrow Button */}
             <button

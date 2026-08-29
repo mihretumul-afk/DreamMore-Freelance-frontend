@@ -20,9 +20,6 @@ import { cn } from '../../utils/cn';
 const GROUP_LABELS = {
   users:        'Users',
   jobs:         'Jobs',
-  payments:     'Payments',
-  milestones:   'Milestones',
-  transactions: 'Transactions',
   disputes:     'Disputes',
   admins:       'Administrators',
   roles:        'Roles',
@@ -30,7 +27,7 @@ const GROUP_LABELS = {
   settings:     'Settings',
 };
 
-const GROUP_ORDER = ['users','jobs','payments','milestones','transactions','disputes','admins','roles','audit','settings'];
+const GROUP_ORDER = ['users','jobs','disputes','admins','roles','audit','settings'];
 
 export default function RoleFormPage() {
   const { id } = useParams(); // undefined = create mode

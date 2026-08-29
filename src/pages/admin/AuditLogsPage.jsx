@@ -55,13 +55,7 @@ const ACTION_REGISTRY = {
   'dispute.deleted':        { label: 'Dispute Deleted',          tone: 'danger',  icon: Trash2,      module: 'disputes' },
   // Settings
   'settings.changed':       { label: 'Settings Changed',         tone: 'warning', icon: Settings,    module: 'settings' },
-  // Payments
-  'payment.verified':       { label: 'Payment Verified',         tone: 'success', icon: CreditCard,  module: 'payments' },
-  'payment.processed':      { label: 'Payment Processed',        tone: 'success', icon: CreditCard,  module: 'payments' },
-  'payment.refunded':       { label: 'Payment Refunded',         tone: 'warning', icon: CreditCard,  module: 'payments' },
-  // Milestones
-  'milestone.funded':       { label: 'Milestone Funded',         tone: 'success', icon: CreditCard,  module: 'milestones' },
-  'milestone.released':     { label: 'Milestone Released',       tone: 'success', icon: CreditCard,  module: 'milestones' },
+
 };
 
 const MODULE_LABELS = {
@@ -72,8 +66,6 @@ const MODULE_LABELS = {
   verifications: 'Verifications',
   disputes:      'Disputes',
   settings:      'Settings',
-  payments:      'Payments',
-  milestones:    'Milestones',
 };
 
 // Group actions by module for the action dropdown

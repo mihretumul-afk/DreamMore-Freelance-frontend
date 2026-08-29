@@ -179,29 +179,29 @@ export default function TrustedBySection() {
   ];
 
   return (
-    <section className="bg-gradient-to-b from-white via-gray-50 to-white py-16 lg:py-24" aria-labelledby="trusted-heading">
+    <section className="bg-white py-10 lg:py-12 border-b border-gray-100" aria-labelledby="trusted-heading">
       <Container>
         {/* ── Heading ── */}
         <div className="mx-auto max-w-2xl text-center">
           <Reveal>
-            <span className="inline-block rounded-full bg-brand-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-brand-600">
+            <span className="inline-block rounded-full bg-brand-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-brand-600">
               {t('trusted.eyebrow')}
             </span>
           </Reveal>
           <Reveal delay={100}>
-            <h2 id="trusted-heading" className="mt-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            <h2 id="trusted-heading" className="mt-2 text-2xl font-extrabold tracking-tight text-ink-900 sm:text-3xl">
               {t('trusted.title')}
             </h2>
           </Reveal>
           <Reveal delay={200}>
-            <p className="mt-4 text-base text-gray-500">{t('trusted.subtitle')}</p>
+            <p className="mt-1.5 text-xs sm:text-sm text-gray-500">{t('trusted.subtitle')}</p>
           </Reveal>
         </div>
 
         {/* ── Logo marquee ── */}
         <Reveal delay={300}>
-          <div className="mt-12 rounded-2xl border border-gray-100 bg-white/50 px-4 shadow-sm backdrop-blur-sm">
-            <p className="pt-4 text-center text-xs font-bold uppercase tracking-widest text-gray-400">
+          <div className="mt-6 rounded-2xl border border-gray-100 bg-gray-50/50 px-4 shadow-2xs backdrop-blur-sm">
+            <p className="pt-3 text-center text-[11px] font-bold uppercase tracking-widest text-gray-400">
               {t('trusted.trustedByLabel')}
             </p>
             <LogoMarquee />
@@ -209,7 +209,7 @@ export default function TrustedBySection() {
         </Reveal>
 
         {/* ── Stats grid ── */}
-        <div className="mt-14 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
+        <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
           {stats.map((stat, i) => (
             <StatCard
               key={stat.label}
