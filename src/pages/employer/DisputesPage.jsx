@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   Flag, ArrowLeft, MessageSquare, User, FileText,
   ExternalLink, Download, Send, CheckCircle2,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, Trash2,
 } from 'lucide-react';
 import Card, { CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -108,6 +108,23 @@ export default function EmployerDisputesPage() {
     }
   }, [id, loadDisputes, loadDisputeDetail]);
 
+  // Delete dispute
+  const handleDeleteDispute = async (e, disputeId) => {
+    e.stopPropagation();
+    if (!window.confirm('Are you sure you want to remove this dispute from your history?')) return;
+    try {
+      await disputeService.deleteDispute(disputeId);
+      showToast('Dispute removed.', 'success');
+      loadDisputes();
+      if (selectedDispute?.id === disputeId) {
+        setSelectedDispute(null);
+        navigate('/employer/disputes');
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to remove dispute.', 'error');
+    }
+  };
+
   // Send note / reply
   const handleAddNote = async () => {
     if (!noteText.trim() || !selectedDispute) return;
@@ -144,12 +161,17 @@ export default function EmployerDisputesPage() {
 
     return (
       <div className="space-y-6">
-        <button
-          onClick={() => navigate('/employer/disputes')}
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-ink-900 transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to all disputes
-        </button>
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => navigate('/employer/disputes')}
+            className="flex items-center gap-2 text-sm text-gray-500 hover:text-ink-900 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back to all disputes
+          </button>
+          <Button variant="danger" size="sm" onClick={(e) => handleDeleteDispute(e, selectedDispute.id)}>
+            <Trash2 className="h-3.5 w-3.5" /> Remove Dispute
+          </Button>
+        </div>
 
         {/* ── Dispute Header ─────────────────────────────────────────── */}
         <Card>
@@ -414,7 +436,12 @@ export default function EmployerDisputesPage() {
                       Filed {formatDate(dispute.created_at)}
                     </p>
                   </div>
-                  <Button variant="outline" size="xs">View Details</Button>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="xs">View Details</Button>
+                    <Button variant="ghost" size="xs" onClick={(e) => handleDeleteDispute(e, dispute.id)}>
+                      <Trash2 className="h-3.5 w-3.5 text-red-500" /> Delete
+                    </Button>
+                  </div>
                 </div>
               </CardBody>
             </Card>

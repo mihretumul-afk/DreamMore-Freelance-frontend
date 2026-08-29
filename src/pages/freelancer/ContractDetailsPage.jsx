@@ -431,6 +431,17 @@ export default function FreelancerContractDetailsPage() {
     }
   };
 
+  const handleDeleteSubmissionFile = async (contractId, milestoneId, submissionId, filePath) => {
+    if (!window.confirm('Are you sure you want to delete this file?')) return;
+    try {
+      await contractService.deleteSubmissionFile(contractId, milestoneId, submissionId, filePath);
+      showToast('File deleted.', 'success');
+      load();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to delete file.', 'error');
+    }
+  };
+
   /* ── Loading / Error ──────────────────────────────────────────────────── */
   if (loading) {
     return (
@@ -539,7 +550,7 @@ export default function FreelancerContractDetailsPage() {
         ) : (
           <div className="space-y-3">
             {contract.milestones.map((m) => (
-              <MilestoneCard key={m.id} milestone={m} onAction={handleAction} actionLoading={actionLoading} />
+              <MilestoneCard key={m.id} milestone={m} onAction={handleAction} actionLoading={actionLoading} onDeleteSubmissionFile={handleDeleteSubmissionFile} />
             ))}
           </div>
         )}

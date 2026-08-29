@@ -21,6 +21,12 @@ export const disputeService = {
     const response = await apiClient.post(`/disputes/${id}/notes`, { note });
     return response.data;
   },
+
+  /** DELETE /disputes/:id — dismiss/delete a dispute */
+  deleteDispute: async (id) => {
+    const response = await apiClient.delete(`/disputes/${id}`);
+    return response.data;
+  },
 };
 
 export default disputeService;

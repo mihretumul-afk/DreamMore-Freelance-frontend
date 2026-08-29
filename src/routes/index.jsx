@@ -63,7 +63,7 @@ const EmployerSavedFreelancersPage = lazy(() => import('../pages/employer/SavedF
 const EmployerContractsPage = lazy(() => import('../pages/employer/ContractsPage'));
 const EmployerContractDetailsPage = lazy(() => import('../pages/employer/ContractDetailsPage'));
 const EmployerDisputesPage = lazy(() => import('../pages/employer/DisputesPage'));
-const EmployerPaymentMethodsPage = lazy(() => import('../pages/shared/PaymentMethodsPage'));
+const EmployerFinancePage = lazy(() => import('../pages/employer/FinancePage'));
 
 const AdminLayout = lazy(() => import('../layouts/AdminLayout'));
 const AdminDashboardPage = lazy(() => import('../pages/admin/DashboardPage'));
@@ -205,9 +205,9 @@ export const router = createBrowserRouter([
           { path: 'contracts/:id', element: lazyPage(<FreelancerContractDetailsPage />) },
           { path: 'disputes', element: lazyPage(<FreelancerDisputesPage />) },
           { path: 'disputes/:id', element: lazyPage(<FreelancerDisputesPage />) },
-          { path: 'earnings', element: lazyPage(<FreelancerEarningsPage />) },
+          { path: 'earnings', element: <Navigate to="/freelancer/withdrawals" replace /> },
           { path: 'withdrawals', element: lazyPage(<FreelancerWithdrawalsPage />) },
-          { path: 'settings/payment-methods', element: lazyPage(<PaymentMethodsPage />) },
+          { path: 'settings/payment-methods', element: <Navigate to="/freelancer/withdrawals" replace /> },
           { path: 'saved-jobs', element: lazyPage(<FreelancerSavedJobsPage />) },
           { path: 'credentials', element: lazyPage(<FreelancerCredentialsPage />) },
           { path: 'messages', element: lazyPage(<FreelancerMessagesPage />) },
@@ -235,7 +235,7 @@ export const router = createBrowserRouter([
           { path: 'contracts/:id', element: lazyPage(<EmployerContractDetailsPage />) },
           { path: 'disputes', element: lazyPage(<EmployerDisputesPage />) },
           { path: 'disputes/:id', element: lazyPage(<EmployerDisputesPage />) },
-          { path: 'settings/payment-methods', element: lazyPage(<EmployerPaymentMethodsPage />) },
+          { path: 'settings/payment-methods', element: lazyPage(<EmployerFinancePage />) },
           { path: 'saved-freelancers', element: lazyPage(<EmployerSavedFreelancersPage />) },
           { path: 'messages', element: lazyPage(<EmployerMessagesPage />) },
           { path: 'notifications', element: lazyPage(<EmployerNotificationsPage />) },

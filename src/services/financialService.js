@@ -47,6 +47,11 @@ export const financialService = {
     return res.data;
   },
 
+  getEmployerFinance: async () => {
+    const res = await apiClient.get('/employer-finance');
+    return res.data;
+  },
+
   getWithdrawals: async (params = {}) => {
     const res = await apiClient.get('/withdrawals', { params });
     return res.data;
@@ -76,6 +81,18 @@ export const financialService = {
 
   getPayments: async (params = {}) => {
     const res = await apiClient.get('/payments', { params });
+    return res.data;
+  },
+
+  // ── Budget (Employer) ──────────────────────────────────────────────────
+
+  getBudget: async () => {
+    const res = await apiClient.get('/budget');
+    return res.data;
+  },
+
+  updateBudget: async (payload) => {
+    const res = await apiClient.post('/budget', payload);
     return res.data;
   },
 
