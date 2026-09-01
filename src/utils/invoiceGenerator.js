@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { formatETB, formatDate } from './format';
 
 const TX_TYPES = {
@@ -76,7 +76,7 @@ export function generateTransactionInvoice(transaction, userInfo = {}) {
     ['Reference', transaction.reference || `TXN-${transaction.id}`],
   ];
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: startY + 8,
     head: [],
     body: details,
@@ -143,7 +143,7 @@ export function generateTransactionInvoice(transaction, userInfo = {}) {
     ['Account Type', userInfo.role ? (userInfo.role.charAt(0).toUpperCase() + userInfo.role.slice(1)) : '—'],
   ];
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: userY + 8,
     head: [],
     body: userDetails,
@@ -241,7 +241,7 @@ export function generateBulkInvoices(transactions, userInfo = {}) {
     ['Net Amount', `${formatETB(totalCredits - totalDebits)}`],
   ];
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 60,
     head: [],
     body: summaryData,
@@ -274,7 +274,7 @@ export function generateBulkInvoices(transactions, userInfo = {}) {
     tx.fee > 0 ? formatETB(tx.fee) : '—',
   ]);
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: tableY + 5,
     head: [['Date', 'Type', 'Direction', 'Description', 'Amount', 'Fee']],
     body: tableData,

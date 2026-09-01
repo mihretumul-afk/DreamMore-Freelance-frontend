@@ -150,7 +150,7 @@ export default function FreelancerApprovalPage() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <Link
-                          to={`/freelancers/${freelancer.user_id}`}
+                          to={`/admin/freelancers/${freelancer.id}`}
                           className="text-sm font-bold text-ink-900 hover:text-brand-600"
                         >
                           {freelancer.user?.name}
@@ -192,11 +192,11 @@ export default function FreelancerApprovalPage() {
                     )}
                     <Button
                       as={Link}
-                      to={`/freelancers/${freelancer.user_id}`}
+                      to={`/admin/freelancers/${freelancer.id}`}
                       variant="outline"
                       size="sm"
                     >
-                      <Eye className="h-4 w-4" /> View
+                      <Eye className="h-4 w-4" /> Review
                     </Button>
                   </div>
                 </div>

@@ -17,26 +17,50 @@ const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15000,
   headers: {
-    'Content-Type': 'application/json',
     Accept: 'application/json',
   },
 });
 
-// Attach the stored access token to every request.
+// Attach the stored access token and correct Content-Type to every request.
 apiClient.interceptors.request.use(
   (config) => {
     const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // FormData bodies need multipart/form-data with boundary — axios
+    // auto-generates this ONLY when no Content-Type is set, so we must
+    // not set it for FormData. For everything else default to JSON.
+    if (config.data instanceof FormData) {
+      config.headers.delete('Content-Type');
+    } else if (!config.headers.has('Content-Type')) {
+      config.headers.set('Content-Type', 'application/json');
+    }
     return config;
   },
   (error) => Promise.reject(error),
 );
 
-// Single response interceptor: normalize 401s and keep everything else untouched.
+// Single response interceptor: normalize 401s, handle blob error responses.
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // When responseType is 'blob' and the server returns a JSON error
+    // (4xx/5xx), axios resolves with a blob containing JSON text instead of
+    // rejecting. Detect this and reject so callers get a proper error.
+    if (
+      response.config?.responseType === 'blob' &&
+      response.data instanceof Blob &&
+      response.headers?.['content-type']?.includes('application/json')
+    ) {
+      return response.data.text().then((text) => {
+        const parsed = JSON.parse(text);
+        const err = new Error(parsed.message || 'Request failed');
+        err.response = { status: response.status, data: parsed, headers: response.headers };
+        return Promise.reject(err);
+      });
+    }
+    return response;
+  },
   (error) => {
     const hadToken = Boolean(error.config?.headers?.Authorization);
     if (error.response?.status === 401 && hadToken) {

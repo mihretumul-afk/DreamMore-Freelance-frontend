@@ -13,10 +13,14 @@ import {
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /**
- * Processes an array of transactions into monthly earnings data.
- * Groups by month, sums up credit amounts (payments received).
+ * Processes an array of transactions into monthly data.
+ * Groups by month, sums up amounts by direction.
+ *
+ * @param {Object[]} transactions - Array of transaction objects
+ * @param {number} count - Number of months to display
+ * @param {string} direction - 'credit' for earnings, 'debit' for spending, 'all' for both
  */
-function processMonthlyData(transactions, count = 6) {
+function processMonthlyData(transactions, count = 6, direction = 'credit') {
   const now = new Date();
   const monthlyData = [];
 
@@ -28,6 +32,7 @@ function processMonthlyData(transactions, count = 6) {
       fullMonth: `${MONTHS[date.getMonth()]} ${date.getFullYear()}`,
       key: monthKey,
       earnings: 0,
+      spending: 0,
       withdrawals: 0,
       count: 0,
     });
@@ -38,18 +43,31 @@ function processMonthlyData(transactions, count = 6) {
     const txMonthKey = `${txDate.getFullYear()}-${String(txDate.getMonth() + 1).padStart(2, '0')}`;
     const bucket = monthlyData.find((m) => m.key === txMonthKey);
 
-    if (bucket && tx.direction === 'credit' && tx.amount > 0) {
-      bucket.earnings += parseFloat(tx.amount) || 0;
+    if (!bucket) return;
+
+    const amt = parseFloat(tx.amount) || 0;
+    if (amt <= 0) return;
+
+    if (tx.direction === 'credit') {
+      bucket.earnings += amt;
       bucket.count += 1;
-    }
-    if (bucket && tx.direction === 'debit' && tx.type === 'withdrawal') {
-      bucket.withdrawals += parseFloat(tx.amount) || 0;
+    } else if (tx.direction === 'debit') {
+      // Skip platform_fee and processing_fee for spending chart (they're sub-costs)
+      if (tx.type === 'platform_fee' || tx.type === 'processing_fee') {
+        bucket.spending += amt;
+      } else if (tx.type === 'withdrawal') {
+        bucket.withdrawals += amt;
+      } else {
+        bucket.spending += amt;
+        bucket.count += 1;
+      }
     }
   });
 
   return monthlyData.map((m) => ({
     ...m,
     earnings: Math.round(m.earnings * 100) / 100,
+    spending: Math.round(m.spending * 100) / 100,
     withdrawals: Math.round(m.withdrawals * 100) / 100,
   }));
 }
@@ -105,18 +123,27 @@ function RoundedBar(props) {
 }
 
 /**
- * EarningsChart — displays a bar chart of monthly earnings
+ * EarningsChart — displays a bar chart of monthly earnings or spending
  *
  * @param {Object[]} transactions - Array of transaction objects with created_at, amount, direction, type
  * @param {number} months - Number of months to display (default: 6)
+ * @param {string} direction - 'credit' for earnings, 'debit' for spending (default: 'credit')
+ * @param {string} barColor - Bar fill color (default: '#10b981' for earnings, '#ef4444' for spending)
+ * @param {string} barColorHighlight - Highlight color for peak month
  */
-export default function EarningsChart({ transactions = [], months = 6 }) {
+export default function EarningsChart({ transactions = [], months = 6, direction = 'credit', barColor, barColorHighlight }) {
   const chartData = useMemo(
-    () => processMonthlyData(transactions, months),
-    [transactions, months]
+    () => processMonthlyData(transactions, months, direction),
+    [transactions, months, direction]
   );
 
-  const maxEarnings = Math.max(...chartData.map((d) => d.earnings), 1);
+  const dataKey = direction === 'debit' ? 'spending' : 'earnings';
+  const defaultColor = direction === 'debit' ? '#ef4444' : '#10b981';
+  const defaultHighlight = direction === 'debit' ? '#dc2626' : '#059669';
+  const fill = barColor || defaultColor;
+  const highlight = barColorHighlight || defaultHighlight;
+
+  const maxValue = Math.max(...chartData.map((d) => d[dataKey]), 1);
 
   const formatCurrency = (value) => {
     if (value >= 1000) return `${(value / 1000).toFixed(1)}k`;
@@ -151,9 +178,9 @@ export default function EarningsChart({ transactions = [], months = 6 }) {
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.02)' }} />
           <Bar
-            dataKey="earnings"
-            name="Earnings"
-            fill="#10b981"
+            dataKey={dataKey}
+            name={direction === 'debit' ? 'Spending' : 'Earnings'}
+            fill={fill}
             shape={<RoundedBar />}
             animationBegin={0}
             animationDuration={800}
@@ -163,9 +190,9 @@ export default function EarningsChart({ transactions = [], months = 6 }) {
               <Cell
                 key={`cell-${index}`}
                 fill={
-                  entry.earnings === maxEarnings
-                    ? '#059669' // darker for peak month
-                    : '#34d399' // lighter for others
+                  entry[dataKey] === maxValue
+                    ? highlight
+                    : fill
                 }
               />
             ))}

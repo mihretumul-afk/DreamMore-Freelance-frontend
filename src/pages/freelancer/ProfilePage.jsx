@@ -114,9 +114,7 @@ export default function FreelancerProfilePage() {
             onUpload={async (file) => {
               const formData = new FormData();
               formData.append('avatar', file);
-              await apiClient.post('/avatar', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-              });
+              await apiClient.post('/avatar', formData);
               await loadProfile();
               if (refreshUser) await refreshUser();
             }}

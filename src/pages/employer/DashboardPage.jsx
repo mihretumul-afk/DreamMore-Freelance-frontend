@@ -275,7 +275,7 @@ export default function EmployerDashboardPage() {
         ? (jobsRes.value.meta?.total ?? jobsRes.value.data?.meta?.total ?? jobs.length)
         : jobs.length;
 
-      const financeData = financeRes.status === 'fulfilled' ? financeRes.value : null;
+      const financeData = financeRes.status === 'fulfilled' ? (financeRes.value?.data ?? financeRes.value) : null;
       const contractsData = contractsRes.status === 'fulfilled'
         ? (Array.isArray(contractsRes.value.data) ? contractsRes.value.data : (contractsRes.value.data?.data ?? []))
         : [];
@@ -311,6 +311,17 @@ export default function EmployerDashboardPage() {
   useEffect(() => {
     const interval = setInterval(() => loadDashboard(true), 60000);
     return () => clearInterval(interval);
+  }, [loadDashboard]);
+
+  // Refresh when user returns to this tab (e.g. after funding a milestone on another page)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        loadDashboard(true);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, [loadDashboard]);
 
   // Real-time WebSocket listener for financial events
@@ -500,12 +511,12 @@ export default function EmployerDashboardPage() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500">
                   <Wallet className="h-4 w-4 text-white" />
                 </div>
-                <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Balance</span>
+                <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Budget</span>
               </div>
               <p className="text-2xl lg:text-3xl font-bold text-gray-900">
-                {formatCurrency(s.accountBalance)}
+                {finance?.monthly_limit > 0 ? formatCurrency(s.accountBalance) : formatCurrency(s.totalSpent)}
               </p>
-              <p className="text-xs text-emerald-600 mt-2">Available to spend</p>
+              <p className="text-xs text-emerald-600 mt-2">{finance?.monthly_limit > 0 ? `of ${formatCurrency(finance.monthly_limit)} limit` : 'Total spent'}</p>
             </div>
 
             {/* In Escrow */}

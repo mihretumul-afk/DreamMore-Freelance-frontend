@@ -14,6 +14,10 @@ import {
   Star,
   AlertTriangle,
   Trash2,
+  Shield,
+  UserCheck,
+  Zap,
+  RefreshCw,
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
@@ -37,7 +41,21 @@ const TYPE_ICONS = {
   message_received: MessageSquare,
   credential_approved: Award,
   credential_rejected: XCircle,
+  credential_submitted: Award,
+  credential_resubmitted: Award,
+  credential_resubmission_required: RefreshCw,
+  skill_test_required: Zap,
+  credential_test_passed: Award,
+  freelancer_approved: UserCheck,
+  freelancer_rejected: XCircle,
+  verification_approved: Shield,
+  verification_rejected: XCircle,
   review_received: Star,
+  withdrawal_requested: Clock,
+  withdrawal_completed: CheckCircle,
+  withdrawal_failed: XCircle,
+  lms_certificate_verified: Award,
+  lms_certificate_revoked: XCircle,
 };
 
 const TYPE_COLORS = {
@@ -52,7 +70,21 @@ const TYPE_COLORS = {
   message_received: 'text-info-500 bg-info-50',
   credential_approved: 'text-success-500 bg-success-50',
   credential_rejected: 'text-danger-500 bg-danger-50',
+  credential_submitted: 'text-blue-500 bg-blue-50',
+  credential_resubmitted: 'text-amber-500 bg-amber-50',
+  credential_resubmission_required: 'text-amber-500 bg-amber-50',
+  skill_test_required: 'text-amber-500 bg-amber-50',
+  credential_test_passed: 'text-success-500 bg-success-50',
+  freelancer_approved: 'text-success-500 bg-success-50',
+  freelancer_rejected: 'text-danger-500 bg-danger-50',
+  verification_approved: 'text-success-500 bg-success-50',
+  verification_rejected: 'text-danger-500 bg-danger-50',
   review_received: 'text-warning-500 bg-warning-50',
+  withdrawal_requested: 'text-blue-500 bg-blue-50',
+  withdrawal_completed: 'text-success-500 bg-success-50',
+  withdrawal_failed: 'text-danger-500 bg-danger-50',
+  lms_certificate_verified: 'text-success-500 bg-success-50',
+  lms_certificate_revoked: 'text-danger-500 bg-danger-50',
 };
 
 export default function FreelancerNotificationsPage() {

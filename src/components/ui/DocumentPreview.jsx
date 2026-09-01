@@ -60,8 +60,8 @@ export default function DocumentPreview({
         {!loading && (!downloadUrl || error) && (
           <div className="flex flex-col items-center gap-3 py-10">
             <FileText className="h-12 w-12 text-gray-300" />
-            <p className="text-sm font-medium text-gray-600">Unable to render inline preview.</p>
-            <p className="text-xs text-gray-400">Click Download below to view the document directly.</p>
+            <p className="text-sm font-medium text-gray-600">Document preview unavailable</p>
+            <p className="text-xs text-gray-400 max-w-sm text-center">The document file could not be loaded for inline preview. It may not have been uploaded or the file may be unavailable.</p>
           </div>
         )}
 

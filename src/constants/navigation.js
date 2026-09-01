@@ -101,7 +101,7 @@ export const ADMIN_NAV_LINKS = [
     key: 'nav.verifications', label: 'Verifications',
     to: '/admin/verifications', icon: ShieldCheck, end: true,
     permission: 'users.verify', group: 'people',
-    badgeKey: 'pending_verifications',
+    badgeKey: 'pending_verifications_total',
   },
 
   // ── Marketplace ───────────────────────────────────────────────────────

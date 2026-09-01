@@ -242,7 +242,7 @@ export default function FreelancerDashboardPage() {
         ? (proposalsRes.value.meta?.total ?? proposalsRes.value.data?.meta?.total ?? proposals.length)
         : proposals.length;
 
-      const earningsData = earningsRes.status === 'fulfilled' ? earningsRes.value : null;
+      const earningsData = earningsRes.status === 'fulfilled' ? (earningsRes.value?.data ?? earningsRes.value) : null;
       const contractsData = contractsRes.status === 'fulfilled'
         ? (Array.isArray(contractsRes.value.data) ? contractsRes.value.data : (contractsRes.value.data?.data ?? []))
         : [];
@@ -277,6 +277,17 @@ export default function FreelancerDashboardPage() {
   useEffect(() => {
     const interval = setInterval(() => loadDashboard(true), 60000);
     return () => clearInterval(interval);
+  }, [loadDashboard]);
+
+  // Refresh when user returns to this tab
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        loadDashboard(true);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, [loadDashboard]);
 
   // Real-time WebSocket listener for financial events
@@ -492,7 +503,7 @@ export default function FreelancerDashboardPage() {
 
             {/* Total Earned */}
             <div className={cn(
-              'rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 p-4 transition-all duration-500
+              'rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 p-4 transition-all duration-500',
               isRefreshing && 'animate-pulse'
             )}>
               <div className="flex items-center gap-2 mb-3">

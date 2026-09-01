@@ -129,39 +129,71 @@ export default function AdminVerificationsPage() {
     }
   };
 
-  /** Fetch the credential file and create a blob URL for preview. */
-  const handlePreview = useCallback(async (credential) => {
-    setPreviewLoading(true);
-    setPreviewTarget(credential);
+  /** Fetch freelancer profile and open PDF preview in a new tab. */
+  const handlePreview = useCallback(async (item) => {
     try {
-      const response = await adminService.downloadCredential(credential.id);
-      const mime = getMimeType(credential.file_original_name) || response.headers?.['content-type'] || 'application/pdf';
-      const blob = new Blob([response.data], { type: mime });
-      const url = window.URL.createObjectURL(blob);
-      setPreviewUrl(url);
-    } catch {
-      setPreviewUrl(null);
-    } finally {
-      setPreviewLoading(false);
+      // First try to use the freelancer profile data from the item's user relationship
+      const response = await adminService.getFreelancerByUserId(item.user_id);
+      if (response?.success && response?.data?.profile) {
+        const { previewFreelancerProfilePDF } = await import('../../utils/freelancerPdfExport');
+        await previewFreelancerProfilePDF(response.data);
+        showToast('PDF opened in new tab.', 'success');
+      } else {
+        // Fallback: try getting the profile directly from the freelancer list
+        const fallbackRes = await adminService.getFreelancers({ user_id: item.user_id });
+        const fallbackData = fallbackRes?.data ?? fallbackRes;
+        const profiles = Array.isArray(fallbackData) ? fallbackData : (fallbackData?.data ?? []);
+        if (profiles.length > 0) {
+          const profileId = profiles[0].id;
+          const detailRes = await adminService.getFreelancerById(profileId);
+          if (detailRes?.data?.profile) {
+            const { previewFreelancerProfilePDF } = await import('../../utils/freelancerPdfExport');
+            await previewFreelancerProfilePDF(detailRes.data);
+            showToast('PDF opened in new tab.', 'success');
+          } else {
+            showToast('Freelancer profile data is incomplete. Cannot generate PDF.', 'error');
+          }
+        } else {
+          showToast('No freelancer profile found. The freelancer may not have completed their profile yet.', 'error');
+        }
+      }
+    } catch (err) {
+      console.error('Preview error:', err);
+      const msg = err?.response?.data?.message || err?.message || 'Unable to generate PDF preview.';
+      showToast(msg, 'error');
     }
-  }, []);
+  }, [showToast]);
 
-  /** Download a credential file. */
-  const handleDownload = useCallback(async (credential) => {
+  /** Fetch freelancer profile and download as PDF. */
+  const handleDownload = useCallback(async (item) => {
     try {
-      const response = await adminService.downloadCredential(credential.id);
-      const mime = getMimeType(credential.file_original_name) || response.headers?.['content-type'] || 'application/octet-stream';
-      const blob = new Blob([response.data], { type: mime });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', credential.file_original_name || `credential-${credential.id}`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-    } catch {
-      showToast('Unable to download credential file. Please try again.', 'error');
+      const response = await adminService.getFreelancerByUserId(item.user_id);
+      if (response?.success && response?.data?.profile) {
+        const { generateFreelancerProfilePDF } = await import('../../utils/freelancerPdfExport');
+        await generateFreelancerProfilePDF(response.data);
+        showToast('PDF downloaded.', 'success');
+      } else {
+        const fallbackRes = await adminService.getFreelancers({ user_id: item.user_id });
+        const fallbackData = fallbackRes?.data ?? fallbackRes;
+        const profiles = Array.isArray(fallbackData) ? fallbackData : (fallbackData?.data ?? []);
+        if (profiles.length > 0) {
+          const profileId = profiles[0].id;
+          const detailRes = await adminService.getFreelancerById(profileId);
+          if (detailRes?.data?.profile) {
+            const { generateFreelancerProfilePDF } = await import('../../utils/freelancerPdfExport');
+            await generateFreelancerProfilePDF(detailRes.data);
+            showToast('PDF downloaded.', 'success');
+          } else {
+            showToast('Freelancer profile data is incomplete.', 'error');
+          }
+        } else {
+          showToast('No freelancer profile found for this user.', 'error');
+        }
+      }
+    } catch (err) {
+      console.error('Download PDF error:', err);
+      const msg = err?.response?.data?.message || err?.message || 'Unable to generate PDF.';
+      showToast(msg, 'error');
     }
   }, [showToast]);
 

@@ -68,8 +68,7 @@ export const contractService = {
 
   /** POST /contracts/:id/milestones — create milestone (supports FormData for file uploads) */
   createMilestone: async (contractId, payload) => {
-    const config = payload instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
-    const response = await apiClient.post(`/contracts/${contractId}/milestones`, payload, config);
+    const response = await apiClient.post(`/contracts/${contractId}/milestones`, payload);
     return response.data;
   },
 
@@ -93,8 +92,7 @@ export const contractService = {
 
   /** POST /contracts/:id/milestones/:milestoneId/submit — submit work (supports FormData for file uploads) */
   submitWork: async (contractId, milestoneId, payload = {}) => {
-    const config = payload instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
-    const response = await apiClient.post(`/contracts/${contractId}/milestones/${milestoneId}/submit`, payload, config);
+    const response = await apiClient.post(`/contracts/${contractId}/milestones/${milestoneId}/submit`, payload);
     return response.data;
   },
 

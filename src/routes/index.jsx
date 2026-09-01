@@ -79,6 +79,7 @@ const AdminSkillsPage = lazy(() => import('../pages/admin/SkillsPage'));
 const AdminSettingsPage = lazy(() => import('../pages/admin/SettingsPage'));
 const AdminSecurityPage = lazy(() => import('../pages/admin/AdminSecurityPage'));
 const AdminFreelancerApprovalPage = lazy(() => import('../pages/admin/FreelancerApprovalPage'));
+const AdminFreelancerDetailPage = lazy(() => import('../pages/admin/FreelancerDetailPage'));
 // Stage 2 — RBAC + advanced admin pages
 const AdministratorsPage = lazy(() => import('../pages/admin/AdministratorsPage'));
 const AdminDetailPage = lazy(() => import('../pages/admin/AdminDetailPage'));
@@ -165,6 +166,7 @@ export const router = createBrowserRouter([
           { path: 'categories', element: lazyPage(<AdminCategoriesPage />) },
           { path: 'skills', element: lazyPage(<AdminSkillsPage />) },
           { path: 'freelancers', element: lazyPage(<AdminFreelancerApprovalPage />) },
+          { path: 'freelancers/:id', element: lazyPage(<AdminFreelancerDetailPage />) },
           { path: 'settings', element: lazyPage(<AdminSettingsPage />) },
           { path: 'settings/security', element: lazyPage(<AdminSecurityPage />) },
           // Stage 2 — RBAC routes

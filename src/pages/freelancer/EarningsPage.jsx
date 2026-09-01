@@ -146,7 +146,7 @@ export default function EarningsPage() {
                         <td className={`py-3 text-right font-semibold ${isCredit ? 'text-emerald-600' : 'text-red-600'}`}>
                           {isCredit ? '+' : '-'}{formatETB(Math.abs(tx.amount))}
                         </td>
-                        <td className="py-3 text-right text-gray-500">{tx.fee > 0 ? formatETB(tx.fee) : '—'}</td>
+                        <td className="py-3 text-right text-gray-500">{tx.balance_after != null ? formatETB(tx.balance_after) : '—'}</td>
                         <td className="py-3 text-gray-400 text-xs">{formatDate(tx.created_at)}</td>
                       </tr>
                     );

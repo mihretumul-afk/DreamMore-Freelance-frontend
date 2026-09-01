@@ -230,6 +230,21 @@ export const adminService = {
     return response.data;
   },
 
+  /** Find freelancer profile by user ID, then fetch full detail. */
+  getFreelancerByUserId: async (userId) => {
+    try {
+      const listRes = await apiClient.get('/admin/freelancers', { params: { user_id: userId } });
+      const payload = listRes.data;
+      const items = payload?.data ?? (Array.isArray(payload) ? payload : []);
+      if (!items.length) return { success: false, message: 'No freelancer profile found.' };
+      const profileId = items[0].id;
+      const detailRes = await apiClient.get(`/admin/freelancers/${profileId}`);
+      return detailRes.data;
+    } catch (err) {
+      return { success: false, message: err?.response?.data?.message || 'Unable to load freelancer profile.' };
+    }
+  },
+
   /** PUT /admin/freelancers/:id/approve — approve a freelancer. */
   approveFreelancer: async (id) => {
     const response = await apiClient.put(`/admin/freelancers/${id}/approve`);

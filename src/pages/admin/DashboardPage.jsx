@@ -271,6 +271,14 @@ export default function AdminDashboardPage() {
       loadDashboard(true);
     });
 
+    // Credential submission listener
+    const credChannel = echoInstance.private('admin.credentials');
+
+    credChannel.listen('.credential.submitted', (event) => {
+      showToast(`📋 New credential submitted by ${event.freelancer_name}: ${event.title}`, 'info');
+      loadDashboard(true);
+    });
+
     return () => {
       channel.stopListening('.finance.milestone_funded');
       channel.stopListening('.finance.milestone_released');
@@ -280,6 +288,7 @@ export default function AdminDashboardPage() {
       channel.stopListening('.user.registered');
       channel.stopListening('.proposal.received');
       channel.stopListening('.dispute.created');
+      credChannel.stopListening('.credential.submitted');
     };
   }, [loadDashboard, showToast]);
 
@@ -306,9 +315,10 @@ export default function AdminDashboardPage() {
     totalRevenue:         data.total_revenue ?? 0,
     monthlyRevenue:       data.monthly_revenue ?? 0,
     totalCategories:      data.total_categories ?? 0,
-    totalSkills:          data.total_skills ?? 0,
-    pendingVerifications: data.pending_verifications ?? 0,
-    pendingReports:       data.pending_reports ?? 0,
+    totalSkills:          data.total_skills ?? 0,    pendingVerifications: 0,
+    pendingCredentials: data.pending_credentials ?? 0,
+    pendingVerificationsTotal: data.pending_credentials ?? 0,
+    pendingReports: data.pending_reports ?? 0,
     activeDisputes:       data.active_disputes ?? 0,
     totalMessages:        data.total_messages ?? 0,
     platformFees:         data.platform_fees ?? 0,
@@ -362,13 +372,7 @@ export default function AdminDashboardPage() {
       time: 'Just now',
       link: '/admin/users',
     },
-    ...(s.pendingVerifications > 0 ? [{
-      icon: ShieldCheck, color: 'warning',
-      title: `${s.pendingVerifications} Pending Verification${s.pendingVerifications !== 1 ? 's' : ''}`,
-      description: 'Awaiting admin review',
-      time: 'Action needed',
-      link: '/admin/verifications',
-    }] : []),
+
     ...(s.pendingReports > 0 ? [{
       icon: Flag, color: 'danger',
       title: `${s.pendingReports} Open Report${s.pendingReports !== 1 ? 's' : ''}`,
@@ -546,7 +550,7 @@ export default function AdminDashboardPage() {
       {/* ═══════════════════════════════════════════════════════════════════
          ALERTS BANNER — Pending Actions
          ═══════════════════════════════════════════════════════════════════ */}
-      {(s.pendingVerifications > 0 || s.pendingReports > 0 || s.pendingWithdrawals > 0) && (
+      {(s.pendingCredentials > 0 || s.pendingReports > 0 || s.pendingWithdrawals > 0) && (
         <div className="rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
@@ -558,13 +562,14 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mt-3">
-            {s.pendingVerifications > 0 && can('users.verify') && (
+
+            {s.pendingCredentials > 0 && can('users.verify') && (
               <Link
-                to="/admin/verifications"
-                className="inline-flex items-center gap-2 rounded-lg bg-white border border-amber-200 px-3 py-2 text-xs font-semibold text-amber-800 hover:bg-amber-100 transition-all shadow-sm"
+                to="/admin/verifications?type=credential&status=pending"
+                className="inline-flex items-center gap-2 rounded-lg bg-white border border-indigo-200 px-3 py-2 text-xs font-semibold text-indigo-800 hover:bg-indigo-50 transition-all shadow-sm"
               >
-                <ShieldCheck className="h-3.5 w-3.5" />
-                {s.pendingVerifications} Verification{s.pendingVerifications !== 1 ? 's' : ''}
+                <Award className="h-3.5 w-3.5" />
+                {s.pendingCredentials} Credential{s.pendingCredentials !== 1 ? 's' : ''}
                 <ChevronRight className="h-3 w-3" />
               </Link>
             )}

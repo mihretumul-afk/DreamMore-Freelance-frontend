@@ -19,10 +19,7 @@ export const credentialService = {
 
   /** Submit a new credential with file upload. */
   createCredential: async (payload) => {
-    const isFormData = payload instanceof FormData;
-    const response = await apiClient.post('/credentials', payload, isFormData ? {
-      headers: { 'Content-Type': undefined },
-    } : {});
+    const response = await apiClient.post('/credentials', payload);
     return response.data;
   },
 
@@ -36,9 +33,7 @@ export const credentialService = {
   updateCredential: async (id, payload) => {
     if (payload instanceof FormData) {
       payload.append('_method', 'PUT');
-      const response = await apiClient.post(`/credentials/${id}`, payload, {
-        headers: { 'Content-Type': undefined },
-      });
+      const response = await apiClient.post(`/credentials/${id}`, payload);
       return response.data;
     }
     const response = await apiClient.put(`/credentials/${id}`, payload);

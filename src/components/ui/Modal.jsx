@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Card from './Card';
@@ -46,7 +47,7 @@ export default function Modal({
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 overflow-y-auto p-4 sm:p-6 flex min-h-full items-center justify-center">
       <div
         className="fixed inset-0 bg-ink-950/60 backdrop-blur-sm"
@@ -82,6 +83,7 @@ export default function Modal({
         </div>
         <div className="px-5 py-5 overflow-y-auto flex-1">{children}</div>
       </Card>
-    </div>
+    </div>,
+    document.body,
   );
 }

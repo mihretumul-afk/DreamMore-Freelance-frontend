@@ -13,10 +13,7 @@ export const verificationService = {
    * Submit verification documents. Supports FormData.
    */
   async submitVerification(data) {
-    const isFormData = data instanceof FormData;
-    const response = await apiClient.post('/verifications', data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {},
-    });
+    const response = await apiClient.post('/verifications', data);
     return response.data;
   },
 };

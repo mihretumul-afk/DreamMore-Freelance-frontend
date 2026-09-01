@@ -544,7 +544,7 @@ export default function WithdrawalsPage() {
                     <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Type</th>
                     <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Description</th>
                     <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Amount</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Fee</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Balance</th>
                     <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Date</th>
                     <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Invoice</th>
                   </tr>
@@ -563,7 +563,7 @@ export default function WithdrawalsPage() {
                           {isCredit ? '+' : '−'}{formatETB(Math.abs(tx.amount))}
                         </td>
                         <td className="px-6 py-3.5 text-right text-gray-400 text-xs">
-                          {tx.fee > 0 ? formatETB(tx.fee) : '—'}
+                          {tx.balance_after != null ? formatETB(tx.balance_after) : '—'}
                         </td>
                         <td className="px-6 py-3.5 text-gray-400 text-xs whitespace-nowrap">{formatDate(tx.created_at)}</td>
                         <td className="px-6 py-3.5 text-right">

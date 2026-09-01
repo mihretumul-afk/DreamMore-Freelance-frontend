@@ -13,10 +13,7 @@ export const portfolioService = {
    * Create a new portfolio item. Supports multipart/form-data for image uploads.
    */
   async createPortfolioItem(data) {
-    const isFormData = data instanceof FormData;
-    const response = await apiClient.post('/freelancer/portfolio', data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {},
-    });
+    const response = await apiClient.post('/freelancer/portfolio', data);
     return response.data;
   },
 
@@ -32,9 +29,7 @@ export const portfolioService = {
    * Update a portfolio item. Supports multipart/form-data.
    */
   async updatePortfolioItem(id, data) {
-    const isFormData = data instanceof FormData;
     const response = await apiClient.post(`/freelancer/portfolio/${id}`, data, {
-      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {},
       params: { _method: 'PUT' },
     });
     return response.data;

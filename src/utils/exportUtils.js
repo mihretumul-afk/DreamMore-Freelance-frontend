@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { formatETB, formatDate } from './format';
 
 const TX_TYPES = {
@@ -153,7 +153,7 @@ export function exportTransactionsPDF(transactions, metadata = {}) {
   ]);
 
   // Draw table
-  doc.autoTable({
+  autoTable(doc, {
     startY: 48,
     head: [['Date', 'Type', 'Direction', 'Description', 'Amount', 'Fee']],
     body: tableData,
@@ -181,16 +181,14 @@ export function exportTransactionsPDF(transactions, metadata = {}) {
     },
     margin: { left: 14, right: 14 },
     didParseCell: function (data) {
-      // Color the amount column
       if (data.column.index === 4 && data.section === 'body') {
         const value = data.cell.raw;
         if (value && value.startsWith('+')) {
-          data.cell.styles.textColor = [16, 185, 129]; // emerald
+          data.cell.styles.textColor = [16, 185, 129];
         } else if (value && value.startsWith('−')) {
-          data.cell.styles.textColor = [239, 68, 68]; // red
+          data.cell.styles.textColor = [239, 68, 68];
         }
       }
-      // Color the direction column
       if (data.column.index === 2 && data.section === 'body') {
         if (data.cell.raw === 'Credit') {
           data.cell.styles.textColor = [16, 185, 129];
@@ -340,7 +338,7 @@ export function exportAdminPaymentsPDF(payments) {
     formatETB(p.platform_fee || 0),
   ]);
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 44,
     head: [['Reference', 'Date', 'Type', 'Status', 'From', 'To', 'Amount', 'Fee']],
     body: tableData,
@@ -453,7 +451,7 @@ export function exportAdminWithdrawalsPDF(withdrawals) {
     w.status,
   ]);
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 44,
     head: [['Reference', 'Date', 'User', 'Method', 'Amount', 'Fee', 'Net', 'Status']],
     body: tableData,

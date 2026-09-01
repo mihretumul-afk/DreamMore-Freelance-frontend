@@ -309,9 +309,10 @@ export default function EmployerFinancePage() {
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="rounded-2xl bg-blue-50 border border-blue-200 p-4">
               <div className="flex items-center gap-2 text-xs font-semibold text-blue-600">
-                <Wallet className="h-3.5 w-3.5" /> Account Balance
+                <Wallet className="h-3.5 w-3.5" /> Budget Remaining
               </div>
-              <p className="mt-1.5 text-xl font-extrabold text-blue-900">{formatETB(e.account_balance || 0)}</p>
+              <p className="mt-1.5 text-xl font-extrabold text-blue-900">{e.monthly_limit > 0 ? formatETB(e.account_balance || 0) : formatETB(totalSpent)}</p>
+              <p className="text-[10px] text-blue-500 mt-0.5">{e.monthly_limit > 0 ? `of ${formatETB(e.monthly_limit)} limit · ${formatETB(e.monthly_spent || 0)} spent` : 'All time spending'}</p>
             </div>
             <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
               <div className="flex items-center gap-2 text-xs font-semibold text-amber-600">
@@ -349,7 +350,7 @@ export default function EmployerFinancePage() {
           </div>
         </div>
         {transactions.length > 0 ? (
-          <EarningsChart transactions={transactions} months={6} />
+          <EarningsChart transactions={transactions} months={6} direction="debit" barColor="#6366f1" barColorHighlight="#4f46e5" />
         ) : (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
@@ -609,7 +610,7 @@ export default function EmployerFinancePage() {
                     <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Type</th>
                     <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Description</th>
                     <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Amount</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Fee</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Balance</th>
                     <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Date</th>
                     <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Invoice</th>
                   </tr>
@@ -628,7 +629,7 @@ export default function EmployerFinancePage() {
                           {isCredit ? '+' : '−'}{formatETB(Math.abs(tx.amount))}
                         </td>
                         <td className="px-6 py-3.5 text-right text-gray-400 text-xs">
-                          {tx.fee > 0 ? formatETB(tx.fee) : '—'}
+                          {tx.balance_after != null ? formatETB(tx.balance_after) : '—'}
                         </td>
                         <td className="px-6 py-3.5 text-gray-400 text-xs whitespace-nowrap">{formatDate(tx.created_at)}</td>
                         <td className="px-6 py-3.5 text-right">
