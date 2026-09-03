@@ -19,11 +19,20 @@ import { ROLES } from '../../constants/app';
 const BLOCKING_STATUSES = ['pending', 'shortlisted', 'accepted'];
 
 export default function JobProposalPanel({ job, onProposalSubmitted }) {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { t } = useI18n();
   const { addToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Refresh the auth user on mount so approval status (is_fully_approved)
+  // reflects the latest server state — avoids stale cached values after
+  // the admin approves the freelancer in another tab/session.
+  useEffect(() => {
+    if (user?.role === 'freelancer') {
+      refreshUser().catch(() => {});
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [checking, setChecking] = useState(false);
   const [existing, setExisting] = useState(null); // normalized proposal or null

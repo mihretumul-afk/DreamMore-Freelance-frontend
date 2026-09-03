@@ -6,6 +6,7 @@ import Button from '../ui/Button';
 import { useI18n } from '../../i18n';
 import { cn } from '../../utils/cn';
 import { searchService } from '../../services/searchService';
+import { getPlatformCurrency } from '../../utils/format';
 
 const TRUST_BULLETS = [
   { icon: BadgeCheck, key: 'hero.verifiedTalent' },
@@ -350,7 +351,7 @@ export default function HeroSection() {
                               </div>
                               {job.max_budget > 0 && (
                                 <span className="shrink-0 text-xs font-medium text-gray-500">
-                                  {new Intl.NumberFormat('en-ET', { maximumFractionDigits: 0 }).format(job.max_budget)} ETB
+                                  {new Intl.NumberFormat('en-ET', { maximumFractionDigits: 0 }).format(job.max_budget)} {getPlatformCurrency()}
                                 </span>
                               )}
                             </button>
@@ -407,7 +408,7 @@ export default function HeroSection() {
                               </div>
                               {freelancer.hourly_rate > 0 && (
                                 <span className="shrink-0 text-xs font-medium text-gray-500">
-                                  {new Intl.NumberFormat('en-ET', { maximumFractionDigits: 0 }).format(freelancer.hourly_rate)} ETB/hr
+                                  {new Intl.NumberFormat('en-ET', { maximumFractionDigits: 0 }).format(freelancer.hourly_rate)} {getPlatformCurrency()}/hr
                                 </span>
                               )}
                             </button>

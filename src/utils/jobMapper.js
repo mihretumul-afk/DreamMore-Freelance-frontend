@@ -72,5 +72,8 @@ export function normalizeJob(job) {
     publishedAt: job.published_at,
     createdAt: job.created_at,
     postedAtLabel: timeAgo(job.published_at ?? job.created_at),
+
+    // Featured status (set by backend query or API)
+    featured: job.featured ?? false,
   };
 }

@@ -8,6 +8,7 @@ import Select from '../ui/Select';
 import { categoryService } from '../../services/categoryService';
 import { skillService } from '../../services/skillService';
 import { useAuth } from '../../hooks/useAuth';
+import { getPlatformCurrency } from '../../utils/format';
 import { useI18n } from '../../i18n';
 import { ROLES } from '../../constants/app';
 
@@ -172,7 +173,7 @@ export default function JobFiltersPanel({ values = {}, onChange, onApply, onClea
         />
 
         <div className="space-y-1.5">
-          <span className="block text-sm font-medium text-ink-800">Budget range (ETB)</span>
+          <span className="block text-sm font-medium text-ink-800">Budget range ({getPlatformCurrency()})</span>
           <div className="grid grid-cols-2 gap-3">
             <Input
               type="number" min="0" step="0.01"

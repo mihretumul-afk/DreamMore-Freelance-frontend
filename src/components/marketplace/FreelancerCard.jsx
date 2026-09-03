@@ -3,6 +3,7 @@ import { MapPin, ShieldCheck, TrendingUp, CheckCircle2, Bookmark, Star, Clock, Z
 import Card from '../ui/Card';
 import { useI18n } from '../../i18n';
 import { cn } from '../../utils/cn';
+import { getPlatformCurrency } from '../../utils/format';
 
 // Default high-resolution portrait fallback images for talent
 const PORTRAIT_FALLBACKS = [
@@ -167,7 +168,7 @@ export default function FreelancerCard({
             {hourlyRate != null && (
               <div className="flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2 py-0.5">
                 <span className="text-[11px] font-black text-emerald-700">
-                  ETB {Number(hourlyRate).toLocaleString('en-US')}
+                  {getPlatformCurrency()} {Number(hourlyRate).toLocaleString('en-US')}
                 </span>
                 <span className="text-[9px] font-medium text-emerald-500">/hr</span>
               </div>

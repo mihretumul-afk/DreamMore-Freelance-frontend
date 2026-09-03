@@ -1,4 +1,5 @@
 import { cn } from '../../utils/cn';
+import { usePlatform } from '../../hooks/usePlatform';
 
 /**
  * Dream More brand mark — precisely matching the official DreamMore logo:
@@ -85,6 +86,8 @@ export function LogoMark({ className, ...props }) {
  */
 export default function Logo({ variant = 'dark', tagline = true, className, markClassName }) {
   const light = variant === 'light';
+  const { settings } = usePlatform();
+  const brandName = settings?.platform_name || 'DreamMore';
   return (
     <span className={cn('inline-flex items-center gap-2.5', className)}>
       <LogoMark className={markClassName} />
@@ -95,7 +98,7 @@ export default function Logo({ variant = 'dark', tagline = true, className, mark
             light ? 'text-white' : 'text-[#3D4464]',
           )}
         >
-          DreamMore
+          {brandName}
         </span>
         {tagline && (
           <span

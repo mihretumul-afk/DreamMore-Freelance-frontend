@@ -17,6 +17,7 @@ import { normalizeJob } from '../../utils/jobMapper';
 import { normalizeProposal, proposalFormToPayload } from '../../utils/proposalMapper';
 import { getErrorMessage, getFieldErrors } from '../../utils/errors';
 import { formatDate, formatETB } from '../../utils/format';
+import { useAuth } from '../../hooks/useAuth';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useToast } from '../../hooks/useToast';
 
@@ -183,6 +184,12 @@ export default function FreelancerSubmitProposalPage() {
   const [submittedProposal, setSubmittedProposal] = useState(null);
 
   usePageTitle(job ? `Apply: ${job.title}` : 'Submit Proposal');
+
+  // Refresh auth user on mount so approval status is current
+  const { refreshUser } = useAuth();
+  useEffect(() => {
+    refreshUser().catch(() => {});
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadData = useCallback(async () => {
     setLoading(true);

@@ -1,12 +1,34 @@
 /**
- * Format an amount as Ethiopian Birr.
+ * Module-level currency cache. Updated by PlatformProvider when settings load.
+ * Defaults to 'ETB' until the platform settings are fetched.
+ */
+let _currency = 'ETB';
+
+/**
+ * Set the platform currency (called by PlatformProvider on settings load).
+ */
+export function setPlatformCurrency(currency) {
+  if (currency && typeof currency === 'string') {
+    _currency = currency.trim().toUpperCase();
+  }
+}
+
+/**
+ * Get the current platform currency code.
+ */
+export function getPlatformCurrency() {
+  return _currency;
+}
+
+/**
+ * Format an amount using the platform's default currency.
  * @param {number|string|null|undefined} amount
- * @returns {string} e.g. "ETB 45,000"
+ * @returns {string} e.g. "ETB 45,000" or "$1,200.50"
  */
 export function formatETB(amount) {
   const value = Number(amount ?? 0);
-  if (Number.isNaN(value)) return 'ETB 0';
-  return `ETB ${value.toLocaleString('en-US', {
+  if (Number.isNaN(value)) return `${_currency} 0`;
+  return `${_currency} ${value.toLocaleString('en-US', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   })}`;
@@ -45,21 +67,22 @@ export function formatCurrency(amount, currency = 'ETB', options = {}) {
  * @param {string} currency - Currency code
  * @returns {string} Compact formatted currency string
  */
-export function formatCurrencyCompact(amount, currency = 'ETB') {
+export function formatCurrencyCompact(amount, currency) {
+  const cur = currency || _currency;
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
 
   if (isNaN(numAmount)) {
-    return `${currency} 0`;
+    return `${cur} 0`;
   }
 
   if (numAmount >= 1000000) {
-    return `${currency} ${(numAmount / 1000000).toFixed(1)}M`;
+    return `${cur} ${(numAmount / 1000000).toFixed(1)}M`;
   }
   if (numAmount >= 1000) {
-    return `${currency} ${(numAmount / 1000).toFixed(1)}K`;
+    return `${cur} ${(numAmount / 1000).toFixed(1)}K`;
   }
 
-  return `${currency} ${numAmount}`;
+  return `${cur} ${numAmount}`;
 }
 
 /**

@@ -27,6 +27,7 @@ import { getErrorMessage, getFieldErrors } from '../../utils/errors';
 import { isHttpUrl } from '../../utils/validate';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useToast } from '../../hooks/useToast';
+import { getPlatformCurrency } from '../../utils/format';
 import { useAuth } from '../../hooks/useAuth';
 import { cn } from '../../utils/cn';
 
@@ -675,7 +676,7 @@ export default function FreelancerProfileEditPage() {
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <Input
                   type="number"
-                  label="Hourly rate (ETB)"
+                  label={`Hourly rate (${getPlatformCurrency()})`}
                   name="hourlyRate"
                   placeholder="0.00"
                   min="0"

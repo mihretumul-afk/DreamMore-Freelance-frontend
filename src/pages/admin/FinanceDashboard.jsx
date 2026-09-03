@@ -374,6 +374,38 @@ export default function FinanceDashboard() {
         </div>
       </div>
 
+      {/* ─── Featured Revenue ────────────────────────────────────────── */}
+      {d.featured_revenue && (
+        <div className="rounded-2xl border border-gray-200 bg-white p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50">
+              <Zap className="h-5 w-5 text-amber-600" />
+            </div>
+            <div>
+              <h2 className="font-bold text-ink-900">Featured Listings Revenue</h2>
+              <p className="text-xs text-gray-400">Revenue from paid job and profile boosts</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 p-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-amber-600">Total Featured Revenue</p>
+              <p className="mt-1.5 text-2xl font-extrabold text-amber-900">{formatETB(d.featured_revenue?.total || 0)}</p>
+              <p className="text-[10px] text-amber-600 mt-0.5">This month: {formatETB(d.featured_revenue?.monthly || 0)}</p>
+            </div>
+            <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 p-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Featured Jobs</p>
+              <p className="mt-1.5 text-2xl font-extrabold text-blue-900">{formatETB(d.featured_revenue?.jobs_total || 0)}</p>
+              <p className="text-[10px] text-blue-600 mt-0.5">{d.featured_revenue?.jobs_active || 0} active • This month: {formatETB(d.featured_revenue?.jobs_monthly || 0)}</p>
+            </div>
+            <div className="rounded-2xl bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 p-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-violet-600">Featured Profiles</p>
+              <p className="mt-1.5 text-2xl font-extrabold text-violet-900">{formatETB(d.featured_revenue?.profiles_total || 0)}</p>
+              <p className="text-[10px] text-violet-600 mt-0.5">{d.featured_revenue?.profiles_active || 0} active • This month: {formatETB(d.featured_revenue?.profiles_monthly || 0)}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ─── Tab Navigation ──────────────────────────────────────────── */}
       <div className="flex gap-1 rounded-2xl bg-gray-100 p-1">
         {[

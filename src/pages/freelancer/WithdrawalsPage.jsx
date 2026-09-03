@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   ArrowDownRight, Clock, CheckCircle2, AlertTriangle, ChevronLeft, ChevronRight,
   Wallet, CreditCard, Plus, Trash2, Star, Banknote, TrendingUp, ArrowUpRight,
   RefreshCw, Eye, EyeOff, PiggyBank, DollarSign, BadgeDollarSign, BarChart3,
-  Download, FileText, FileSpreadsheet, ChevronDown, Calendar, X, FileDown
+  Download, FileText, FileSpreadsheet, ChevronDown, Calendar, X, FileDown, ArrowUpCircle
 } from 'lucide-react';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -15,7 +16,7 @@ import EmptyState from '../../components/common/EmptyState';
 import ErrorState from '../../components/common/ErrorState';
 import EarningsChart from '../../components/charts/EarningsChart';
 import { financialService } from '../../services/financialService';
-import { formatETB, formatDate } from '../../utils/format';
+import { formatETB, formatDate, getPlatformCurrency } from '../../utils/format';
 import { useToast } from '../../hooks/useToast';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useAuth } from '../../hooks/useAuth';
@@ -34,6 +35,7 @@ const TX_TYPES = {
   withdrawal:       { label: 'Withdrawal',      tone: 'danger',  color: 'red' },
   withdrawal_fee:   { label: 'Withdrawal Fee',  tone: 'warning', color: 'amber' },
   adjustment:       { label: 'Adjustment',      tone: 'neutral', color: 'gray' },
+  wallet_deposit:   { label: 'Wallet Deposit',  tone: 'success', color: 'emerald' },
 };
 
 const WD_STATUS = {
@@ -171,13 +173,23 @@ export default function WithdrawalsPage() {
   const [methodId, setMethodId] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Add funds modal
+  const [showAddFunds, setShowAddFunds] = useState(false);
+  const [depositAmount, setDepositAmount] = useState('');
+  const [depositMethodId, setDepositMethodId] = useState('');
+  const [depositStep, setDepositStep] = useState('form'); // form | processing | success | error
+  const [depositResult, setDepositResult] = useState(null);
+  const [depositError, setDepositError] = useState('');
+
   // Add method modal
   const [showAddMethod, setShowAddMethod] = useState(false);
   const [methodForm, setMethodForm] = useState({
     type: 'card', provider: 'stripe', nickname: '',
     card_last_four: '', bank_name: '', masked_phone: '', masked_account_number: '',
     card_brand: '', mobile_provider: '',
+    account_number: '', bank_code: '',
   });
+  const [methodDepositAmount, setMethodDepositAmount] = useState('');
   const [savingMethod, setSavingMethod] = useState(false);
 
   // Export dropdown
@@ -214,7 +226,30 @@ export default function WithdrawalsPage() {
     }
   }, [txPage, wdPage]);
 
-  useEffect(() => { load(); }, [load]);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // On page load: load data immediately, reconcile in background
+  useEffect(() => {
+    const depositReturn = searchParams.get('deposit');
+    const isReturn = depositReturn === 'return';
+
+    if (isReturn) {
+      setSearchParams({}, { replace: true });
+    }
+
+    // Always load data FIRST so the page shows immediately
+    load();
+
+    // Fire reconcile in background — don't block the page
+    financialService.reconcileAllDeposits()
+      .then(() => {
+        load();
+        if (isReturn) {
+          showToast('Payment processed. Your wallet balance has been updated.', 'success');
+        }
+      })
+      .catch(() => { /* reconcile failed — page still shows data */ });
+  }, []);
 
   /* ── Filtered Data ───────────────────────────────────────────────── */
 
@@ -272,14 +307,74 @@ export default function WithdrawalsPage() {
     }
   };
 
+  const handleAddFunds = async () => {
+    if (!depositAmount || parseFloat(depositAmount) < 10) {
+      showToast('Please enter a valid amount (minimum 10 ETB).', 'error');
+      return;
+    }
+    if (!depositMethodId) {
+      showToast('Please select a payment method.', 'error');
+      return;
+    }
+    setDepositStep('processing');
+    setDepositError('');
+    try {
+      const res = await financialService.initiateDeposit(parseFloat(depositAmount), parseInt(depositMethodId));
+      const data = res.data;
+
+      // Check if this is a redirect-based provider (Chapa)
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+        return;
+      }
+
+      // Synchronous provider (sandbox) — show success immediately
+      setDepositResult(data);
+      setDepositStep('success');
+      load(); // Reload wallet data
+      showToast('Funds added successfully!', 'success');
+    } catch (err) {
+      setDepositError(err.response?.data?.message || 'Payment failed. Please try again.');
+      setDepositStep('error');
+    }
+  };
+
+  const resetAddFundsModal = () => {
+    setDepositAmount('');
+    setDepositMethodId('');
+    setDepositStep('form');
+    setDepositResult(null);
+    setDepositError('');
+    setShowAddFunds(false);
+  };
+
   const handleAddMethod = async () => {
     setSavingMethod(true);
     try {
-      await financialService.addPaymentMethod(methodForm);
-      showToast('Withdrawal method added successfully!', 'success');
-      setShowAddMethod(false);
-      setMethodForm({ type: 'card', provider: 'stripe', nickname: '', card_last_four: '', bank_name: '', masked_phone: '', masked_account_number: '', card_brand: '', mobile_provider: '' });
-      load();
+      const methodRes = await financialService.addPaymentMethod(methodForm);
+      const newMethodId = methodRes.data?.id;
+      const depositAmt = parseFloat(methodDepositAmount) || 0;
+
+      if (depositAmt > 0 && newMethodId) {
+        // Also deposit funds using the newly created method
+        setSavingMethod(false);
+        setDepositMethodId(String(newMethodId));
+        setDepositAmount(methodDepositAmount);
+        setShowAddMethod(false);
+        setMethodForm({ type: 'card', provider: 'stripe', nickname: '', card_last_four: '', bank_name: '', masked_phone: '', masked_account_number: '', card_brand: '', mobile_provider: '', account_number: '', bank_code: '' });
+        setMethodDepositAmount('');
+        // Open Add Funds modal pre-filled
+        setShowAddFunds(true);
+        setDepositStep('form');
+        await load();
+        showToast('Payment method added. Confirm your deposit below.', 'success');
+      } else {
+        showToast('Payment method added successfully!', 'success');
+        setShowAddMethod(false);
+        setMethodForm({ type: 'card', provider: 'stripe', nickname: '', card_last_four: '', bank_name: '', masked_phone: '', masked_account_number: '', card_brand: '', mobile_provider: '', account_number: '', bank_code: '' });
+        setMethodDepositAmount('');
+        await load();
+      }
     } catch (err) {
       showToast(err.response?.data?.message || 'Failed to add method.', 'error');
     } finally {
@@ -404,6 +499,14 @@ export default function WithdrawalsPage() {
 
       {/* ─── Quick Actions Bar ───────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-3">
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => setShowAddFunds(true)}
+          className="shadow-lg shadow-brand-500/20"
+        >
+          <ArrowUpCircle className="h-4 w-4" /> Add Funds
+        </Button>
         <Button
           variant="success"
           size="sm"
@@ -760,6 +863,142 @@ export default function WithdrawalsPage() {
         </div>
       )}
 
+      {/* ─── Add Funds Modal ─────────────────────────────────────────── */}
+      <Modal open={showAddFunds} onClose={resetAddFundsModal} title="Add Funds" size="md">
+        <div className="space-y-5">
+          {depositStep === 'form' && (
+            <>
+              {/* Current Balance Banner */}
+              <div className="rounded-2xl bg-gradient-to-r from-brand-500 to-indigo-500 p-6 text-center text-white">
+                <p className="text-xs font-bold uppercase tracking-wider text-brand-100">Current Available Balance</p>
+                <p className="mt-1 text-3xl font-extrabold">{formatETB(e.available_balance || 0)}</p>
+              </div>
+
+              <Input
+                label={`Amount (${getPlatformCurrency()})`}
+                type="number"
+                min="10"
+                max="500000"
+                step="0.01"
+                value={depositAmount}
+                onChange={(e) => setDepositAmount(e.target.value)}
+                placeholder={`Minimum 10 ${getPlatformCurrency()}`}
+                required
+              />
+
+              {methods.length > 0 ? (
+                <Select
+                  label="Payment Method"
+                  value={depositMethodId}
+                  onChange={(e) => setDepositMethodId(e.target.value)}
+                  required
+                >
+                  <option value="">Select payment method</option>
+                  {methods.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.display_label || m.nickname || `Method #${m.id}`}
+                    </option>
+                  ))}
+                </Select>
+              ) : (
+                <div className="rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50 p-6 text-center">
+                  <CreditCard className="mx-auto h-10 w-10 text-amber-400" />
+                  <p className="mt-3 font-bold text-amber-800">No Payment Methods</p>
+                  <p className="mt-1 text-xs text-amber-600">Add a payment method first to add funds.</p>
+                  <Button variant="outline" size="sm" className="mt-3" onClick={() => { resetAddFundsModal(); setShowAddMethod(true); }}>
+                    <Plus className="h-3 w-3" /> Add Method
+                  </Button>
+                </div>
+              )}
+
+              {/* Summary */}
+              {depositAmount && parseFloat(depositAmount) > 0 && (
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Amount to add</span>
+                    <span className="font-bold text-ink-900">{formatETB(parseFloat(depositAmount) || 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">New balance</span>
+                    <span className="font-bold text-emerald-600">{formatETB((e.available_balance || 0) + (parseFloat(depositAmount) || 0))}</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-2">
+                <Button variant="outline" onClick={resetAddFundsModal}>Cancel</Button>
+                <Button
+                  variant="primary"
+                  onClick={handleAddFunds}
+                  disabled={!depositAmount || !depositMethodId || methods.length === 0}
+                  className="shadow-lg shadow-brand-500/20"
+                >
+                  <ArrowUpCircle className="h-4 w-4" /> Add Funds
+                </Button>
+              </div>
+            </>
+          )}
+
+          {depositStep === 'processing' && (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-50">
+                <RefreshCw className="h-8 w-8 text-brand-500 animate-spin" />
+              </div>
+              <p className="mt-4 text-lg font-bold text-ink-900">Processing Payment</p>
+              <p className="mt-1 text-sm text-gray-500">Please wait while we confirm your payment...</p>
+            </div>
+          )}
+
+          {depositStep === 'success' && depositResult && (
+            <div className="space-y-4">
+              <div className="flex flex-col items-center py-6">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
+                  <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+                </div>
+                <h3 className="mt-4 text-xl font-bold text-emerald-700">Funds Added Successfully</h3>
+                <p className="mt-1 text-sm text-gray-500">{formatETB(depositResult.payment.amount)} has been added to your Available Balance.</p>
+              </div>
+
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm text-emerald-700">Previous Balance</span>
+                  <span className="text-sm font-bold text-emerald-900">{formatETB(depositResult.previous_balance)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-emerald-700">Added</span>
+                  <span className="text-sm font-bold text-emerald-900">+ {formatETB(depositResult.payment.amount)}</span>
+                </div>
+                <div className="border-t border-emerald-200 pt-2 flex justify-between">
+                  <span className="text-sm font-bold text-emerald-700">New Available Balance</span>
+                  <span className="text-lg font-extrabold text-emerald-900">{formatETB(depositResult.wallet.available_balance)}</span>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <Button variant="primary" onClick={resetAddFundsModal}>Done</Button>
+              </div>
+            </div>
+          )}
+
+          {depositStep === 'error' && (
+            <div className="space-y-4">
+              <div className="flex flex-col items-center py-6">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
+                  <AlertTriangle className="h-8 w-8 text-red-500" />
+                </div>
+                <h3 className="mt-4 text-xl font-bold text-red-700">Payment Failed</h3>
+                <p className="mt-1 text-sm text-gray-500 text-center max-w-sm">{depositError}</p>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <Button variant="outline" onClick={resetAddFundsModal}>Cancel</Button>
+                <Button variant="primary" onClick={() => setDepositStep('form')}>Try Again</Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
+
       {/* ─── Withdraw Modal ──────────────────────────────────────────── */}
       <Modal open={showWithdraw} onClose={() => setShowWithdraw(false)} title="Request Withdrawal" size="md">
         <div className="space-y-5">
@@ -781,13 +1020,13 @@ export default function WithdrawalsPage() {
           )}
 
           <Input
-            label="Amount (ETB)"
+            label={`Amount (${getPlatformCurrency()})`}
             type="number"
             min="100"
             step="0.01"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            placeholder="Minimum 100 ETB"
+            placeholder={`Minimum 100 ${getPlatformCurrency()}`}
             required
           />
 
@@ -887,21 +1126,45 @@ export default function WithdrawalsPage() {
           )}
           {methodForm.type === 'bank' && (
             <>
-              <Input label="Bank Name" placeholder="e.g., CBE" value={methodForm.bank_name} onChange={(e) => setMethodForm({ ...methodForm, bank_name: e.target.value })} />
-              <Input label="Account Last 4" placeholder="1234" value={methodForm.masked_account_number} onChange={(e) => setMethodForm({ ...methodForm, masked_account_number: e.target.value })} />
+              <Input label="Bank Name" placeholder="e.g., CBE, Bank of Abyssinia" value={methodForm.bank_name} onChange={(e) => setMethodForm({ ...methodForm, bank_name: e.target.value })} />
+              <Input label="Account Number" placeholder="Full account number" value={methodForm.account_number} onChange={(e) => setMethodForm({ ...methodForm, account_number: e.target.value })} />
+              <p className="text-xs text-gray-500 -mt-1">This is stored securely and only used for processing withdrawals.</p>
             </>
           )}
           {methodForm.type === 'mobile_money' && (
             <>
-              <Input label="Mobile Provider" placeholder="e.g., TeleBirr" value={methodForm.mobile_provider} onChange={(e) => setMethodForm({ ...methodForm, mobile_provider: e.target.value })} />
-              <Input label="Mobile Number" placeholder="+251911234567" value={methodForm.masked_phone} onChange={(e) => setMethodForm({ ...methodForm, masked_phone: e.target.value })} />
+              <Input label="Mobile Provider" placeholder="e.g., TeleBirr, CBE Birr" value={methodForm.mobile_provider} onChange={(e) => setMethodForm({ ...methodForm, mobile_provider: e.target.value })} />
+              <Input label="Account Number" placeholder="Full phone/account number" value={methodForm.account_number} onChange={(e) => setMethodForm({ ...methodForm, account_number: e.target.value })} />
+              <p className="text-xs text-gray-500 -mt-1">This is stored securely and only used for processing withdrawals.</p>
             </>
           )}
 
+          {/* Optional Deposit Amount */}
+          <div className="rounded-2xl border border-brand-200 bg-brand-50 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <ArrowUpCircle className="h-4 w-4 text-brand-600" />
+              <span className="text-sm font-bold text-brand-700">Optional: Add Funds Now</span>
+            </div>
+            <p className="text-xs text-brand-600 mb-3">Enter an amount to deposit into your Available Balance using this new method.</p>
+            <Input
+              label={`Deposit Amount (${getPlatformCurrency()})`}
+              type="number"
+              min="0"
+              step="0.01"
+              value={methodDepositAmount}
+              onChange={(e) => setMethodDepositAmount(e.target.value)}
+              placeholder="Leave empty to skip"
+            />
+          </div>
+
           <div className="flex justify-end gap-3 pt-2">
-            <Button variant="outline" onClick={() => setShowAddMethod(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => { setShowAddMethod(false); setMethodDepositAmount(''); }}>Cancel</Button>
             <Button variant="primary" loading={savingMethod} onClick={handleAddMethod}>
-              <Plus className="h-4 w-4" /> Add Method
+              {methodDepositAmount && parseFloat(methodDepositAmount) > 0 ? (
+                <><Plus className="h-4 w-4" /> Add Method & Deposit</>
+              ) : (
+                <><Plus className="h-4 w-4" /> Add Method</>
+              )}
             </Button>
           </div>
         </div>

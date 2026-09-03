@@ -15,6 +15,7 @@ import { normalizeJob } from '../../utils/jobMapper';
 import { getErrorMessage, getFieldErrors } from '../../utils/errors';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useToast } from '../../hooks/useToast';
+import { getPlatformCurrency } from '../../utils/format';
 
 const BUDGET_TYPES = [
   { value: 'fixed', label: 'Fixed Price' },
@@ -69,7 +70,7 @@ export default function EmployerJobEditPage() {
           budget_type: job.budgetType === 'hourly' ? 'hourly' : 'fixed',
           min_budget: job.minBudget != null ? String(job.minBudget) : '',
           max_budget: job.maxBudget != null ? String(job.maxBudget) : '',
-          currency: job.currency ?? 'ETB',
+          currency: job.currency ?? getPlatformCurrency(),
           experience_level: job.experienceLevel?.toLowerCase() ?? 'intermediate',
           location_type: job.locationType ?? 'remote',
           location: job.location === 'Remote' ? '' : (job.location ?? ''),
@@ -138,7 +139,7 @@ export default function EmployerJobEditPage() {
       budget_type: form.budget_type,
       min_budget: form.min_budget ? Number(form.min_budget) : null,
       max_budget: form.max_budget ? Number(form.max_budget) : null,
-      currency: form.currency.trim().toUpperCase() || 'ETB',
+      currency: form.currency.trim().toUpperCase() || getPlatformCurrency(),
       experience_level: form.experience_level,
       location_type: form.location_type,
       location: form.location.trim() || null,
@@ -299,7 +300,7 @@ export default function EmployerJobEditPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Input
                   type="number"
-                  label="Minimum budget (ETB)"
+                  label={`Minimum budget (${getPlatformCurrency()})`}
                   name="min_budget"
                   placeholder="0"
                   min="0"
@@ -311,7 +312,7 @@ export default function EmployerJobEditPage() {
                 />
                 <Input
                   type="number"
-                  label="Maximum budget (ETB)"
+                  label={`Maximum budget (${getPlatformCurrency()})`}
                   name="max_budget"
                   placeholder="0"
                   min="0"

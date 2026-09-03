@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { getPlatformCurrency } from '../../utils/format';
 import {
   BarChart,
   Bar,
@@ -88,7 +89,7 @@ function CustomTooltip({ active, payload, label }) {
           <span className="text-sm font-bold text-ink-900">
             {new Intl.NumberFormat('en-ET', {
               style: 'currency',
-              currency: 'ETB',
+              currency: getPlatformCurrency(),
               minimumFractionDigits: 0,
             }).format(entry.value)}
           </span>

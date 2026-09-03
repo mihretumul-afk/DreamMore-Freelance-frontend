@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { getPlatformCurrency } from '../../utils/format';
 import {
   ArrowRight,
   BarChart3,
@@ -222,7 +223,7 @@ export default function CategoryCard({ category, to, className, themeIndex = 0 }
 
   const level = category?.level || 'Beginner';
   const duration = category?.duration || '3 Months';
-  const price = category?.price || (category?.jobs_count != null && category.jobs_count > 0 ? `${category.jobs_count} Jobs` : 'ETB 6,000');
+  const price = category?.price || (category?.jobs_count != null && category.jobs_count > 0 ? `${category.jobs_count} Jobs` : `${getPlatformCurrency()} 6,000`);
 
   const targetHref = to ?? (category?.id ? `/jobs?category_id=${category.id}` : '/jobs');
 

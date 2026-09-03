@@ -32,6 +32,14 @@ function flattenSettings(grouped) {
     auto_approve_days:    grouped.auto_approve_days ?? '5',
     registration_open:    String(grouped.access?.registration_open ?? 'true'),
     maintenance_mode:     String(grouped.access?.maintenance_mode ?? 'false'),
+
+    // Featured Listing settings
+    featured_jobs_enabled:             String(grouped.featured?.featured_jobs_enabled ?? 'false'),
+    featured_profiles_enabled:         String(grouped.featured?.featured_profiles_enabled ?? 'false'),
+    featured_job_price:                String(grouped.featured?.featured_job_price ?? '150'),
+    featured_job_duration_days:        String(grouped.featured?.featured_job_duration_days ?? '7'),
+    featured_profile_price:            String(grouped.featured?.featured_profile_price ?? '100'),
+    featured_profile_duration_days:    String(grouped.featured?.featured_profile_duration_days ?? '7'),
   };
 }
 
@@ -46,6 +54,14 @@ const INITIAL_FORM = {
   auto_approve_days: '5',
   registration_open: 'true',
   maintenance_mode: 'false',
+
+  // Featured Listing settings
+  featured_jobs_enabled: 'false',
+  featured_profiles_enabled: 'false',
+  featured_job_price: '150',
+  featured_job_duration_days: '7',
+  featured_profile_price: '100',
+  featured_profile_duration_days: '7',
 };
 
 export default function AdminSettingsPage() {
@@ -285,6 +301,101 @@ export default function AdminSettingsPage() {
               </div>
               <span className="text-sm text-brand-600 font-medium">Manage →</span>
             </Link>
+          </CardBody>
+        </Card>
+
+        {/* ── Featured Listings (Revenue) ────────────────────────────────── */}
+        <Card>
+          <CardHeader
+            title="Featured Listings"
+            description="Enable paid listing boosts for jobs and freelancer profiles."
+          />
+          <CardBody className="space-y-6">
+            {/* Featured Jobs */}
+            <div className="rounded-lg border border-gray-200 p-4 space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-ink-900">Featured Jobs</p>
+                  <p className="text-xs text-gray-500">Allow employers to pay to boost job visibility in search results.</p>
+                </div>
+                <Select
+                  value={form.featured_jobs_enabled}
+                  onChange={update('featured_jobs_enabled')}
+                  error={fieldErrors.featured_jobs_enabled}
+                  className="w-32"
+                >
+                  <option value="false">Disabled</option>
+                  <option value="true">Enabled</option>
+                </Select>
+              </div>
+              {form.featured_jobs_enabled === 'true' && (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 pl-0 sm:pl-4 border-l-0 sm:border-l-2 sm:border-brand-200">
+                  <Input
+                    label="Price per featured job"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={form.featured_job_price}
+                    onChange={update('featured_job_price')}
+                    error={fieldErrors.featured_job_price}
+                    hint="Amount in ETB"
+                  />
+                  <Input
+                    label="Duration (days)"
+                    type="number"
+                    min="1"
+                    max="90"
+                    value={form.featured_job_duration_days}
+                    onChange={update('featured_job_duration_days')}
+                    error={fieldErrors.featured_job_duration_days}
+                    hint="How long the boost lasts"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Featured Profiles */}
+            <div className="rounded-lg border border-gray-200 p-4 space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-ink-900">Featured Freelancer Profiles</p>
+                  <p className="text-xs text-gray-500">Allow freelancers to pay to boost profile visibility in search results.</p>
+                </div>
+                <Select
+                  value={form.featured_profiles_enabled}
+                  onChange={update('featured_profiles_enabled')}
+                  error={fieldErrors.featured_profiles_enabled}
+                  className="w-32"
+                >
+                  <option value="false">Disabled</option>
+                  <option value="true">Enabled</option>
+                </Select>
+              </div>
+              {form.featured_profiles_enabled === 'true' && (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 pl-0 sm:pl-4 border-l-0 sm:border-l-2 sm:border-brand-200">
+                  <Input
+                    label="Price per featured profile"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={form.featured_profile_price}
+                    onChange={update('featured_profile_price')}
+                    error={fieldErrors.featured_profile_price}
+                    hint="Amount in ETB"
+                  />
+                  <Input
+                    label="Duration (days)"
+                    type="number"
+                    min="1"
+                    max="90"
+                    value={form.featured_profile_duration_days}
+                    onChange={update('featured_profile_duration_days')}
+                    error={fieldErrors.featured_profile_duration_days}
+                    hint="How long the boost lasts"
+                  />
+                </div>
+              )}
+            </div>
           </CardBody>
         </Card>
 

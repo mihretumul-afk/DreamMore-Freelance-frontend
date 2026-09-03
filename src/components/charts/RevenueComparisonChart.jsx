@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { getPlatformCurrency } from '../../utils/format';
 import {
   AreaChart,
   Area,
@@ -19,7 +20,7 @@ const formatCurrency = (value) => {
 const formatFullCurrency = (value) => {
   return new Intl.NumberFormat('en-ET', {
     style: 'currency',
-    currency: 'ETB',
+    currency: getPlatformCurrency(),
     minimumFractionDigits: 0,
   }).format(value);
 };

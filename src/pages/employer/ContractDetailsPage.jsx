@@ -16,7 +16,7 @@ import EmptyState from '../../components/common/EmptyState';
 import ErrorState from '../../components/common/ErrorState';
 import { contractService } from '../../services/contractService';
 import { financialService } from '../../services/financialService';
-import { formatDate, formatETB } from '../../utils/format';
+import { formatDate, formatETB, getPlatformCurrency } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useToast } from '../../hooks/useToast';
 import { API_BASE_URL } from '../../config/env';
@@ -595,7 +595,7 @@ export default function EmployerContractDetailsPage() {
           <Textarea label="Deliverables" placeholder="What should be delivered?"
             value={milestoneForm.deliverables} onChange={(e) => setMilestoneForm({ ...milestoneForm, deliverables: e.target.value })} rows={2} />
           <div className="grid grid-cols-2 gap-4">
-            <Input label="Amount (ETB)" type="number" step="0.01" min="0" placeholder="0.00"
+            <Input label={`Amount (${getPlatformCurrency()})`} type="number" step="0.01" min="0" placeholder="0.00"
               value={milestoneForm.amount} onChange={(e) => setMilestoneForm({ ...milestoneForm, amount: e.target.value })} required />
             <Input label="Due Date" type="date" value={milestoneForm.due_date}
               onChange={(e) => setMilestoneForm({ ...milestoneForm, due_date: e.target.value })} />

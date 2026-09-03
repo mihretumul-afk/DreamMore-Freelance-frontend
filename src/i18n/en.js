@@ -148,7 +148,7 @@ export const en = {
 
   // ---- How it works ----
   'how.eyebrow': 'How it works',
-  'how.title': 'It\'s Easy to Get Work Done',
+  'how.title': 'how DreamMore work',
   'how.description':
     'A clear process for freelancers finding work and employers building teams.',
   'how.ctaLabel': 'See How DreamMore Works',

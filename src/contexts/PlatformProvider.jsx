@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { PlatformContext } from './PlatformContext';
 import { platformService } from '../services/platformService';
+import { setPlatformCurrency } from '../utils/format';
 
 const DEFAULT_SETTINGS = {
   platform_name: 'Dream More AppWorks',
@@ -28,16 +29,21 @@ export function PlatformProvider({ children }) {
     try {
       const response = await platformService.getSettings();
       const data = response.data ?? response;
+      const currency = data.default_currency ?? DEFAULT_SETTINGS.default_currency;
       setSettings({
         platform_name: data.platform_name ?? DEFAULT_SETTINGS.platform_name,
         platform_description: data.platform_description ?? DEFAULT_SETTINGS.platform_description,
         support_email: data.support_email ?? DEFAULT_SETTINGS.support_email,
-        default_currency: data.default_currency ?? DEFAULT_SETTINGS.default_currency,
+        default_currency: currency,
         min_proposal_amount: data.min_proposal_amount ?? DEFAULT_SETTINGS.min_proposal_amount,
         max_proposal_amount: data.max_proposal_amount ?? DEFAULT_SETTINGS.max_proposal_amount,
         registration_open: data.registration_open ?? DEFAULT_SETTINGS.registration_open,
         maintenance_mode: data.maintenance_mode ?? DEFAULT_SETTINGS.maintenance_mode,
+        featured_jobs_enabled: data.featured_jobs_enabled ?? false,
+        featured_profiles_enabled: data.featured_profiles_enabled ?? false,
       });
+      // Push currency into the format.js cache so formatETB() uses it everywhere
+      setPlatformCurrency(currency);
     } catch {
       // Use defaults on failure
     } finally {

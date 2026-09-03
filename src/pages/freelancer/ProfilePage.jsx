@@ -30,7 +30,10 @@ import { normalizeFreelancer } from '../../utils/freelancerMapper';
 import { getErrorMessage } from '../../utils/errors';
 import { formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { useToast } from '../../hooks/useToast';
+import { usePlatform } from '../../hooks/usePlatform';
 import apiClient from '../../api/client';
+import Modal from '../../components/ui/Modal';
 
 import { useAuth } from '../../hooks/useAuth';
 
@@ -41,7 +44,12 @@ export default function FreelancerProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [forbidden, setForbidden] = useState(false);
+  const { showToast } = useToast();
+  const { settings: platformSettings } = usePlatform();
   const [rawData, setRawData] = useState(null);
+  const [featuredStatus, setFeaturedStatus] = useState(null);
+  const [featuring, setFeaturing] = useState(false);
+  const [showFeatureModal, setShowFeatureModal] = useState(false);
 
   const loadProfile = useCallback(async () => {
     setLoading(true);
@@ -74,6 +82,21 @@ export default function FreelancerProfilePage() {
     loadProfile();
   }, [loadProfile]);
 
+  // Load featured status when profile loads
+  useEffect(() => {
+    if (!platformSettings?.featured_profiles_enabled) return;
+    let cancelled = false;
+    freelancerService.getFeaturedStatus().then((res) => {
+      if (!cancelled && res.success) {
+        setFeaturedStatus({
+          is_featured: res.data?.is_featured ?? false,
+          expires_at: res.data?.featured_until ?? null,
+        });
+      }
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [platformSettings?.featured_profiles_enabled]);
+
   if (loading) return <FreelancerProfileSkeleton />;
 
   if (error || !profile) {
@@ -99,9 +122,26 @@ export default function FreelancerProfilePage() {
         title="My Profile"
         description="How clients see you on the marketplace."
         actions={
-          <Button as={Link} to="/freelancer/profile/edit">
-            <Pencil className="h-4 w-4" aria-hidden="true" /> Edit Profile
-          </Button>
+          <div className="flex items-center gap-2">
+            {platformSettings?.featured_profiles_enabled && !featuredStatus?.is_featured && (
+              <Button
+                variant="primary"
+                size="sm"
+                loading={featuring}
+                onClick={() => setShowFeatureModal(true)}
+              >
+                ⭐ Feature My Profile
+              </Button>
+            )}
+            {featuredStatus?.is_featured && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-700">
+                ⭐ Featured until {featuredStatus.expires_at ? new Date(featuredStatus.expires_at).toLocaleDateString() : '—'}
+              </span>
+            )}
+            <Button as={Link} to="/freelancer/profile/edit">
+              <Pencil className="h-4 w-4" aria-hidden="true" /> Edit Profile
+            </Button>
+          </div>
         }
       />
 
@@ -325,6 +365,43 @@ export default function FreelancerProfilePage() {
           )}
         </CardBody>
       </Card>
+
+      {/* Feature Profile Modal */}
+      <Modal
+        open={showFeatureModal}
+        onClose={() => setShowFeatureModal(false)}
+        title="Feature My Profile"
+        description={`This will deduct ${formatETB(platformSettings?.featured_profile_price ?? 100)} from your wallet and boost your profile's visibility for ${platformSettings?.featured_profile_duration_days ?? 7} days. Continue?`}
+        size="sm"
+      >
+        <div className="flex justify-end gap-3">
+          <Button variant="outline" size="sm" onClick={() => setShowFeatureModal(false)}>Cancel</Button>
+          <Button
+            variant="primary"
+            size="sm"
+            loading={featuring}
+            onClick={async () => {
+              setFeaturing(true);
+              try {
+                const res = await freelancerService.featureMyProfile();
+                if (res.success) {
+                  showToast('Profile featured successfully! Your profile is now boosted.', 'success');
+                  setFeaturedStatus({ is_featured: true, expires_at: res.data?.featured_profile?.expires_at });
+                  setShowFeatureModal(false);
+                } else {
+                  showToast(res.message || 'Unable to feature your profile.', 'error');
+                }
+              } catch (err) {
+                showToast(getErrorMessage(err, 'Unable to feature your profile. Please try again.'), 'error');
+              } finally {
+                setFeaturing(false);
+              }
+            }}
+          >
+            Confirm Feature
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

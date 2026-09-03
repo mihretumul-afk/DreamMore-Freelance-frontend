@@ -51,6 +51,18 @@ export const jobService = {
     const response = await apiClient.get(`/jobs/${id}`);
     return response.data; // { success, message, data }
   },
+
+  /** Feature a job (employer pays to boost visibility). */
+  featureJob: async (jobId) => {
+    const response = await apiClient.post(`/jobs/${jobId}/feature`);
+    return response.data;
+  },
+
+  /** Check if a job is currently featured. */
+  getFeaturedStatus: async (jobId) => {
+    const response = await apiClient.get(`/jobs/${jobId}/featured`);
+    return response.data;
+  },
 };
 
 export default jobService;

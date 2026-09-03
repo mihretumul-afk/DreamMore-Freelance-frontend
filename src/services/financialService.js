@@ -96,6 +96,31 @@ export const financialService = {
     return res.data;
   },
 
+  // ── Add Funds (Wallet Deposit) ─────────────────────────────────────
+
+  initiateDeposit: async (amount, paymentMethodId) => {
+    const res = await apiClient.post('/wallet/deposit', {
+      amount,
+      payment_method_id: paymentMethodId,
+    });
+    return res.data;
+  },
+
+  getDepositStatus: async (paymentId) => {
+    const res = await apiClient.get(`/wallet/deposit/${paymentId}`);
+    return res.data;
+  },
+
+  reconcileDeposit: async (reference) => {
+    const res = await apiClient.post(`/wallet/deposit/reconcile/${reference}`);
+    return res.data;
+  },
+
+  reconcileAllDeposits: async () => {
+    const res = await apiClient.post('/wallet/deposit/reconcile-all');
+    return res.data;
+  },
+
   // ── Admin Finance ───────────────────────────────────────────────────────
 
   getFinanceDashboard: async () => {

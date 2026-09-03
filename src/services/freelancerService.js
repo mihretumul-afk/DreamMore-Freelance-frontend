@@ -33,6 +33,18 @@ export const freelancerService = {
     const response = await apiClient.put('/freelancer/profile', payload);
     return response.data; // { success, message, data }
   },
+
+  /** Feature the freelancer's own profile (pay to boost visibility). */
+  featureMyProfile: async () => {
+    const response = await apiClient.post('/freelancer-profile/feature');
+    return response.data;
+  },
+
+  /** Check if the freelancer's profile is currently featured. */
+  getFeaturedStatus: async () => {
+    const response = await apiClient.get('/freelancer-profile/featured');
+    return response.data;
+  },
 };
 
 export default freelancerService;

@@ -23,7 +23,7 @@ import Textarea from '../ui/Textarea';
 import Select from '../ui/Select';
 import Modal from '../ui/Modal';
 import { portfolioService } from '../../services/portfolioService';
-import { formatDate, formatETB } from '../../utils/format';
+import { formatDate, formatETB, getPlatformCurrency } from '../../utils/format';
 import { useI18n } from '../../i18n';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -62,7 +62,7 @@ export default function ProposalForm({
   const [form, setForm] = useState(() => ({
     coverLetter: initialValues?.coverLetter || '',
     bidAmount: initialValues?.bidAmount || (isHourly && defaultRate ? String(defaultRate) : (job?.minBudget ? String(job.minBudget) : '')),
-    currency: initialValues?.currency || 'ETB',
+    currency: initialValues?.currency || getPlatformCurrency(),
     estimatedDuration: initialValues?.estimatedDuration || '1 to 4 weeks',
     proposedMilestones: initialValues?.proposedMilestones || [
       { id: '1', title: 'Initial Milestone / Delivery Phase 1', amount: job?.minBudget ? String(job.minBudget) : '1000', dueDate: '', description: '' }
@@ -156,7 +156,7 @@ export default function ProposalForm({
     }
 
     if (!form.bidAmount || Number(form.bidAmount) < 1) {
-      errs.bidAmount = 'Enter a valid proposed amount (min 1 ETB).';
+      errs.bidAmount = `Enter a valid proposed amount (min 1 ${getPlatformCurrency()}).`;
     }
 
     if (!form.estimatedDuration) {
@@ -244,7 +244,7 @@ export default function ProposalForm({
               <h3 className="text-base font-bold text-ink-900">
                 {isHourly ? 'Hourly Rate & Terms' : 'Proposed Terms & Milestones'}
               </h3>
-              <p className="text-xs text-gray-500">Set your pricing terms in ETB.</p>
+              <p className="text-xs text-gray-500">Set your pricing terms in {getPlatformCurrency()}.</p>
             </div>
           </div>
         </div>
@@ -252,7 +252,7 @@ export default function ProposalForm({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Input
             type="number"
-            label={isHourly ? 'Hourly Rate (ETB/hr)' : 'Total Proposal Bid Amount (ETB)'}
+            label={isHourly ? `Hourly Rate (${getPlatformCurrency()}/hr)` : `Total Proposal Bid Amount (${getPlatformCurrency()})`}
             name="bidAmount"
             placeholder="0.00"
             min="1"
@@ -326,7 +326,7 @@ export default function ProposalForm({
                     <div>
                       <Input
                         type="number"
-                        label="Amount (ETB)"
+                        label={`Amount (${getPlatformCurrency()})`}
                         placeholder="1000"
                         min="1"
                         value={milestone.amount}

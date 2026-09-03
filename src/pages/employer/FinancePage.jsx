@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   ArrowUpRight, Clock, CheckCircle2, AlertTriangle, ChevronLeft, ChevronRight,
   Wallet, CreditCard, Plus, Trash2, Star, Banknote, TrendingUp,
   RefreshCw, PiggyBank, DollarSign, BadgeDollarSign, Receipt, Download,
-  FileText, FileSpreadsheet, ChevronDown, Calendar, X, Shield, Zap, FileDown
+  FileText, FileSpreadsheet, ChevronDown, Calendar, X, Shield, Zap, FileDown, ArrowUpCircle
 } from 'lucide-react';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -16,7 +17,7 @@ import ErrorState from '../../components/common/ErrorState';
 import EarningsChart from '../../components/charts/EarningsChart';
 import SpendingBreakdownChart from '../../components/charts/SpendingBreakdownChart';
 import { financialService } from '../../services/financialService';
-import { formatETB, formatDate } from '../../utils/format';
+import { formatETB, formatDate, getPlatformCurrency } from '../../utils/format';
 import { useToast } from '../../hooks/useToast';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useAuth } from '../../hooks/useAuth';
@@ -35,6 +36,7 @@ const TX_TYPES = {
   withdrawal:       { label: 'Withdrawal',      tone: 'danger',  color: 'red' },
   withdrawal_fee:   { label: 'Withdrawal Fee',  tone: 'warning', color: 'amber' },
   adjustment:       { label: 'Adjustment',      tone: 'neutral', color: 'gray' },
+  wallet_deposit:   { label: 'Wallet Deposit',  tone: 'success', color: 'emerald' },
 };
 
 const METHOD_TYPES = [
@@ -153,13 +155,23 @@ export default function EmployerFinancePage() {
   const [budgetForm, setBudgetForm] = useState({ monthly_limit: '', alert_threshold: 80, alerts_enabled: true });
   const [savingBudget, setSavingBudget] = useState(false);
 
+  // Add funds modal
+  const [showAddFunds, setShowAddFunds] = useState(false);
+  const [depositAmount, setDepositAmount] = useState('');
+  const [depositMethodId, setDepositMethodId] = useState('');
+  const [depositStep, setDepositStep] = useState('form'); // form | processing | success | error
+  const [depositResult, setDepositResult] = useState(null);
+  const [depositError, setDepositError] = useState('');
+
   // Add method modal
   const [showAddMethod, setShowAddMethod] = useState(false);
   const [methodForm, setMethodForm] = useState({
     type: 'card', provider: 'stripe', nickname: '',
     card_last_four: '', bank_name: '', masked_phone: '', masked_account_number: '',
     card_brand: '', mobile_provider: '',
+    account_number: '', bank_code: '',
   });
+  const [methodDepositAmount, setMethodDepositAmount] = useState('');
   const [savingMethod, setSavingMethod] = useState(false);
 
   const load = useCallback(async () => {
@@ -193,7 +205,38 @@ export default function EmployerFinancePage() {
     }
   }, [txPage]);
 
-  useEffect(() => { load(); }, [load]);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // On page load: load data immediately, then reconcile in background
+  useEffect(() => {
+    const depositReturn = searchParams.get('deposit');
+    const isReturn = depositReturn === 'return';
+
+    if (isReturn) {
+      setSearchParams({}, { replace: true });
+    }
+
+    // Always load data FIRST so the page shows immediately
+    load();
+
+    // Fire reconcile in background — don't block the page
+    financialService.reconcileAllDeposits()
+      .then(() => {
+        // After reconcile completes, reload to get updated balance
+        load();
+        if (isReturn) {
+          showToast('Payment processed. Your wallet balance has been updated.', 'success');
+        }
+      })
+      .catch(() => { /* reconcile failed — page still shows data */ });
+
+    // Auto-refresh every 30 seconds to catch wallet changes from milestones etc.
+    const interval = setInterval(() => {
+      load();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   /* ── Filtered Data ───────────────────────────────────────────────── */
 
@@ -212,14 +255,76 @@ export default function EmployerFinancePage() {
 
   /* ── Handlers ─────────────────────────────────────────────────────── */
 
+  const handleAddFunds = async () => {
+    if (!depositAmount || parseFloat(depositAmount) < 10) {
+      showToast('Please enter a valid amount (minimum 10 ETB).', 'error');
+      return;
+    }
+    if (!depositMethodId) {
+      showToast('Please select a payment method.', 'error');
+      return;
+    }
+    setDepositStep('processing');
+    setDepositError('');
+    try {
+      const res = await financialService.initiateDeposit(parseFloat(depositAmount), parseInt(depositMethodId));
+      const data = res.data;
+
+      // Check if this is a redirect-based provider (Chapa)
+      if (data.checkout_url) {
+        // Redirect to Chapa checkout
+        // When user returns, reconciliation on page load will credit the wallet
+        window.location.href = data.checkout_url;
+        return;
+      }
+
+      // Synchronous provider (sandbox) — show success immediately
+      setDepositResult(data);
+      setDepositStep('success');
+      load(); // Reload wallet data
+      showToast('Funds added successfully!', 'success');
+    } catch (err) {
+      setDepositError(err.response?.data?.message || 'Payment failed. Please try again.');
+      setDepositStep('error');
+    }
+  };
+
+  const resetAddFundsModal = () => {
+    setDepositAmount('');
+    setDepositMethodId('');
+    setDepositStep('form');
+    setDepositResult(null);
+    setDepositError('');
+    setShowAddFunds(false);
+  };
+
   const handleAddMethod = async () => {
     setSavingMethod(true);
     try {
-      await financialService.addPaymentMethod(methodForm);
-      showToast('Payment method added successfully!', 'success');
-      setShowAddMethod(false);
-      setMethodForm({ type: 'card', provider: 'stripe', nickname: '', card_last_four: '', bank_name: '', masked_phone: '', masked_account_number: '', card_brand: '', mobile_provider: '' });
-      load();
+      const methodRes = await financialService.addPaymentMethod(methodForm);
+      const newMethodId = methodRes.data?.id;
+      const depositAmt = parseFloat(methodDepositAmount) || 0;
+
+      if (depositAmt > 0 && newMethodId) {
+        // Also deposit funds using the newly created method
+        setSavingMethod(false);
+        setDepositMethodId(String(newMethodId));
+        setDepositAmount(methodDepositAmount);
+        setShowAddMethod(false);
+        setMethodForm({ type: 'card', provider: 'stripe', nickname: '', card_last_four: '', bank_name: '', masked_phone: '', masked_account_number: '', card_brand: '', mobile_provider: '', account_number: '', bank_code: '' });
+        setMethodDepositAmount('');
+        // Open Add Funds modal pre-filled
+        setShowAddFunds(true);
+        setDepositStep('form');
+        await load();
+        showToast('Payment method added. Confirm your deposit below.', 'success');
+      } else {
+        showToast('Payment method added successfully!', 'success');
+        setShowAddMethod(false);
+        setMethodForm({ type: 'card', provider: 'stripe', nickname: '', card_last_four: '', bank_name: '', masked_phone: '', masked_account_number: '', card_brand: '', mobile_provider: '', account_number: '', bank_code: '' });
+        setMethodDepositAmount('');
+        await load();
+      }
     } catch (err) {
       showToast(err.response?.data?.message || 'Failed to add method.', 'error');
     } finally {
@@ -301,18 +406,25 @@ export default function EmployerFinancePage() {
         <div className="absolute -top-12 -right-12 h-48 w-48 rounded-full bg-brand-100/40 blur-3xl" />
         <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-blue-100/40 blur-2xl" />
         <div className="relative">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">Employer Finance</p>
-          <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900">Finance</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage payment methods, track spending, and view billing history.</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">Employer Finance</p>            <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900">Finance</h1>
+          <p className="mt-1 text-sm text-gray-500">Manage your wallet, payment methods, track spending, and view billing history.</p>
 
           {/* Quick Stats Row */}
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="rounded-2xl bg-blue-50 border border-blue-200 p-4">
-              <div className="flex items-center gap-2 text-xs font-semibold text-blue-600">
-                <Wallet className="h-3.5 w-3.5" /> Budget Remaining
+            <div className="rounded-2xl bg-brand-50 border border-brand-200 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-semibold text-brand-600">
+                  <Wallet className="h-3.5 w-3.5" /> Available Balance
+                </div>
+                <button
+                  onClick={() => setShowAddFunds(true)}
+                  className="inline-flex items-center gap-1 rounded-full bg-brand-500 px-2.5 py-1 text-[10px] font-bold text-white hover:bg-brand-600 transition-colors cursor-pointer"
+                >
+                  <ArrowUpCircle className="h-3 w-3" /> Add Funds
+                </button>
               </div>
-              <p className="mt-1.5 text-xl font-extrabold text-blue-900">{e.monthly_limit > 0 ? formatETB(e.account_balance || 0) : formatETB(totalSpent)}</p>
-              <p className="text-[10px] text-blue-500 mt-0.5">{e.monthly_limit > 0 ? `of ${formatETB(e.monthly_limit)} limit · ${formatETB(e.monthly_spent || 0)} spent` : 'All time spending'}</p>
+              <p className="mt-1.5 text-xl font-extrabold text-brand-900">{formatETB(e.available_balance || 0)}</p>
+              <p className="text-[10px] text-brand-500 mt-0.5">Use for milestones, featured jobs, and more</p>
             </div>
             <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
               <div className="flex items-center gap-2 text-xs font-semibold text-amber-600">
@@ -709,6 +821,142 @@ export default function EmployerFinancePage() {
         </div>
       )}
 
+      {/* ─── Add Funds Modal ─────────────────────────────────────────── */}
+      <Modal open={showAddFunds} onClose={resetAddFundsModal} title="Add Funds" size="md">
+        <div className="space-y-5">
+          {depositStep === 'form' && (
+            <>
+              {/* Current Balance Banner */}
+              <div className="rounded-2xl bg-gradient-to-r from-brand-500 to-indigo-500 p-6 text-center text-white">
+                <p className="text-xs font-bold uppercase tracking-wider text-brand-100">Current Available Balance</p>
+                <p className="mt-1 text-3xl font-extrabold">{formatETB(e.available_balance || 0)}</p>
+              </div>
+
+              <Input
+                label={`Amount (${getPlatformCurrency()})`}
+                type="number"
+                min="10"
+                max="500000"
+                step="0.01"
+                value={depositAmount}
+                onChange={(e) => setDepositAmount(e.target.value)}
+                placeholder={`Minimum 10 ${getPlatformCurrency()}`}
+                required
+              />
+
+              {methods.length > 0 ? (
+                <Select
+                  label="Payment Method"
+                  value={depositMethodId}
+                  onChange={(e) => setDepositMethodId(e.target.value)}
+                  required
+                >
+                  <option value="">Select payment method</option>
+                  {methods.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.display_label || m.nickname || `Method #${m.id}`}
+                    </option>
+                  ))}
+                </Select>
+              ) : (
+                <div className="rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50 p-6 text-center">
+                  <CreditCard className="mx-auto h-10 w-10 text-amber-400" />
+                  <p className="mt-3 font-bold text-amber-800">No Payment Methods</p>
+                  <p className="mt-1 text-xs text-amber-600">Add a payment method first to add funds.</p>
+                  <Button variant="outline" size="sm" className="mt-3" onClick={() => { resetAddFundsModal(); setShowAddMethod(true); }}>
+                    <Plus className="h-3 w-3" /> Add Method
+                  </Button>
+                </div>
+              )}
+
+              {/* Summary */}
+              {depositAmount && parseFloat(depositAmount) > 0 && (
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Amount to add</span>
+                    <span className="font-bold text-ink-900">{formatETB(parseFloat(depositAmount) || 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">New balance</span>
+                    <span className="font-bold text-emerald-600">{formatETB((e.available_balance || 0) + (parseFloat(depositAmount) || 0))}</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-2">
+                <Button variant="outline" onClick={resetAddFundsModal}>Cancel</Button>
+                <Button
+                  variant="primary"
+                  onClick={handleAddFunds}
+                  disabled={!depositAmount || !depositMethodId || methods.length === 0}
+                  className="shadow-lg shadow-brand-500/20"
+                >
+                  <ArrowUpCircle className="h-4 w-4" /> Add Funds
+                </Button>
+              </div>
+            </>
+          )}
+
+          {depositStep === 'processing' && (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-50">
+                <RefreshCw className="h-8 w-8 text-brand-500 animate-spin" />
+              </div>
+              <p className="mt-4 text-lg font-bold text-ink-900">Processing Payment</p>
+              <p className="mt-1 text-sm text-gray-500">Please wait while we confirm your payment...</p>
+            </div>
+          )}
+
+          {depositStep === 'success' && depositResult && (
+            <div className="space-y-4">
+              <div className="flex flex-col items-center py-6">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
+                  <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+                </div>
+                <h3 className="mt-4 text-xl font-bold text-emerald-700">Funds Added Successfully</h3>
+                <p className="mt-1 text-sm text-gray-500">{formatETB(depositResult.payment.amount)} has been added to your Available Balance.</p>
+              </div>
+
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm text-emerald-700">Previous Balance</span>
+                  <span className="text-sm font-bold text-emerald-900">{formatETB(depositResult.previous_balance)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-emerald-700">Added</span>
+                  <span className="text-sm font-bold text-emerald-900">+ {formatETB(depositResult.payment.amount)}</span>
+                </div>
+                <div className="border-t border-emerald-200 pt-2 flex justify-between">
+                  <span className="text-sm font-bold text-emerald-700">New Available Balance</span>
+                  <span className="text-lg font-extrabold text-emerald-900">{formatETB(depositResult.wallet.available_balance)}</span>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <Button variant="primary" onClick={resetAddFundsModal}>Done</Button>
+              </div>
+            </div>
+          )}
+
+          {depositStep === 'error' && (
+            <div className="space-y-4">
+              <div className="flex flex-col items-center py-6">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
+                  <AlertTriangle className="h-8 w-8 text-red-500" />
+                </div>
+                <h3 className="mt-4 text-xl font-bold text-red-700">Payment Failed</h3>
+                <p className="mt-1 text-sm text-gray-500 text-center max-w-sm">{depositError}</p>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <Button variant="outline" onClick={resetAddFundsModal}>Cancel</Button>
+                <Button variant="primary" onClick={() => setDepositStep('form')}>Try Again</Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
+
       {/* ─── Add Method Modal ────────────────────────────────────────── */}
       <Modal open={showAddMethod} onClose={() => setShowAddMethod(false)} title="Add Payment Method" size="md">
         <div className="space-y-4">
@@ -761,21 +1009,45 @@ export default function EmployerFinancePage() {
           )}
           {methodForm.type === 'bank' && (
             <>
-              <Input label="Bank Name" placeholder="e.g., CBE" value={methodForm.bank_name} onChange={(e) => setMethodForm({ ...methodForm, bank_name: e.target.value })} />
-              <Input label="Account Last 4" placeholder="1234" value={methodForm.masked_account_number} onChange={(e) => setMethodForm({ ...methodForm, masked_account_number: e.target.value })} />
+              <Input label="Bank Name" placeholder="e.g., CBE, Bank of Abyssinia" value={methodForm.bank_name} onChange={(e) => setMethodForm({ ...methodForm, bank_name: e.target.value })} />
+              <Input label="Account Number" placeholder="Full account number" value={methodForm.account_number} onChange={(e) => setMethodForm({ ...methodForm, account_number: e.target.value })} />
+              <p className="text-xs text-gray-500 -mt-1">This is stored securely and only used for processing withdrawals.</p>
             </>
           )}
           {methodForm.type === 'mobile_money' && (
             <>
-              <Input label="Mobile Provider" placeholder="e.g., TeleBirr" value={methodForm.mobile_provider} onChange={(e) => setMethodForm({ ...methodForm, mobile_provider: e.target.value })} />
-              <Input label="Mobile Number" placeholder="+251911234567" value={methodForm.masked_phone} onChange={(e) => setMethodForm({ ...methodForm, masked_phone: e.target.value })} />
+              <Input label="Mobile Provider" placeholder="e.g., TeleBirr, CBE Birr" value={methodForm.mobile_provider} onChange={(e) => setMethodForm({ ...methodForm, mobile_provider: e.target.value })} />
+              <Input label="Account Number" placeholder="Full phone/account number" value={methodForm.account_number} onChange={(e) => setMethodForm({ ...methodForm, account_number: e.target.value })} />
+              <p className="text-xs text-gray-500 -mt-1">This is stored securely and only used for processing withdrawals.</p>
             </>
           )}
 
+          {/* Optional Deposit Amount */}
+          <div className="rounded-2xl border border-brand-200 bg-brand-50 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <ArrowUpCircle className="h-4 w-4 text-brand-600" />
+              <span className="text-sm font-bold text-brand-700">Optional: Add Funds Now</span>
+            </div>
+            <p className="text-xs text-brand-600 mb-3">Enter an amount to deposit into your Available Balance using this new method.</p>
+            <Input
+              label={`Deposit Amount (${getPlatformCurrency()})`}
+              type="number"
+              min="0"
+              step="0.01"
+              value={methodDepositAmount}
+              onChange={(e) => setMethodDepositAmount(e.target.value)}
+              placeholder="Leave empty to skip"
+            />
+          </div>
+
           <div className="flex justify-end gap-3 pt-2">
-            <Button variant="outline" onClick={() => setShowAddMethod(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => { setShowAddMethod(false); setMethodDepositAmount(''); }}>Cancel</Button>
             <Button variant="primary" loading={savingMethod} onClick={handleAddMethod}>
-              <Plus className="h-4 w-4" /> Add Method
+              {methodDepositAmount && parseFloat(methodDepositAmount) > 0 ? (
+                <><Plus className="h-4 w-4" /> Add Method & Deposit</>
+              ) : (
+                <><Plus className="h-4 w-4" /> Add Method</>
+              )}
             </Button>
           </div>
         </div>
@@ -795,7 +1067,7 @@ export default function EmployerFinancePage() {
           </div>
 
           <Input
-            label="Monthly Budget Limit (ETB)"
+            label={`Monthly Budget Limit (${getPlatformCurrency()})`}
             type="number"
             min="100"
             step="100"

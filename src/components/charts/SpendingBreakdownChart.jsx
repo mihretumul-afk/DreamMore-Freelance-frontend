@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { getPlatformCurrency } from '../../utils/format';
 import {
   PieChart,
   Pie,
@@ -84,7 +85,7 @@ function CustomPieTooltip({ active, payload }) {
           <span className="text-sm font-bold text-ink-900">
             {new Intl.NumberFormat('en-ET', {
               style: 'currency',
-              currency: 'ETB',
+              currency: getPlatformCurrency(),
               minimumFractionDigits: 0,
             }).format(data.total)}
           </span>
@@ -110,7 +111,7 @@ function CustomBarTooltip({ active, payload, label }) {
       <p className="mt-1 text-sm text-gray-600">
         {new Intl.NumberFormat('en-ET', {
           style: 'currency',
-          currency: 'ETB',
+          currency: getPlatformCurrency(),
           minimumFractionDigits: 0,
         }).format(payload[0].value)}
       </p>
@@ -279,7 +280,7 @@ export default function SpendingBreakdownChart({ transactions = [], variant = 'p
 function formatETB(amount) {
   return new Intl.NumberFormat('en-ET', {
     style: 'currency',
-    currency: 'ETB',
+    currency: getPlatformCurrency(),
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);

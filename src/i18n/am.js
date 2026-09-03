@@ -146,7 +146,7 @@ export const am = {
 
   // ---- How it works ----
   'how.eyebrow': 'እንዴት እንደሚሰራ',
-  'how.title': 'ስራ ለማድረግ ቀላል ነው',
+  'how.title': 'ድሪም ሞር እንዴት ይሰራል',
   'how.description':
     'ለፍሪላንሰሮች ስራ ለማግኘት እና ለቀጣሪዎች ቡድን ለመገንባት ግልጽ እና ቀላል ሂደት።',
   'how.ctaLabel': 'ድሪም ሞር እንዴት ይሰራል ይመልከቱ',

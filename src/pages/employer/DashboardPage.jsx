@@ -28,7 +28,7 @@ import { recommendationService } from '../../services/recommendationService';
 import { normalizeEmployer } from '../../utils/employerMapper';
 import { normalizeJob } from '../../utils/jobMapper';
 import { getErrorMessage } from '../../utils/errors';
-import { formatETB, formatDate, timeAgo } from '../../utils/format';
+import { formatETB, formatDate, timeAgo, getPlatformCurrency } from '../../utils/format';
 import { useAuth } from '../../hooks/useAuth';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useToast } from '../../hooks/useToast';
@@ -46,8 +46,8 @@ const formatNumber = (num) => {
 };
 
 const formatCurrency = (amount) => {
-  if (amount === null || amount === undefined) return 'ETB 0';
-  return `ETB ${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (amount === null || amount === undefined) return `${getPlatformCurrency()} 0`;
+  return `${getPlatformCurrency()} ${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
 /* ═══════════════════════════════════════════════════════════════════════════

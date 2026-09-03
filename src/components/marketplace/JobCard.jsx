@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { MapPin, Clock, Bookmark, Sparkles, CheckCircle2, ChevronRight } from 'lucide-react';
-import Card from '../ui/Card';
 import Badge from '../ui/Badge';
 import SkillBadge from './SkillBadge';
 import PriceDisplay from './PriceDisplay';
@@ -13,6 +12,9 @@ import { useI18n } from '../../i18n';
 /**
  * JobCard — reusable modern marketplace job listing card.
  * Used across Find Jobs page, Saved Jobs, Search, and Landing Page.
+ *
+ * The entire card is clickable and navigates to the job detail page.
+ * The bookmark button uses stopPropagation to avoid navigating.
  */
 export default function JobCard({
   job,
@@ -28,7 +30,10 @@ export default function JobCard({
   const { user } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
-  const href = to ?? (job?.id ? `/jobs/${job.id}` : '/jobs');
+
+  const jobId = job?.id ?? job?.job_id ?? job?.job?.id;
+  const href = to ?? (jobId != null ? `/jobs/${jobId}` : '/jobs');
+
   const jobType =
     job?.jobType ||
     job?.type ||
@@ -37,6 +42,22 @@ export default function JobCard({
   if (job?.saved !== undefined && job.saved !== localSaved) {
     setLocalSaved(job.saved);
   }
+
+  const handleCardClick = (e) => {
+    if (e?.target?.closest('button') || e?.target?.closest('a')) {
+      return;
+    }
+    if (href) {
+      navigate(href);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleCardClick(e);
+    }
+  };
 
   const handleToggleSave = (e) => {
     e.preventDefault();
@@ -47,10 +68,10 @@ export default function JobCard({
     }
     if (localSaved) {
       setLocalSaved(false);
-      onUnsave?.(job?.id);
+      onUnsave?.(jobId);
     } else {
       setLocalSaved(true);
-      onSave?.(job?.id);
+      onSave?.(jobId);
     }
   };
 
@@ -58,9 +79,14 @@ export default function JobCard({
     job?.company || job?.employer?.name || job?.user?.name || 'Verified Client';
 
   return (
-    <Card
+    <div
+      role="link"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
       className={cn(
-        'group relative flex h-full flex-col justify-between p-5 transition-all duration-300 hover:-translate-y-1 hover:border-brand-300 hover:shadow-xl',
+        'group relative flex h-full flex-col justify-between rounded-card border border-gray-200 bg-white p-5 shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-brand-300 hover:shadow-xl',
+        href && 'cursor-pointer',
         className,
       )}
     >
@@ -115,14 +141,13 @@ export default function JobCard({
         </div>
 
         {/* Job Title */}
-        <h3 className="mt-3.5 text-base font-bold leading-snug text-ink-900">
-          <Link
-            to={href}
-            className="transition-colors after:absolute after:inset-0 hover:text-brand-600 focus-visible:outline-none"
-          >
-            {job?.title}
-          </Link>
-        </h3>
+        <Link
+          to={href}
+          onClick={(e) => e.stopPropagation()}
+          className="inline-block mt-3.5 text-base font-bold leading-snug text-ink-900 transition-colors hover:text-brand-600"
+        >
+          {job?.title}
+        </Link>
 
         {/* Description Snippet Preview */}
         <p className="mt-1.5 text-xs text-gray-500 leading-relaxed line-clamp-2">
@@ -174,15 +199,19 @@ export default function JobCard({
         <div className="mt-2.5 flex items-center justify-between text-[11px] text-gray-400">
           <span className="inline-flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            {job?.postedAt || 'Recently posted'}
+            {job?.postedAtLabel || job?.postedAt || 'Recently posted'}
           </span>
 
-          <span className="inline-flex items-center gap-0.5 font-bold text-brand-600 transition-transform group-hover:translate-x-0.5">
+          <Link
+            to={href}
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-0.5 rounded-lg px-2 py-1 text-xs font-bold text-brand-600 transition-colors hover:bg-brand-50 hover:text-brand-700"
+          >
             View Job
-            <ChevronRight className="h-3.5 w-3.5" />
-          </span>
+            <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+          </Link>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }

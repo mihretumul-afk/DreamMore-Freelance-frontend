@@ -13,6 +13,7 @@ import { skillService } from '../../services/skillService';
 import { getErrorMessage, getFieldErrors } from '../../utils/errors';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useToast } from '../../hooks/useToast';
+import { getPlatformCurrency } from '../../utils/format';
 
 const BUDGET_TYPES = [
   { value: 'fixed', label: 'Fixed Price' },
@@ -38,7 +39,7 @@ const INITIAL_FORM = {
   budget_type: 'fixed',
   min_budget: '',
   max_budget: '',
-  currency: 'ETB',
+  currency: getPlatformCurrency(),
   experience_level: 'intermediate',
   location_type: 'remote',
   location: '',
@@ -279,7 +280,7 @@ export default function EmployerJobCreatePage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Input
                   type="number"
-                  label="Minimum budget (ETB)"
+                  label={`Minimum budget (${getPlatformCurrency()})`}
                   name="min_budget"
                   placeholder="0"
                   min="0"
@@ -291,7 +292,7 @@ export default function EmployerJobCreatePage() {
                 />
                 <Input
                   type="number"
-                  label="Maximum budget (ETB)"
+                  label={`Maximum budget (${getPlatformCurrency()})`}
                   name="max_budget"
                   placeholder="0"
                   min="0"

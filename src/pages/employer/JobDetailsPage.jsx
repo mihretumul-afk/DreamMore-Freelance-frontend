@@ -15,11 +15,13 @@ import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import { employerService } from '../../services/employerService';
+import jobService from '../../services/jobService';
 import { normalizeJob } from '../../utils/jobMapper';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate, formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useToast } from '../../hooks/useToast';
+import { usePlatform } from '../../hooks/usePlatform';
 
 export default function EmployerJobDetailsPage() {
   const { id } = useParams();
@@ -28,8 +30,11 @@ export default function EmployerJobDetailsPage() {
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { settings: platformSettings } = usePlatform();
   const [actionType, setActionType] = useState(null);
   const [acting, setActing] = useState(false);
+  const [featuredStatus, setFeaturedStatus] = useState(null);
+  const [featuring, setFeaturing] = useState(false);
 
   usePageTitle(job ? job.title : 'Job Details');
 
@@ -53,6 +58,21 @@ export default function EmployerJobDetailsPage() {
   useEffect(() => {
     loadJob();
   }, [loadJob]);
+
+  // Load featured status when job loads
+  useEffect(() => {
+    if (!id || !platformSettings?.featured_jobs_enabled) return;
+    let cancelled = false;
+    jobService.getFeaturedStatus(id).then((res) => {
+      if (!cancelled && res.success) {
+        setFeaturedStatus({
+          is_featured: res.data?.is_featured ?? false,
+          expires_at: res.data?.featured_until ?? null,
+        });
+      }
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [id, platformSettings?.featured_jobs_enabled]);
 
   const handleAction = useCallback(async () => {
     if (!actionType) return;
@@ -83,6 +103,24 @@ export default function EmployerJobDetailsPage() {
       setActing(false);
     }
   }, [actionType, id, loadJob, navigate, showToast]);
+
+  const handleFeature = useCallback(async () => {
+    setFeaturing(true);
+    try {
+      const res = await jobService.featureJob(id);
+      if (res.success) {
+        showToast('Job featured successfully! Your listing is now boosted.', 'success');
+        setFeaturedStatus({ is_featured: true, expires_at: res.data?.featured_job?.expires_at });
+        setActionType(null);
+      } else {
+        showToast(res.message || 'Unable to feature this job.', 'error');
+      }
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Unable to feature this job. Please try again.'), 'error');
+    } finally {
+      setFeaturing(false);
+    }
+  }, [id, showToast]);
 
   if (loading) {
     return (
@@ -261,6 +299,25 @@ export default function EmployerJobDetailsPage() {
               <Button as={Link} to={`/employer/jobs/${job.id}/proposals`} variant="outline" className="w-full" size="sm">
                 <Send className="h-4 w-4" aria-hidden="true" /> View Proposals
               </Button>
+              {/* Feature this job — only when enabled, job is open, and not already featured */}
+              {platformSettings?.featured_jobs_enabled &&
+                job.status === 'open' &&
+                !featuredStatus?.is_featured && (
+                <Button
+                  variant="primary"
+                  className="w-full"
+                  size="sm"
+                  loading={featuring}
+                  onClick={() => setActionType('feature')}
+                >
+                  ⭐ Feature This Job
+                </Button>
+              )}
+              {featuredStatus?.is_featured && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-center">
+                  <p className="text-sm font-semibold text-amber-700">⭐ Featured until {featuredStatus.expires_at ? new Date(featuredStatus.expires_at).toLocaleDateString() : '—'}</p>
+                </div>
+              )}
             </CardBody>
           </Card>
         </div>
@@ -273,6 +330,7 @@ export default function EmployerJobDetailsPage() {
         title={
           actionType === 'delete' ? 'Delete Job'
             : actionType === 'close' ? 'Close Job'
+            : actionType === 'feature' ? 'Feature This Job'
             : 'Reopen Job'
         }
         description={
@@ -280,6 +338,8 @@ export default function EmployerJobDetailsPage() {
             ? 'This will permanently delete the job draft. This action cannot be undone.'
             : actionType === 'close'
             ? 'Freelancers will no longer be able to submit proposals to this job.'
+            : actionType === 'feature'
+            ? `This will deduct ${formatETB(platformSettings?.featured_job_price ?? 150)} from your wallet and boost this job's visibility for ${platformSettings?.featured_job_duration_days ?? 7} days. Continue?`
             : 'The job will reopen and freelancers can submit proposals again.'
         }
         size="sm"
@@ -287,12 +347,12 @@ export default function EmployerJobDetailsPage() {
         <div className="flex justify-end gap-3">
           <Button variant="outline" size="sm" onClick={() => setActionType(null)}>Cancel</Button>
           <Button
-            variant={actionType === 'delete' ? 'danger' : 'primary'}
+            variant={actionType === 'delete' ? 'danger' : actionType === 'feature' ? 'primary' : 'primary'}
             size="sm"
-            loading={acting}
-            onClick={handleAction}
+            loading={acting || featuring}
+            onClick={actionType === 'feature' ? handleFeature : handleAction}
           >
-            {actionType === 'delete' ? 'Delete' : actionType === 'close' ? 'Close' : 'Reopen'}
+            {actionType === 'delete' ? 'Delete' : actionType === 'close' ? 'Close' : actionType === 'feature' ? 'Confirm Feature' : 'Reopen'}
           </Button>
         </div>
       </Modal>
