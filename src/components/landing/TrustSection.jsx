@@ -16,7 +16,7 @@ export default function TrustSection() {
   const { t } = useI18n();
 
   return (
-    <section className="bg-white py-16 lg:py-24" aria-labelledby="trust-heading">
+    <section className="bg-white dark:bg-slate-900 py-16 lg:py-24 transition-colors" aria-labelledby="trust-heading">
       <Container>
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <Reveal>
@@ -32,12 +32,12 @@ export default function TrustSection() {
             <ul className="mt-8 space-y-5">
               {TRUST_FEATURES.map((feature) => (
                 <li key={feature.titleKey} className="flex gap-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50">
-                    <ShieldCheck className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-950/60">
+                    <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-ink-900">{t(feature.titleKey)}</h3>
-                    <p className="mt-0.5 text-sm leading-relaxed text-gray-500">
+                    <h3 className="text-sm font-bold text-ink-900 dark:text-slate-100">{t(feature.titleKey)}</h3>
+                    <p className="mt-0.5 text-sm leading-relaxed text-gray-500 dark:text-slate-400">
                       {t(feature.descriptionKey)}
                     </p>
                   </div>
@@ -52,10 +52,10 @@ export default function TrustSection() {
                 <p className="text-sm font-semibold uppercase tracking-widest text-brand-500">
                   {t('trust.commitment')}
                 </p>
-                <blockquote className="mt-4 text-xl font-bold leading-relaxed text-ink-900 sm:text-2xl">
+                <blockquote className="mt-4 text-xl font-bold leading-relaxed text-ink-900 dark:text-slate-100 sm:text-2xl">
                   {t('trust.quote')}
                 </blockquote>
-                <p className="mt-5 text-sm text-gray-500">{t('trust.signature')}</p>
+                <p className="mt-5 text-sm text-gray-500 dark:text-slate-400">{t('trust.signature')}</p>
               </div>
             </Card>
           </Reveal>

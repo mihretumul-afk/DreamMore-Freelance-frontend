@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+
 /* ============================================================
    Dream More AppWorks — Design tokens (Tailwind CSS v4)
    Brand palette: Sunset Orange (#FF6B35) + Dark Blue (#0B132B)
@@ -130,7 +133,7 @@
   }
 
   body {
-    @apply bg-white font-sans text-ink-900 antialiased;
+    @apply bg-white dark:bg-slate-900 font-sans text-ink-900 dark:text-slate-100 antialiased transition-colors duration-200;
     text-rendering: optimizeLegibility;
   }
 

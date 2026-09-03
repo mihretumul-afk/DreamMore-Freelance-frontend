@@ -26,6 +26,9 @@ export const en = {
   'nav.homeShort': 'Home',
   'nav.accountMenu': 'Account menu',
   'nav.language': 'Language',
+  'nav.toggleTheme': 'Toggle night mode',
+  'nav.themeLight': 'Light mode',
+  'nav.themeDark': 'Night mode',
 
   // ---- Language selector ----
   'lang.label': 'Language',

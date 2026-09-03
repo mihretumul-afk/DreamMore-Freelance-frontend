@@ -92,8 +92,8 @@ export default function DashboardLayout({ role }) {
               'group relative flex items-center rounded-xl text-sm font-medium transition-all duration-150',
               showLabel ? 'gap-3 px-3 py-2.5' : 'justify-center px-0 py-2.5',
               isActive
-                ? 'bg-brand-50 text-brand-700 before:absolute before:left-0 before:top-2 before:h-[calc(100%-1rem)] before:w-0.5 before:rounded-r before:bg-brand-500'
-                : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900',
+                ? 'bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-400 before:absolute before:left-0 before:top-2 before:h-[calc(100%-1rem)] before:w-0.5 before:rounded-r before:bg-brand-500'
+                : 'text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white',
             )
           }
         >
@@ -102,7 +102,7 @@ export default function DashboardLayout({ role }) {
               <Icon
                 className={cn(
                   'h-[18px] w-[18px] shrink-0 transition-colors',
-                  isActive ? 'text-brand-600' : 'text-gray-400 group-hover:text-gray-700',
+                  isActive ? 'text-brand-600 dark:text-brand-400' : 'text-gray-400 dark:text-slate-400 group-hover:text-gray-700 dark:group-hover:text-slate-200',
                 )}
                 aria-hidden="true"
               />
@@ -141,15 +141,15 @@ export default function DashboardLayout({ role }) {
       </nav>
 
       {/* User + logout at bottom */}
-      <div className={cn('border-t border-gray-100 pt-3', showLabel ? 'px-3' : 'px-2')}>
+      <div className={cn('border-t border-gray-100 dark:border-slate-800 pt-3', showLabel ? 'px-3' : 'px-2')}>
         {showLabel && (
           <div className="mb-2 flex items-center gap-2.5 rounded-xl px-2 py-1.5">
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-500 text-xs font-bold text-white">
               {initials}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-xs font-semibold text-gray-800">{user?.name}</p>
-              <p className="truncate text-[10px] capitalize text-gray-400">{role}</p>
+              <p className="truncate text-xs font-semibold text-gray-800 dark:text-slate-200">{user?.name}</p>
+              <p className="truncate text-[10px] capitalize text-gray-400 dark:text-slate-400">{role}</p>
             </div>
           </div>
         )}
@@ -158,11 +158,11 @@ export default function DashboardLayout({ role }) {
           onClick={handleLogout}
           title={!showLabel ? t('nav.signOut') : undefined}
           className={cn(
-            'flex w-full items-center rounded-xl text-sm font-medium text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-900',
+            'flex w-full items-center rounded-xl text-sm font-medium text-gray-500 dark:text-slate-400 transition-all hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white',
             showLabel ? 'gap-3 px-3 py-2.5' : 'justify-center px-0 py-2.5',
           )}
         >
-          <LogOut className="h-[18px] w-[18px] shrink-0 text-gray-400" aria-hidden="true" />
+          <LogOut className="h-[18px] w-[18px] shrink-0 text-gray-400 dark:text-slate-400" aria-hidden="true" />
           {showLabel && <span>{t('nav.signOut')}</span>}
         </button>
       </div>
@@ -170,19 +170,19 @@ export default function DashboardLayout({ role }) {
   );
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
-      {/* ── Original Navbar — untouched ─────────────────────────────── */}
+    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-slate-950 text-ink-900 dark:text-slate-100 transition-colors duration-200">
+      {/* ── Original Navbar ─────────────────────────────── */}
       <Navbar />
 
       <div className="flex flex-1">
-        {/* ── Desktop sidebar — icon-only by default, expands on hover ── */}
+        {/* ── Desktop sidebar ── */}
         <aside
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
           className={cn(
             'hidden lg:flex lg:flex-col',
             'fixed left-0 top-16 bottom-0 z-30',
-            'border-r border-gray-200 bg-white shadow-sm',
+            'border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm',
             'transition-[width] duration-300 ease-in-out overflow-hidden',
             hovered ? 'w-64' : 'w-16',
           )}
@@ -190,33 +190,33 @@ export default function DashboardLayout({ role }) {
           <SidebarContent showLabel={hovered} onNavigate={undefined} />
         </aside>
 
-        {/* ── Mobile backdrop ─────────────────────────────────────────── */}
+        {/* ── Mobile backdrop ── */}
         {mobileOpen && (
           <div
-            className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-xs lg:hidden"
             aria-hidden="true"
             onClick={() => setMobileOpen(false)}
           />
         )}
 
-        {/* ── Mobile slide-out drawer ──────────────────────────────────── */}
+        {/* ── Mobile slide-out drawer ── */}
         <aside
           ref={drawerRef}
           tabIndex={-1}
           aria-label={`${role} navigation`}
           className={cn(
-            'fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-xl outline-none',
+            'fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 shadow-xl outline-none',
             'transition-transform duration-300 ease-in-out lg:hidden',
             mobileOpen ? 'translate-x-0' : '-translate-x-full',
           )}
         >
-          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-4">
-            <span className="text-sm font-bold capitalize text-gray-800">{role} Menu</span>
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 px-4 py-4">
+            <span className="text-sm font-bold capitalize text-gray-800 dark:text-slate-200">{role} Menu</span>
             <button
               type="button"
               aria-label="Close menu"
               onClick={() => setMobileOpen(false)}
-              className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+              className="rounded-lg p-1.5 text-gray-400 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-700 dark:hover:text-slate-200"
             >
               <X className="h-5 w-5" />
             </button>
@@ -224,19 +224,19 @@ export default function DashboardLayout({ role }) {
           <SidebarContent showLabel onNavigate={() => setMobileOpen(false)} />
         </aside>
 
-        {/* ── Main content ─────────────────────────────────────────────── */}
+        {/* ── Main content ── */}
         <div className="flex flex-1 flex-col min-w-0 lg:ml-16">
           {/* Mobile top bar */}
-          <div className="flex items-center border-b border-gray-200 bg-white px-4 py-3 lg:hidden">
+          <div className="flex items-center border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 lg:hidden">
             <button
               type="button"
               aria-label="Open menu"
               onClick={() => setMobileOpen(true)}
-              className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
+              className="rounded-lg p-2 text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800"
             >
               <Menu className="h-5 w-5" />
             </button>
-            <span className="ml-3 text-sm font-semibold capitalize text-gray-700">
+            <span className="ml-3 text-sm font-semibold capitalize text-gray-700 dark:text-slate-200">
               {role} Dashboard
             </span>
           </div>

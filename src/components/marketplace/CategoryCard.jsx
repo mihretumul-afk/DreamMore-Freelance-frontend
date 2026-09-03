@@ -233,7 +233,7 @@ export default function CategoryCard({ category, to, className, themeIndex = 0 }
       to={targetHref}
       interactive
       className={cn(
-        'group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-gray-200/90 bg-white p-4 shadow-sm transition-all duration-300 border-t-4',
+        'group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-gray-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sm transition-all duration-300 border-t-4',
         theme.topBorder,
         'hover:-translate-y-1.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2',
         theme.ring,
@@ -252,17 +252,17 @@ export default function CategoryCard({ category, to, className, themeIndex = 0 }
             {category?.avatarText || theme.avatarText || <Icon className="h-4 w-4 text-white" />}
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-bold text-gray-900 leading-snug line-clamp-1 group-hover:text-brand-600 transition-colors">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-slate-100 leading-snug line-clamp-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
               {name}
             </h3>
-            <p className="text-[11px] text-gray-400 leading-tight line-clamp-1 mt-0.5">
+            <p className="text-[11px] text-gray-400 dark:text-slate-400 leading-tight line-clamp-1 mt-0.5">
               {subtitle}
             </p>
           </div>
         </div>
 
         {/* Media Banner Image */}
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-gray-100 mb-4 shadow-xs">
+        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-gray-100 dark:bg-slate-800 mb-4 shadow-xs">
           <img
             src={bannerImage}
             alt={name}
@@ -273,17 +273,17 @@ export default function CategoryCard({ category, to, className, themeIndex = 0 }
         </div>
 
         {/* Details Grid */}
-        <div className="space-y-1.5 text-xs text-gray-600 font-medium px-1">
+        <div className="space-y-1.5 text-xs text-gray-600 dark:text-slate-300 font-medium px-1">
           <div className="flex justify-between items-center">
-            <span className="text-gray-400 font-normal">Level:</span>
-            <span className="font-semibold text-gray-800">{level}</span>
+            <span className="text-gray-400 dark:text-slate-400 font-normal">Level:</span>
+            <span className="font-semibold text-gray-800 dark:text-slate-200">{level}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-gray-400 font-normal">Duration:</span>
-            <span className="font-semibold text-gray-800">{duration}</span>
+            <span className="text-gray-400 dark:text-slate-400 font-normal">Duration:</span>
+            <span className="font-semibold text-gray-800 dark:text-slate-200">{duration}</span>
           </div>
           <div className="flex justify-between items-center pt-0.5">
-            <span className="text-gray-400 font-normal">Price:</span>
+            <span className="text-gray-400 dark:text-slate-400 font-normal">Price:</span>
             <span className={cn('font-bold text-xs sm:text-sm', theme.priceColor)}>
               {price}
             </span>

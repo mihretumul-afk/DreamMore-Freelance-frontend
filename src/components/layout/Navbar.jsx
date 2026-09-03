@@ -7,6 +7,7 @@ import Avatar from '../marketplace/Avatar';
 import UserMenu from './UserMenu';
 import NotificationBell from './NotificationBell';
 import LanguageSelector from '../common/LanguageSelector';
+import ThemeToggle from './ThemeToggle';
 import { useAuth } from '../../hooks/useAuth';
 import { useI18n } from '../../i18n';
 import { categoryService } from '../../services/categoryService';
@@ -96,11 +97,11 @@ function CategoryDropdown({ label, toPrefix }) {
         }}
         aria-haspopup="true"
         aria-expanded={open}
-        className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+        className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
       >
         {label}
         <ChevronDown
-          className={cn('h-4 w-4 transition-transform text-slate-400', open && 'rotate-180')}
+          className={cn('h-4 w-4 transition-transform text-slate-400 dark:text-slate-400', open && 'rotate-180')}
           aria-hidden="true"
         />
       </button>
@@ -110,13 +111,13 @@ function CategoryDropdown({ label, toPrefix }) {
           role="menu"
           onMouseEnter={cancelClose}
           onMouseLeave={closeMenu}
-          className="absolute left-0 top-full z-50 mt-1 min-w-[420px] rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-xl"
+          className="absolute left-0 top-full z-50 mt-1 min-w-[420px] rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-3.5 shadow-xl"
         >
           {loading && (
-            <div className="px-3 py-6 text-center text-sm text-gray-500">{t('common.loadingCategories')}</div>
+            <div className="px-3 py-6 text-center text-sm text-gray-500 dark:text-slate-400">{t('common.loadingCategories')}</div>
           )}
           {error && (
-            <div className="px-3 py-4 text-center text-sm text-red-500">
+            <div className="px-3 py-4 text-center text-sm text-red-500 dark:text-red-400">
               {error}
               <button
                 type="button"
@@ -134,25 +135,25 @@ function CategoryDropdown({ label, toPrefix }) {
                   key={cat.id}
                   to={`${toPrefix}?category_id=${cat.id}`}
                   onClick={() => setOpen(false)}
-                  className="block rounded-xl px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-brand-50 hover:text-brand-700 font-medium"
+                  className="block rounded-xl px-3 py-2 text-sm text-slate-700 dark:text-slate-200 transition-colors hover:bg-brand-50 dark:hover:bg-slate-800 hover:text-brand-700 dark:hover:text-brand-400 font-medium"
                 >
                   <span>{cat.name}</span>
                   {cat.skills_count != null && cat.skills_count > 0 && (
-                    <span className="ml-1 text-xs text-slate-400">({cat.skills_count})</span>
+                    <span className="ml-1 text-xs text-slate-400 dark:text-slate-500">({cat.skills_count})</span>
                   )}
                 </Link>
               ))}
             </div>
           )}
           {!loading && !error && categories.length === 0 && (
-            <div className="px-3 py-4 text-center text-sm text-gray-500">{t('categories.noCategories')}</div>
+            <div className="px-3 py-4 text-center text-sm text-gray-500 dark:text-slate-400">{t('categories.noCategories')}</div>
           )}
           {/* View All link */}
-          <div className="mt-2 border-t border-slate-100 pt-2">
+          <div className="mt-2 border-t border-slate-100 dark:border-slate-800 pt-2">
             <Link
               to={toPrefix}
               onClick={() => setOpen(false)}
-              className="flex items-center gap-1 text-sm font-bold text-brand-600 hover:text-brand-700"
+              className="flex items-center gap-1 text-sm font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300"
             >
               {t('common.viewAll')} →
             </Link>
@@ -260,17 +261,17 @@ export default function Navbar() {
     cn(
       'rounded-lg px-3 py-2 text-sm font-semibold transition-colors',
       isActive
-        ? 'bg-brand-50 text-brand-700'
-        : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900',
+        ? 'bg-brand-50 dark:bg-brand-950/50 text-brand-700 dark:text-brand-400'
+        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white',
     );
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/90 bg-white/95 backdrop-blur-md shadow-2xs">
+    <header className="sticky top-0 z-50 border-b border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-2xs transition-colors">
       <nav
         aria-label={t('nav.main')}
         className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 lg:px-8"
       >
-        {/* Brand Logo - Dark variant for crisp contrast on off-white */}
+        {/* Brand Logo */}
         <Link to="/" aria-label={t('nav.home')} className="shrink-0">
           <Logo variant="dark" />
         </Link>
@@ -297,6 +298,7 @@ export default function Navbar() {
         {/* Desktop right side */}
         <div className="hidden items-center gap-2 md:flex">
           <LanguageSelector variant="light" />
+          <ThemeToggle />
           {user ? (
             <>
               <NotificationBell />
@@ -304,7 +306,7 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Button as={Link} to="/login" variant="outline" size="sm" className="border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-semibold">
+              <Button as={Link} to="/login" variant="outline" size="sm" className="border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white font-semibold">
                 {t('nav.signIn')}
               </Button>
               <Button as={Link} to="/register" size="sm" className="font-semibold shadow-xs">
@@ -316,10 +318,11 @@ export default function Navbar() {
 
         {/* Mobile right controls */}
         <div className="flex items-center gap-1.5 md:hidden">
+          <ThemeToggle />
           {user && <NotificationBell />}
           <button
             type="button"
-            className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
+            className="rounded-lg p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
             aria-label={menuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
@@ -358,12 +361,12 @@ export default function Navbar() {
           aria-modal="true"
           aria-label={t('nav.mobileNav')}
           className={cn(
-            'absolute right-0 top-0 flex h-full w-72 max-w-[85vw] flex-col overflow-y-auto bg-white border-l border-slate-200 shadow-2xl transition-transform duration-200 ease-out',
+            'absolute right-0 top-0 flex h-full w-72 max-w-[85vw] flex-col overflow-y-auto bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl transition-transform duration-200 ease-out',
             menuOpen ? 'translate-x-0' : 'translate-x-full',
           )}
         >
           {/* Mobile drawer header */}
-          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-4 py-4">
             <Link to="/" onClick={() => setMenuOpen(false)} aria-label={t('nav.home')}>
               <Logo variant="dark" markClassName="h-8" />
             </Link>
@@ -374,7 +377,7 @@ export default function Navbar() {
                 data-close-menu
                 onClick={() => setMenuOpen(false)}
                 aria-label={t('nav.closeMenu')}
-                className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+                className="rounded-lg p-2 text-slate-600 dark:text-slate-300 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
               >
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
@@ -389,23 +392,23 @@ export default function Navbar() {
                 type="button"
                 onClick={toggleMobileJobs}
                 aria-expanded={mobileJobsOpen}
-                className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 <span className="flex items-center gap-2">
-                  <Briefcase className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  <Briefcase className="h-4 w-4 text-slate-400 dark:text-slate-400" aria-hidden="true" />
                   {t('nav.findJobs')}
                 </span>
                 <ChevronDown
-                  className={cn('h-4 w-4 transition-transform text-slate-400', mobileJobsOpen && 'rotate-180')}
+                  className={cn('h-4 w-4 transition-transform text-slate-400 dark:text-slate-400', mobileJobsOpen && 'rotate-180')}
                   aria-hidden="true"
                 />
               </button>
               {mobileJobsOpen && (
-                <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-slate-200 pl-3">
+                <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-slate-200 dark:border-slate-700 pl-3">
                   <Link
                     to="/jobs"
                     onClick={() => setMenuOpen(false)}
-                    className="block rounded-lg px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100"
+                    className="block rounded-lg px-3 py-2 text-sm font-semibold text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
                   >
                     All Jobs
                   </Link>
@@ -417,7 +420,7 @@ export default function Navbar() {
                         key={cat.id}
                         to={`/jobs?category_id=${cat.id}`}
                         onClick={() => setMenuOpen(false)}
-                        className="block rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100"
+                        className="block rounded-lg px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                       >
                         {cat.name}
                       </Link>
@@ -433,23 +436,23 @@ export default function Navbar() {
                 type="button"
                 onClick={toggleMobileTalent}
                 aria-expanded={mobileTalentOpen}
-                className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 <span className="flex items-center gap-2">
-                  <Search className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  <Search className="h-4 w-4 text-slate-400 dark:text-slate-400" aria-hidden="true" />
                   {t('nav.findTalent')}
                 </span>
                 <ChevronDown
-                  className={cn('h-4 w-4 transition-transform text-slate-400', mobileTalentOpen && 'rotate-180')}
+                  className={cn('h-4 w-4 transition-transform text-slate-400 dark:text-slate-400', mobileTalentOpen && 'rotate-180')}
                   aria-hidden="true"
                 />
               </button>
               {mobileTalentOpen && (
-                <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-slate-200 pl-3">
+                <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-slate-200 dark:border-slate-700 pl-3">
                   <Link
                     to="/freelancers"
                     onClick={() => setMenuOpen(false)}
-                    className="block rounded-lg px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100"
+                    className="block rounded-lg px-3 py-2 text-sm font-semibold text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800"
                   >
                     All Talent
                   </Link>
@@ -461,7 +464,7 @@ export default function Navbar() {
                         key={cat.id}
                         to={`/freelancers?category_id=${cat.id}`}
                         onClick={() => setMenuOpen(false)}
-                        className="block rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100"
+                        className="block rounded-lg px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                       >
                         {cat.name}
                       </Link>

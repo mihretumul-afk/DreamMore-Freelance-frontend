@@ -65,7 +65,7 @@ function FeaturedJobCard({ job }) {
     >
       <div>
         {/* Top Employer Row */}
-        <div className="flex items-center justify-between gap-2 border-b border-gray-100 pb-3">
+        <div className="flex items-center justify-between gap-2 border-b border-gray-100 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2.5 min-w-0">
             <Avatar
               name={employerName}
@@ -76,11 +76,11 @@ function FeaturedJobCard({ job }) {
             />
             <div className="min-w-0">
               <div className="flex items-center gap-1">
-                <span className="truncate text-xs font-bold text-ink-900">{employerName}</span>
+                <span className="truncate text-xs font-bold text-ink-900 dark:text-slate-100">{employerName}</span>
                 <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-brand-500 fill-brand-50 text-brand-600" />
               </div>
-              <p className="flex items-center gap-1 text-[11px] text-gray-400">
-                <MapPin className="h-3 w-3 shrink-0 text-gray-400" />
+              <p className="flex items-center gap-1 text-[11px] text-gray-400 dark:text-slate-400">
+                <MapPin className="h-3 w-3 shrink-0 text-gray-400 dark:text-slate-400" />
                 <span className="truncate">{job?.location || 'Remote / Global'}</span>
               </p>
             </div>
@@ -88,7 +88,7 @@ function FeaturedJobCard({ job }) {
 
           <div className="flex items-center gap-1.5 shrink-0">
             {job?.featured && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-amber-700 border border-amber-200/70">
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-amber-700 dark:text-amber-400 border border-amber-200/70 dark:border-amber-800">
                 <Sparkles className="h-3 w-3" /> Featured
               </span>
             )}
@@ -96,7 +96,7 @@ function FeaturedJobCard({ job }) {
               type="button"
               onClick={handleToggleSave}
               aria-label={saved ? 'Remove saved job' : 'Save job'}
-              className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-brand-600"
+              className="rounded-lg p-1.5 text-gray-400 dark:text-slate-400 transition-colors hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-brand-600 dark:hover:text-brand-400"
             >
               <Bookmark className={cn('h-4 w-4', saved && 'fill-brand-600 text-brand-600')} />
             </button>
@@ -104,12 +104,12 @@ function FeaturedJobCard({ job }) {
         </div>
 
         {/* Job Title */}
-        <h3 className="mt-3.5 text-base font-bold leading-snug text-ink-900 transition-colors group-hover:text-brand-600 line-clamp-2">
+        <h3 className="mt-3.5 text-base font-bold leading-snug text-ink-900 dark:text-slate-100 transition-colors group-hover:text-brand-600 dark:group-hover:text-brand-400 line-clamp-2">
           {job?.title}
         </h3>
 
         {/* Description Snippet Preview */}
-        <p className="mt-1.5 text-xs text-gray-500 leading-relaxed line-clamp-2">
+        <p className="mt-1.5 text-xs text-gray-500 dark:text-slate-400 leading-relaxed line-clamp-2">
           {job?.description || 'Looking for an experienced professional to execute high-quality project deliverables.'}
         </p>
 
@@ -239,7 +239,7 @@ export default function FeaturedJobsSection() {
   });
 
   return (
-    <section className="bg-slate-50/70 py-8 lg:py-10 border-b border-gray-100" aria-labelledby="featured-jobs-heading">
+    <section className="bg-slate-50/70 dark:bg-slate-950/70 py-8 lg:py-10 border-b border-gray-100 dark:border-slate-800 transition-colors" aria-labelledby="featured-jobs-heading">
       <Container>
         <HorizontalScrollRow
           scrollStep={360}
@@ -248,13 +248,13 @@ export default function FeaturedJobsSection() {
               {/* Section Header */}
               <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
                 <div>
-                  <span className="inline-block rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
+                  <span className="inline-block rounded-full bg-brand-50 dark:bg-brand-950/60 px-3 py-1 text-xs font-semibold text-brand-700 dark:text-brand-400">
                     Explore Open Gigs
                   </span>
-                  <h2 id="featured-jobs-heading" className="mt-1 text-2xl font-extrabold tracking-tight text-ink-900 sm:text-3xl">
+                  <h2 id="featured-jobs-heading" className="mt-1 text-2xl font-extrabold tracking-tight text-ink-900 dark:text-slate-100 sm:text-3xl">
                     {t('featuredJobs.title') || 'Latest Job Opportunities'}
                   </h2>
-                  <p className="mt-1 text-xs sm:text-sm text-gray-500 max-w-xl">
+                  <p className="mt-1 text-xs sm:text-sm text-gray-500 dark:text-slate-400 max-w-xl">
                     {t('featuredJobs.description') || 'Hand-picked jobs from employers across Ethiopia and beyond.'}
                   </p>
                 </div>
@@ -262,7 +262,7 @@ export default function FeaturedJobsSection() {
                 <div className="flex items-center gap-3 shrink-0">
                   <Link
                     to="/jobs"
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-brand-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-brand-600 shadow-2xs transition-all duration-200 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-brand-200 dark:border-brand-800 bg-white dark:bg-slate-900 px-3.5 py-2 text-xs sm:text-sm font-semibold text-brand-600 dark:text-brand-400 shadow-2xs transition-all duration-200 hover:border-brand-300 hover:bg-brand-50 dark:hover:bg-slate-800 hover:text-brand-700"
                   >
                     {t('featuredJobs.viewAll') || 'View All Jobs'}
                     <ArrowRight className="h-4 w-4" />
@@ -287,7 +287,7 @@ export default function FeaturedJobsSection() {
                         'flex items-center gap-1.5 shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition-all duration-200',
                         isActive
                           ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20'
-                          : 'bg-white text-ink-700 border border-gray-200/80 hover:bg-gray-50 hover:text-brand-600'
+                          : 'bg-white dark:bg-slate-900 text-ink-700 dark:text-slate-200 border border-gray-200/80 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-brand-600'
                       )}
                     >
                       {Icon && <Icon className="h-3.5 w-3.5" />}

@@ -128,6 +128,23 @@ export const financialService = {
     return res.data;
   },
 
+  // ── Platform Revenue Management ──────────────────────────────────────
+
+  getPlatformRevenue: async () => {
+    const res = await apiClient.get('/admin/finance/platform-revenue');
+    return res.data;
+  },
+
+  withdrawPlatformRevenue: async (payload) => {
+    const res = await apiClient.post('/admin/finance/withdraw-revenue', payload);
+    return res.data;
+  },
+
+  addPlatformFunds: async (payload) => {
+    const res = await apiClient.post('/admin/finance/add-funds', payload);
+    return res.data;
+  },
+
   getAdminPayments: async (params = {}) => {
     const res = await apiClient.get('/admin/finance/payments', { params });
     return res.data;

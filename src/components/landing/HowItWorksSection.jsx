@@ -36,14 +36,14 @@ function StepItem({ step, icon: Icon, titleKey, descriptionKey, delay }) {
   const { t } = useI18n();
   return (
     <Reveal delay={delay} className="flex flex-col items-center text-center">
-      <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-brand-200/60 bg-white shadow-md transition-transform duration-300 hover:scale-105 hover:border-brand-400">
+      <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl border border-brand-200/60 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md transition-transform duration-300 hover:scale-105 hover:border-brand-400">
         <span className="absolute -top-2.5 -right-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-brand-600 text-[11px] font-extrabold text-white shadow-xs">
           {step}
         </span>
         <Icon className="h-8 w-8 text-brand-600" strokeWidth={1.5} aria-hidden="true" />
       </div>
-      <h3 className="mt-4 text-base font-bold text-ink-900">{t(titleKey)}</h3>
-      <p className="mt-1.5 max-w-[220px] text-xs leading-relaxed text-gray-500">
+      <h3 className="mt-4 text-base font-bold text-ink-900 dark:text-slate-100">{t(titleKey)}</h3>
+      <p className="mt-1.5 max-w-[220px] text-xs leading-relaxed text-gray-500 dark:text-slate-400">
         {t(descriptionKey)}
       </p>
     </Reveal>
@@ -54,7 +54,7 @@ export default function HowItWorksSection() {
   const { t } = useI18n();
 
   return (
-    <section className="bg-slate-50/60 py-10 lg:py-12 border-b border-gray-100" aria-labelledby="how-it-works-heading">
+    <section className="bg-slate-50/60 dark:bg-slate-950/60 py-10 lg:py-12 border-b border-gray-100 dark:border-slate-800 transition-colors" aria-labelledby="how-it-works-heading">
       <Container>
         {/* Heading */}
         <div className="mx-auto max-w-2xl text-center">

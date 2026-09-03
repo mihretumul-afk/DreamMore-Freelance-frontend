@@ -3,7 +3,8 @@ import {
   DollarSign, TrendingUp, Wallet, AlertTriangle, CreditCard, ArrowDownRight,
   CheckCircle2, Clock, RefreshCw, Download, Users, Briefcase, ArrowUpRight,
   Banknote, Shield, Eye, ChevronDown, ChevronLeft, ChevronRight, FileText,
-  FileSpreadsheet, Calendar, X, Zap, BarChart3, Filter
+  FileSpreadsheet, Calendar, X, Zap, BarChart3, Filter, ArrowDownToLine,
+  PlusCircle, Building2, CreditCard as CreditCardIcon
 } from 'lucide-react';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -118,6 +119,26 @@ export default function FinanceDashboard() {
   const [wdDateFrom, setWdDateFrom] = useState('');
   const [wdDateTo, setWdDateTo] = useState('');
 
+  // Platform Revenue Management
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [showAddFundsModal, setShowAddFundsModal] = useState(false);
+  const [platformRevenue, setPlatformRevenue] = useState(null);
+  const [withdrawLoading, setWithdrawLoading] = useState(false);
+  const [addFundsLoading, setAddFundsLoading] = useState(false);
+  
+  // Withdraw form
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawAccountName, setWithdrawAccountName] = useState('');
+  const [withdrawAccountNumber, setWithdrawAccountNumber] = useState('');
+  const [withdrawBankName, setWithdrawBankName] = useState('');
+  const [withdrawBankCode, setWithdrawBankCode] = useState('');
+  const [withdrawDescription, setWithdrawDescription] = useState('');
+  
+  // Add funds form
+  const [addFundsAmount, setAddFundsAmount] = useState('');
+  const [addFundsDescription, setAddFundsDescription] = useState('');
+  const [addFundsSource, setAddFundsSource] = useState('');
+
   const load = useCallback(async (isAutoRefresh = false) => {
     if (isAutoRefresh) {
       setIsRefreshing(true);
@@ -158,6 +179,15 @@ export default function FinanceDashboard() {
   }, [paymentPage, withdrawalPage, paymentFilter, withdrawalFilter, payDateFrom, payDateTo, wdDateFrom, wdDateTo]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Load platform revenue when modal opens
+  useEffect(() => {
+    if (showWithdrawModal && !platformRevenue) {
+      financialService.getPlatformRevenue()
+        .then(res => setPlatformRevenue(res.data ?? res))
+        .catch(err => console.error('Failed to load platform revenue:', err));
+    }
+  }, [showWithdrawModal, platformRevenue]);
 
   // Real-time updates via WebSocket
   useEffect(() => {
@@ -209,6 +239,69 @@ export default function FinanceDashboard() {
       load();
     } catch (err) {
       showToast(err.response?.data?.message || 'Failed to approve.', 'error');
+    }
+  };
+
+  const handleWithdrawRevenue = async () => {
+    if (!withdrawAmount || !withdrawAccountName || !withdrawAccountNumber || !withdrawBankName) {
+      showToast('Please fill in all required fields.', 'error');
+      return;
+    }
+    
+    setWithdrawLoading(true);
+    try {
+      await financialService.withdrawPlatformRevenue({
+        amount: parseFloat(withdrawAmount),
+        account_name: withdrawAccountName,
+        account_number: withdrawAccountNumber,
+        bank_name: withdrawBankName,
+        bank_code: withdrawBankCode || undefined,
+        description: withdrawDescription || 'Platform revenue withdrawal',
+      });
+      
+      showToast('Platform revenue withdrawn successfully!', 'success');
+      setShowWithdrawModal(false);
+      setPlatformRevenue(null);
+      // Reset form
+      setWithdrawAmount('');
+      setWithdrawAccountName('');
+      setWithdrawAccountNumber('');
+      setWithdrawBankName('');
+      setWithdrawBankCode('');
+      setWithdrawDescription('');
+      load();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to withdraw revenue.', 'error');
+    } finally {
+      setWithdrawLoading(false);
+    }
+  };
+
+  const handleAddFunds = async () => {
+    if (!addFundsAmount || !addFundsDescription) {
+      showToast('Please fill in amount and description.', 'error');
+      return;
+    }
+    
+    setAddFundsLoading(true);
+    try {
+      await financialService.addPlatformFunds({
+        amount: parseFloat(addFundsAmount),
+        description: addFundsDescription,
+        source: addFundsSource || undefined,
+      });
+      
+      showToast('Funds added to platform successfully!', 'success');
+      setShowAddFundsModal(false);
+      // Reset form
+      setAddFundsAmount('');
+      setAddFundsDescription('');
+      setAddFundsSource('');
+      load();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to add funds.', 'error');
+    } finally {
+      setAddFundsLoading(false);
     }
   };
 
@@ -401,6 +494,281 @@ export default function FinanceDashboard() {
               <p className="text-xs font-bold uppercase tracking-wider text-violet-600">Featured Profiles</p>
               <p className="mt-1.5 text-2xl font-extrabold text-violet-900">{formatETB(d.featured_revenue?.profiles_total || 0)}</p>
               <p className="text-[10px] text-violet-600 mt-0.5">{d.featured_revenue?.profiles_active || 0} active • This month: {formatETB(d.featured_revenue?.profiles_monthly || 0)}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Platform Revenue Management ──────────────────────────── */}
+      <div className="rounded-2xl border border-gray-200 bg-white p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600">
+            <Banknote className="h-5 w-5 text-white" />
+          </div>
+          <div className="flex-1">
+            <h2 className="font-bold text-ink-900">Platform Revenue Management</h2>
+            <p className="text-xs text-gray-400">Manage platform fees collected from milestones and featured listings</p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* Withdraw Revenue Button */}
+          <button
+            onClick={() => setShowWithdrawModal(true)}
+            className="group relative overflow-hidden rounded-2xl border-2 border-dashed border-emerald-300 bg-gradient-to-br from-emerald-50 to-teal-50 p-6 text-left transition-all hover:border-emerald-500 hover:shadow-lg hover:-translate-y-0.5"
+          >
+            <div className="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-emerald-500/10 blur-2xl transition-all group-hover:bg-emerald-500/20" />
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30 transition-transform group-hover:scale-110">
+                  <ArrowDownToLine className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-emerald-900">Withdraw Revenue</p>
+                  <p className="text-xs text-emerald-600">Transfer to bank account</p>
+                </div>
+              </div>
+              <p className="text-xs text-emerald-700 mb-3">
+                Withdraw all collected platform fees (milestone fees + featured listing fees) to your designated bank account.
+              </p>
+              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                Available: {formatETB(platformRevenue?.available_revenue || d.platform_revenue?.total || 0)}
+              </div>
+            </div>
+          </button>
+
+          {/* Add Funds Button */}
+          <button
+            onClick={() => setShowAddFundsModal(true)}
+            className="group relative overflow-hidden rounded-2xl border-2 border-dashed border-blue-300 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 text-left transition-all hover:border-blue-500 hover:shadow-lg hover:-translate-y-0.5"
+          >
+            <div className="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-blue-500/10 blur-2xl transition-all group-hover:bg-blue-500/20" />
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 transition-transform group-hover:scale-110">
+                  <PlusCircle className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-blue-900">Add Funds</p>
+                  <p className="text-xs text-blue-600">Deposit to platform wallet</p>
+                </div>
+              </div>
+              <p className="text-xs text-blue-700 mb-3">
+                Add funds to the platform wallet for operational expenses, promotional credits, or external deposits.
+              </p>
+              <div className="flex items-center gap-2 text-xs font-semibold text-blue-600">
+                <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                Platform wallet balance: {formatETB(d.wallets?.total_available || 0)}
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* ─── Withdraw Revenue Modal ─────────────────────────────────── */}
+      {showWithdrawModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowWithdrawModal(false)} />
+          <div className="relative w-full max-w-lg max-h-[90vh] rounded-3xl bg-white shadow-2xl flex flex-col">
+            {/* Header - fixed */}
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600">
+                  <ArrowDownToLine className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-ink-900">Withdraw Platform Revenue</h3>
+                  <p className="text-xs text-gray-400">Transfer collected fees to your bank account</p>
+                </div>
+              </div>
+              <button onClick={() => setShowWithdrawModal(false)} className="rounded-xl p-2 hover:bg-gray-100 transition-colors">
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Scrollable body */}
+            <div className="overflow-y-auto px-6 py-4 flex-1 min-h-0">
+              <div className="space-y-4">
+                <div className="rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 p-4">
+                  <p className="text-xs font-bold text-emerald-600">Available for Withdrawal</p>
+                  <p className="text-2xl font-extrabold text-emerald-900">{formatETB(platformRevenue?.available_revenue || d.platform_revenue?.total || 0)}</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5">Amount (ETB) *</label>
+                  <input
+                    type="number"
+                    value={withdrawAmount}
+                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                    placeholder="Enter amount"
+                    min="1"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5">Account Holder Name *</label>
+                  <input
+                    type="text"
+                    value={withdrawAccountName}
+                    onChange={(e) => setWithdrawAccountName(e.target.value)}
+                    placeholder="e.g., DreamMore Technologies PLC"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5">Account Number *</label>
+                  <input
+                    type="text"
+                    value={withdrawAccountNumber}
+                    onChange={(e) => setWithdrawAccountNumber(e.target.value)}
+                    placeholder="Enter bank account number"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">Bank Name *</label>
+                    <input
+                      type="text"
+                      value={withdrawBankName}
+                      onChange={(e) => setWithdrawBankName(e.target.value)}
+                      placeholder="e.g., Commercial Bank of Ethiopia"
+                      className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1.5">Bank Code</label>
+                    <input
+                      type="text"
+                      value={withdrawBankCode}
+                      onChange={(e) => setWithdrawBankCode(e.target.value)}
+                      placeholder="Optional"
+                      className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5">Description</label>
+                  <textarea
+                    value={withdrawDescription}
+                    onChange={(e) => setWithdrawDescription(e.target.value)}
+                    placeholder="Optional note for this withdrawal"
+                    rows={2}
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100 resize-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Footer - fixed */}
+            <div className="flex gap-3 px-6 py-4 border-t border-gray-100 shrink-0">
+              <Button variant="outline" onClick={() => setShowWithdrawModal(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                variant="success"
+                onClick={handleWithdrawRevenue}
+                disabled={withdrawLoading}
+                className="flex-1"
+              >
+                {withdrawLoading ? (
+                  <><RefreshCw className="h-4 w-4 animate-spin" /> Processing...</>
+                ) : (
+                  <><ArrowDownToLine className="h-4 w-4" /> Withdraw Revenue</>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Add Funds Modal ────────────────────────────────────────── */}
+      {showAddFundsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowAddFundsModal(false)} />
+          <div className="relative w-full max-w-lg max-h-[90vh] rounded-3xl bg-white shadow-2xl flex flex-col">
+            {/* Header - fixed */}
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600">
+                  <PlusCircle className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-ink-900">Add Funds to Platform</h3>
+                  <p className="text-xs text-gray-400">Deposit funds for operations or promotions</p>
+                </div>
+              </div>
+              <button onClick={() => setShowAddFundsModal(false)} className="rounded-xl p-2 hover:bg-gray-100 transition-colors">
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Scrollable body */}
+            <div className="overflow-y-auto px-6 py-4 flex-1 min-h-0">
+              <div className="space-y-4">
+                <div className="rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 p-4">
+                  <p className="text-xs font-bold text-blue-600">Current Platform Balance</p>
+                  <p className="text-2xl font-extrabold text-blue-900">{formatETB(d.wallets?.total_available || 0)}</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5">Amount (ETB) *</label>
+                  <input
+                    type="number"
+                    value={addFundsAmount}
+                    onChange={(e) => setAddFundsAmount(e.target.value)}
+                    placeholder="Enter amount to deposit"
+                    min="1"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5">Description *</label>
+                  <textarea
+                    value={addFundsDescription}
+                    onChange={(e) => setAddFundsDescription(e.target.value)}
+                    placeholder="e.g., Operational deposit, Promotional credits, etc."
+                    rows={2}
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5">Source (Optional)</label>
+                  <input
+                    type="text"
+                    value={addFundsSource}
+                    onChange={(e) => setAddFundsSource(e.target.value)}
+                    placeholder="e.g., Company bank transfer, Investment"
+                    className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Footer - fixed */}
+            <div className="flex gap-3 px-6 py-4 border-t border-gray-100 shrink-0">
+              <Button variant="outline" onClick={() => setShowAddFundsModal(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleAddFunds}
+                disabled={addFundsLoading}
+                className="flex-1"
+              >
+                {addFundsLoading ? (
+                  <><RefreshCw className="h-4 w-4 animate-spin" /> Processing...</>
+                ) : (
+                  <><PlusCircle className="h-4 w-4" /> Add Funds</>
+                )}
+              </Button>
             </div>
           </div>
         </div>

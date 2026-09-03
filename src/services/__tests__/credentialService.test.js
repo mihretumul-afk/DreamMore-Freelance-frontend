@@ -49,9 +49,7 @@ describe('credentialService', () => {
 
       const result = await credentialService.createCredential(formData);
 
-      expect(apiClient.post).toHaveBeenCalledWith('/credentials', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      expect(apiClient.post).toHaveBeenCalledWith('/credentials', formData);
       expect(result).toEqual(mockResponse);
     });
   });

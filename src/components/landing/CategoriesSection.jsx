@@ -134,7 +134,7 @@ export default function CategoriesSection() {
   }, []);
 
   return (
-    <section className="bg-white py-8 lg:py-10 border-b border-gray-100" aria-labelledby="categories-heading">
+    <section className="bg-white dark:bg-slate-900 py-8 lg:py-10 border-b border-gray-100 dark:border-slate-800 transition-colors" aria-labelledby="categories-heading">
       <Container>
         <HorizontalScrollRow
           scrollStep={300}
@@ -153,7 +153,7 @@ export default function CategoriesSection() {
                 <div className="flex items-center justify-center gap-3 sm:gap-4 shrink-0">
                   <Link
                     to="/categories"
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-brand-200 bg-brand-50/60 px-3.5 py-2 text-xs sm:text-sm font-semibold text-brand-600 shadow-2xs transition-all duration-200 hover:border-brand-300 hover:bg-brand-100/70 hover:text-brand-700"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-brand-200 dark:border-brand-800 bg-brand-50/60 dark:bg-brand-950/40 px-3.5 py-2 text-xs sm:text-sm font-semibold text-brand-600 dark:text-brand-400 shadow-2xs transition-all duration-200 hover:border-brand-300 hover:bg-brand-100/70 dark:hover:bg-brand-900/60 hover:text-brand-700 dark:hover:text-brand-300"
                   >
                     {t('categories.viewAll') || 'View All Categories'}
                     <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -172,7 +172,7 @@ export default function CategoriesSection() {
             Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
-                className="h-80 w-[240px] sm:w-[260px] md:w-[270px] shrink-0 animate-pulse rounded-2xl border border-gray-100 bg-gray-50/80 snap-start"
+                className="h-80 w-[240px] sm:w-[260px] md:w-[270px] shrink-0 animate-pulse rounded-2xl border border-gray-100 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-800/80 snap-start"
               />
             ))
           ) : (
@@ -193,20 +193,20 @@ export default function CategoriesSection() {
 
               {/* Student Success Highlight Card (Direct match to reference image) */}
               <div className="w-[240px] sm:w-[260px] md:w-[270px] shrink-0 snap-start flex">
-                <div className="w-full flex flex-col items-center justify-center rounded-2xl border border-gray-200/90 bg-white p-6 text-center shadow-xs transition-all duration-300 hover:shadow-md hover:border-orange-200">
-                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-orange-50 text-orange-600">
+                <div className="w-full flex flex-col items-center justify-center rounded-2xl border border-gray-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 text-center shadow-xs transition-all duration-300 hover:shadow-md hover:border-orange-200">
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
                     <Award className="h-6 w-6" />
                   </div>
-                  <span className="text-xs font-bold tracking-widest text-gray-500 uppercase">
+                  <span className="text-xs font-bold tracking-widest text-gray-500 dark:text-slate-400 uppercase">
                     Student Success
                   </span>
                   <div className="my-2 text-4xl sm:text-5xl font-black tracking-tight text-orange-500">
                     150+
                   </div>
-                  <div className="text-xs font-extrabold tracking-wider text-gray-900 uppercase max-w-[180px] leading-snug">
+                  <div className="text-xs font-extrabold tracking-wider text-gray-900 dark:text-slate-100 uppercase max-w-[180px] leading-snug">
                     Professionals Trained
                   </div>
-                  <p className="mt-3 text-[11px] text-gray-400">
+                  <p className="mt-3 text-[11px] text-gray-400 dark:text-slate-400">
                     Empowering top talent across Ethiopia
                   </p>
                 </div>

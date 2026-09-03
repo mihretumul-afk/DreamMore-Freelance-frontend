@@ -201,22 +201,22 @@ export default function FeaturedFreelancersSection() {
   });
 
   return (
-    <section className="bg-white py-8 lg:py-10 border-b border-gray-100" aria-labelledby="featured-freelancers-heading">
+    <section className="bg-white dark:bg-slate-900 py-8 lg:py-10 border-b border-gray-100 dark:border-slate-800 transition-colors" aria-labelledby="featured-freelancers-heading">
       <Container>
-        {/* Section Heading Header */}
-        <div className="mb-5 flex flex-col items-center gap-3 text-center">
+        {/* Section Header */}
+        <div className="mb-6 flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
           <SectionHeading
-            align="center"
-            eyebrow={t('featuredFreelancers.eyebrow') || 'Verified Ethiopian Talent'}
-            title={t('featuredFreelancers.title') || 'Registered DreamMore Freelancers'}
+            eyebrow={t('featuredFreelancers.eyebrow') || 'Top Talent'}
+            title={t('featuredFreelancers.title') || 'Featured Freelancers'}
             description={
               t('featuredFreelancers.description') ||
-              'Explore registered and approved freelancers on the DreamMore platform.'
+              'Work with Ethiopia’s top software engineers, designers, video editors, and digital experts.'
             }
           />
+
           <Link
             to="/freelancers"
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-brand-200 bg-brand-50/60 px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-brand-600 shadow-2xs transition-all duration-200 hover:border-brand-300 hover:bg-brand-100/70 hover:text-brand-700"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-brand-200 dark:border-brand-800 bg-brand-50/60 dark:bg-brand-950/40 px-3.5 py-2 text-xs sm:text-sm font-semibold text-brand-600 dark:text-brand-400 shadow-2xs transition-all duration-200 hover:border-brand-300 hover:bg-brand-100/70 dark:hover:bg-brand-900/60 hover:text-brand-700"
           >
             {t('featuredFreelancers.viewAll') || 'View All Talent'}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -224,12 +224,12 @@ export default function FeaturedFreelancersSection() {
         </div>
 
         {/* Top Category Filter Tab Bar with Left/Right Arrow Scroll Controls */}
-        <div className="relative mb-5 rounded-2xl border border-gray-200/80 bg-white p-2 shadow-xs">
+        <div className="relative mb-5 rounded-2xl border border-gray-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 shadow-xs">
           <div className="flex items-center gap-1">
             {/* Scroll Left Side Arrow Button */}
             <button
               onClick={() => scrollTabs('left')}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-gray-50 text-gray-600 hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200 transition-colors focus:outline-none shadow-xs"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-brand-50 dark:hover:bg-slate-700 hover:text-brand-600 hover:border-brand-200 transition-colors focus:outline-none shadow-xs"
               aria-label="Scroll categories left"
               title="Scroll categories left"
             >
@@ -252,10 +252,10 @@ export default function FeaturedFreelancersSection() {
                       'flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold transition-all duration-200',
                       isActive
                         ? 'bg-blue-900 text-white shadow-sm ring-1 ring-blue-900'
-                        : 'bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-900 border border-transparent hover:border-gray-200',
+                        : 'bg-white dark:bg-slate-900 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white border border-transparent hover:border-gray-200 dark:hover:border-slate-700',
                     )}
                   >
-                    <Icon className={cn('h-4 w-4', isActive ? 'text-brand-400' : 'text-gray-400')} />
+                    <Icon className={cn('h-4 w-4', isActive ? 'text-brand-400' : 'text-gray-400 dark:text-slate-400')} />
                     <span>{cat.label}</span>
                   </button>
                 );
@@ -265,7 +265,7 @@ export default function FeaturedFreelancersSection() {
             {/* Scroll Right Side Arrow Button */}
             <button
               onClick={() => scrollTabs('right')}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-gray-50 text-gray-600 hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200 transition-colors focus:outline-none shadow-xs"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-brand-50 dark:hover:bg-slate-700 hover:text-brand-600 hover:border-brand-200 transition-colors focus:outline-none shadow-xs"
               aria-label="Scroll categories right"
               title="Scroll categories right"
             >

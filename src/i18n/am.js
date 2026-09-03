@@ -24,6 +24,10 @@ export const am = {
   'nav.homeShort': 'መነሻ',
   'nav.accountMenu': 'የመለያ ሜኑ',
   'nav.language': 'ቋንቋ',
+  'nav.toggleTheme': 'የማታ ሁነታን ቀይር',
+  'nav.themeLight': 'ብርሃን ሁነታ',
+  'nav.themeDark': 'የማታ ሁነታ',
+
 
   // ---- Language selector ----
   'lang.label': 'ቋንቋ',

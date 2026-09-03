@@ -37,15 +37,15 @@ function StatCard({ icon: Icon, numericValue, suffix, label, color, delay }) {
     <Reveal delay={delay} className="h-full">
       <div
         ref={ref}
-        className="flex flex-col items-center rounded-2xl bg-white p-6 shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md hover:-translate-y-1"
+        className="flex flex-col items-center rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm border border-gray-100 dark:border-slate-800 transition-all duration-300 hover:shadow-md hover:-translate-y-1"
       >
         <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${color}`}>
           <Icon className="h-6 w-6 text-white" strokeWidth={1.5} aria-hidden="true" />
         </div>
-        <p className="mt-4 text-3xl font-extrabold text-gray-900 tabular-nums">
+        <p className="mt-4 text-3xl font-extrabold text-gray-900 dark:text-slate-100 tabular-nums">
           {count.toLocaleString()}{suffix}
         </p>
-        <p className="mt-1 text-sm text-gray-500">{label}</p>
+        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">{label}</p>
       </div>
     </Reveal>
   );
@@ -57,16 +57,16 @@ function StatCard({ icon: Icon, numericValue, suffix, label, color, delay }) {
 function TestimonialCard({ quote, name, role, delay }) {
   return (
     <Reveal delay={delay} className="h-full">
-      <div className="relative h-full rounded-2xl bg-gradient-to-br from-gray-50 to-white p-6 sm:p-8 border border-gray-100 shadow-sm transition-all duration-300 hover:shadow-md">
+      <div className="relative h-full rounded-2xl bg-gradient-to-br from-gray-50 to-white dark:from-slate-900 dark:to-slate-800 p-6 sm:p-8 border border-gray-100 dark:border-slate-800 shadow-sm transition-all duration-300 hover:shadow-md">
         <Quote className="absolute top-6 right-6 h-8 w-8 text-brand-500/20" aria-hidden="true" />
-        <p className="text-sm leading-relaxed text-gray-600 italic">"{quote}"</p>
+        <p className="text-sm leading-relaxed text-gray-600 dark:text-slate-300 italic">"{quote}"</p>
         <div className="mt-6 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-500 text-sm font-bold text-white">
             {name.split(' ').map(n => n[0]).join('')}
           </div>
           <div>
-            <p className="text-sm font-bold text-gray-900">{name}</p>
-            <p className="text-xs text-gray-500">{role}</p>
+            <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{name}</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400">{role}</p>
           </div>
         </div>
       </div>
@@ -179,29 +179,29 @@ export default function TrustedBySection() {
   ];
 
   return (
-    <section className="bg-white py-10 lg:py-12 border-b border-gray-100" aria-labelledby="trusted-heading">
+    <section className="bg-white dark:bg-slate-900 py-10 lg:py-12 border-b border-gray-100 dark:border-slate-800 transition-colors" aria-labelledby="trusted-heading">
       <Container>
         {/* ── Heading ── */}
         <div className="mx-auto max-w-2xl text-center">
           <Reveal>
-            <span className="inline-block rounded-full bg-brand-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-brand-600">
+            <span className="inline-block rounded-full bg-brand-500/10 px-3.5 py-1 text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">
               {t('trusted.eyebrow')}
             </span>
           </Reveal>
           <Reveal delay={100}>
-            <h2 id="trusted-heading" className="mt-2 text-2xl font-extrabold tracking-tight text-ink-900 sm:text-3xl">
+            <h2 id="trusted-heading" className="mt-2 text-2xl font-extrabold tracking-tight text-ink-900 dark:text-slate-100 sm:text-3xl">
               {t('trusted.title')}
             </h2>
           </Reveal>
           <Reveal delay={200}>
-            <p className="mt-1.5 text-xs sm:text-sm text-gray-500">{t('trusted.subtitle')}</p>
+            <p className="mt-1.5 text-xs sm:text-sm text-gray-500 dark:text-slate-400">{t('trusted.subtitle')}</p>
           </Reveal>
         </div>
 
         {/* ── Logo marquee ── */}
         <Reveal delay={300}>
-          <div className="mt-6 rounded-2xl border border-gray-100 bg-gray-50/50 px-4 shadow-2xs backdrop-blur-sm">
-            <p className="pt-3 text-center text-[11px] font-bold uppercase tracking-widest text-gray-400">
+          <div className="mt-6 rounded-2xl border border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50 px-4 shadow-2xs backdrop-blur-sm">
+            <p className="pt-3 text-center text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-400">
               {t('trusted.trustedByLabel')}
             </p>
             <LogoMarquee />

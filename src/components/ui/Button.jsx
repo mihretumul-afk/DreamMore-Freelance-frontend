@@ -6,16 +6,16 @@ const base =
 
 const variants = {
   primary: 'bg-brand-500 text-white hover:bg-brand-600 active:bg-brand-700',
-  secondary: 'bg-ink-900 text-white hover:bg-ink-800 active:bg-ink-700',
+  secondary: 'bg-ink-900 dark:bg-slate-800 text-white hover:bg-ink-800 dark:hover:bg-slate-700 active:bg-ink-700',
   outline:
-    'border border-gray-300 bg-white text-ink-900 hover:border-gray-400 hover:bg-gray-50',
-  ghost: 'text-ink-700 hover:bg-gray-100 hover:text-ink-900',
+    'border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-ink-900 dark:text-slate-100 hover:border-gray-400 dark:hover:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-800',
+  ghost: 'text-ink-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-ink-900 dark:hover:text-white',
   danger: 'bg-danger-500 text-white hover:bg-danger-600 active:bg-danger-700',
   success: 'bg-success-500 text-white hover:bg-success-600 active:bg-success-700',
   /** For quiet text buttons on dark surfaces (navbar). */
   nav: 'text-slate-200 hover:bg-white/10 hover:text-white',
   /** For text buttons on light surfaces (public navbar). */
-  'nav-light': 'text-ink-600 hover:bg-ink-50 hover:text-ink-900',
+  'nav-light': 'text-ink-600 dark:text-slate-300 hover:bg-ink-50 dark:hover:bg-slate-800 hover:text-ink-900 dark:hover:text-white',
 };
 
 const sizes = {

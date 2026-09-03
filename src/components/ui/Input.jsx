@@ -2,10 +2,10 @@ import { useId } from 'react';
 import { cn } from '../../utils/cn';
 
 const fieldBase =
-  'w-full rounded-input border bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder:text-gray-400 transition-colors focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400';
+  'w-full rounded-input border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-sm text-ink-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 transition-colors focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-50 dark:disabled:bg-slate-800 disabled:text-gray-400';
 
 const stateClasses = {
-  normal: 'border-gray-300 focus:border-brand-500 focus:ring-brand-500/20',
+  normal: 'border-gray-300 dark:border-slate-700 focus:border-brand-500 focus:ring-brand-500/20',
   error: 'border-danger-400 focus:border-danger-500 focus:ring-danger-500/20',
 };
 
@@ -28,7 +28,7 @@ export default function Input({
   return (
     <div className="space-y-1.5">
       {label && (
-        <label htmlFor={inputId} className="block text-sm font-medium text-ink-800">
+        <label htmlFor={inputId} className="block text-sm font-medium text-ink-800 dark:text-slate-200">
           {label}
           {required && (
             <span className="text-danger-500" aria-hidden="true">
