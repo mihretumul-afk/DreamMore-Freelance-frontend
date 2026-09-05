@@ -179,19 +179,26 @@ export default function FreelancerDetailsPage() {
                     {profile.name ?? 'Freelancer'}
                   </h1>
                   <StatusBadge status={profile.availability} dot />
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={handleToggleSave}
                     disabled={saving}
                     aria-pressed={isSaved}
-                    aria-label={isSaved ? 'Remove from saved freelancers' : 'Save freelancer'}
-                    className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-brand-500 disabled:opacity-50"
+                    className={cn(
+                      'ml-1 font-bold transition-all',
+                      isSaved
+                        ? 'border-brand-300 bg-brand-50 text-brand-700 hover:bg-brand-100'
+                        : 'border-gray-200 text-gray-700 hover:border-brand-300 hover:bg-brand-50/50 hover:text-brand-600',
+                    )}
                   >
                     <Bookmark
-                      className={cn('h-5 w-5', isSaved && 'fill-brand-500 text-brand-500')}
+                      className={cn('h-4 w-4 mr-1', isSaved ? 'fill-brand-600 text-brand-600' : 'text-gray-400')}
                       aria-hidden="true"
                     />
-                  </button>
+                    {isSaved ? 'Saved Talent' : 'Save Talent'}
+                  </Button>
                 </div>
                 <p className="mt-1 text-base font-medium text-gray-600">
                   {profile.headline ?? 'Professional headline not set yet.'}
@@ -434,12 +441,24 @@ export default function FreelancerDetailsPage() {
               </dl>
             </CardBody>
             <div className="space-y-2 border-t border-gray-100 px-5 py-4">
-              <Button disabled className="w-full">
-                <Send className="h-4 w-4" aria-hidden="true" /> Contact Freelancer
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleToggleSave}
+                disabled={saving}
+                className={cn(
+                  'w-full font-bold transition-all',
+                  isSaved
+                    ? 'border-brand-300 bg-brand-50 text-brand-700 hover:bg-brand-100'
+                    : 'border-gray-200 text-gray-700 hover:border-brand-300 hover:bg-brand-50/50 hover:text-brand-600',
+                )}
+              >
+                <Bookmark
+                  className={cn('h-4 w-4 mr-1.5', isSaved ? 'fill-brand-600 text-brand-600' : 'text-gray-500')}
+                  aria-hidden="true"
+                />
+                {isSaved ? 'Saved to Shortlist' : 'Save Talent'}
               </Button>
-              <p className="text-center text-xs text-gray-400">
-                Direct messaging arrives in a later phase.
-              </p>
             </div>
           </Card>
 

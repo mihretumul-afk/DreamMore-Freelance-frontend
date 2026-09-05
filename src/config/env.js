@@ -9,5 +9,9 @@
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000/api/v1';
 
+/** Origin (scheme://host[:port]) of the Laravel backend. Used for browser
+ *  navigations like the Google OAuth redirect (/auth/google/redirect). */
+export const API_ORIGIN = new URL(API_BASE_URL).origin;
+
 /** Display name of the platform. */
 export const APP_NAME = import.meta.env.VITE_APP_NAME ?? 'Dream More AppWorks';

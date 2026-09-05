@@ -36,6 +36,32 @@ export const authService = {
   logout: async () => {
     await apiClient.post('/auth/logout');
   },
+
+  /** Request a password reset link email for an account. */
+  forgotPassword: async (email) => {
+    const response = await apiClient.post('/auth/forgot-password', { email });
+    return response.data;
+  },
+
+  /** Reset user password using token and email. */
+  resetPassword: async ({ token, email, password, password_confirmation }) => {
+    const response = await apiClient.post('/auth/reset-password', {
+      token,
+      email,
+      password,
+      password_confirmation,
+    });
+    return response.data;
+  },
+
+  /**
+   * Finish Google signup by choosing the account role (freelancer/employer).
+   * Called from the role-picker page after a brand-new Google sign-in.
+   */
+  completeGoogleRole: async (role) => {
+    const response = await apiClient.post('/auth/google/complete-role', { role });
+    return response.data.data;
+  },
 };
 
 export default authService;

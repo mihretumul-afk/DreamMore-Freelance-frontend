@@ -1,21 +1,14 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Award, Banknote, Briefcase, CheckCircle2, ClipboardList, Clock,
-  DollarSign, FileText, FolderOpen, MapPin, Pencil, Send, Star,
-  TrendingUp, XCircle, Zap, RefreshCw, Eye, EyeOff, MessageSquare,
-  Bell, Handshake, ArrowUpRight, ArrowDownRight, Target, Rocket,
-  Heart, Bookmark, Globe, Shield, ChevronRight, Calendar, Timer,
-  AlertTriangle, TrendingDown, Minus, BarChart3, PieChart, Wallet,
-  Download, Upload, Search, Filter, MoreVertical, Trash2, Edit,
-  Ban, Check, X, ExternalLink, Layers, Box, Monitor, Cpu,
-  User, Users, Building2, Mail, Phone, Video,
-  Mic, Image, File, Archive, Sparkles,
+  Award, ArrowRight, Briefcase, Check, CheckCircle2, ChevronRight,
+  Clock, DollarSign, FolderOpen, Globe, Handshake, MapPin,
+  MessageSquare, Pencil, RefreshCw, Send, Star, Target, Wallet,
+  X, Zap,
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
 import Avatar from '../../components/marketplace/Avatar';
-import RatingDisplay from '../../components/marketplace/RatingDisplay';
 import StatusBadge from '../../components/marketplace/StatusBadge';
 import Card, { CardBody, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -28,7 +21,7 @@ import { financialService } from '../../services/financialService';
 import { normalizeFreelancer } from '../../utils/freelancerMapper';
 import { normalizeProposal } from '../../utils/proposalMapper';
 import { getErrorMessage } from '../../utils/errors';
-import { formatETB, formatDate, timeAgo, getPlatformCurrency } from '../../utils/format';
+import { formatETB, timeAgo } from '../../utils/format';
 import { useAuth } from '../../hooks/useAuth';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useToast } from '../../hooks/useToast';
@@ -36,133 +29,129 @@ import { cn } from '../../utils/cn';
 import { getEcho } from '../../config/echo';
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   HELPER: Format large numbers
-   ═══════════════════════════════════════════════════════════════════════════ */
-const formatNumber = (num) => {
-  if (num === null || num === undefined) return '0';
-  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-  return num.toLocaleString();
-};
-
-const formatCurrency = (amount) => {
-  if (amount === null || amount === undefined) return `${getPlatformCurrency()} 0`;
-  return `${getPlatformCurrency()} ${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-};
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   HELPER: Calculate percentage change
-   ═══════════════════════════════════════════════════════════════════════════ */
-const getChangePercent = (current, previous) => {
-  if (!previous || previous === 0) return { value: 0, direction: 'neutral' };
-  const change = ((current - previous) / previous) * 100;
-  return {
-    value: Math.abs(change).toFixed(1),
-    direction: change > 0 ? 'up' : change < 0 ? 'down' : 'neutral',
-  };
-};
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   COMPONENT: Animated Counter
-   ═══════════════════════════════════════════════════════════════════════════ */
-function AnimatedCounter({ value, prefix = '', suffix = '', duration = 1000 }) {
-  const [display, setDisplay] = useState(0);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const target = typeof value === 'number' ? value : parseFloat(value) || 0;
-    const start = display;
-    const startTime = Date.now();
-
-    const animate = () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(start + (target - start) * eased);
-
-      if (progress < 1) {
-        ref.current = requestAnimationFrame(animate);
-      }
-    };
-
-    ref.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(ref.current);
-  }, [value]);
-
-  return <span>{prefix}{display.toFixed(2)}{suffix}</span>;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
    COMPONENT: Performance Metric Card
    ═══════════════════════════════════════════════════════════════════════════ */
-function PerformanceMetric({ icon: Icon, label, value, maxValue = 100, color = 'brand', suffix = '' }) {
+function PerformanceMetric({ icon: Icon, label, value, maxValue = 100, color = 'brand', suffix = '', sub, subTo }) {
   const percentage = Math.min((value / maxValue) * 100, 100);
   const colors = {
-    brand: { bg: 'bg-indigo-500', light: 'bg-indigo-100', text: 'text-indigo-600' },
-    success: { bg: 'bg-emerald-500', light: 'bg-emerald-100', text: 'text-emerald-600' },
-    warning: { bg: 'bg-amber-500', light: 'bg-amber-100', text: 'text-amber-600' },
-    danger: { bg: 'bg-red-500', light: 'bg-red-100', text: 'text-red-600' },
-    info: { bg: 'bg-blue-500', light: 'bg-blue-100', text: 'text-blue-600' },
+    brand: {
+      card: 'bg-gradient-to-br from-indigo-50 to-violet-50/70 border-indigo-100',
+      icon: 'bg-gradient-to-br from-indigo-500 to-violet-500 shadow-indigo-500/25',
+      bar: 'bg-gradient-to-r from-indigo-500 to-violet-500',
+      sub: 'text-indigo-600 hover:text-indigo-700',
+    },
+    success: {
+      card: 'bg-gradient-to-br from-emerald-50 to-teal-50/70 border-emerald-100',
+      icon: 'bg-gradient-to-br from-emerald-500 to-teal-500 shadow-emerald-500/25',
+      bar: 'bg-gradient-to-r from-emerald-500 to-teal-500',
+      sub: 'text-emerald-600 hover:text-emerald-700',
+    },
+    warning: {
+      card: 'bg-gradient-to-br from-amber-50 to-orange-50/70 border-amber-100',
+      icon: 'bg-gradient-to-br from-amber-500 to-orange-500 shadow-amber-500/25',
+      bar: 'bg-gradient-to-r from-amber-500 to-orange-500',
+      sub: 'text-amber-600 hover:text-amber-700',
+    },
+    info: {
+      card: 'bg-gradient-to-br from-blue-50 to-cyan-50/70 border-blue-100',
+      icon: 'bg-gradient-to-br from-blue-500 to-cyan-500 shadow-blue-500/25',
+      bar: 'bg-gradient-to-r from-blue-500 to-cyan-500',
+      sub: 'text-blue-600 hover:text-blue-700',
+    },
   };
   const c = colors[color] || colors.brand;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-all duration-300">
-      <div className="flex items-center gap-3 mb-3">
-        <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', c.light)}>
-          <Icon className={cn('h-4 w-4', c.text)} />
+    <div className={cn('rounded-2xl border p-5 shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:shadow-card-hover bg-gradient-to-br', c.card)}>
+      <div className="flex items-start gap-3">
+        <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-lg', c.icon)}>
+          <Icon className="h-5 w-5" />
         </div>
-        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{label}</span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[10px] font-bold uppercase tracking-wider text-gray-400">{label}</p>
+          <div className="flex items-baseline gap-1 mt-0.5">
+            <span className="text-2xl font-extrabold tracking-tight text-ink-900">{value}{suffix}</span>
+            {maxValue < 100 && <span className="text-xs font-medium text-gray-400">/ {maxValue}</span>}
+          </div>
+        </div>
       </div>
-      <div className="flex items-end gap-2">
-        <span className="text-2xl font-bold text-ink-900">{value}{suffix}</span>
-        {maxValue < 100 && <span className="text-xs text-gray-400 mb-1">/ {maxValue}</span>}
-      </div>
-      <div className="mt-3 h-2 rounded-full bg-gray-100 overflow-hidden">
+      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/70">
         <div
-          className={cn('h-full rounded-full transition-all duration-1000', c.bg)}
+          className={cn('h-full rounded-full transition-all duration-1000', c.bar)}
           style={{ width: `${percentage}%` }}
         />
       </div>
+      {sub && (
+        subTo ? (
+          <Link
+            to={subTo}
+            className={cn('mt-2.5 inline-flex items-center gap-0.5 text-[11px] font-bold transition-colors', c.sub)}
+          >
+            {sub} <ChevronRight className="h-3 w-3" />
+          </Link>
+        ) : (
+          <p className="mt-2.5 text-[11px] font-medium text-gray-400">{sub}</p>
+        )
+      )}
     </div>
   );
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   COMPONENT: Earnings Card
+   COMPONENT: Compact Wallet Summary Strip
+   A single-row "at a glance" teaser. Full detail lives on the Finance page
+   (/freelancer/withdrawals), which remains the source of truth for money.
    ═══════════════════════════════════════════════════════════════════════════ */
-function EarningsCard({ icon: Icon, label, value, color = 'brand', trend, trendValue }) {
-  const colors = {
-    brand: { bg: 'bg-gradient-to-br from-indigo-500 to-violet-500', shadow: 'shadow-indigo-500/25' },
-    success: { bg: 'bg-gradient-to-br from-emerald-500 to-teal-500', shadow: 'shadow-emerald-500/25' },
-    warning: { bg: 'bg-gradient-to-br from-amber-500 to-orange-500', shadow: 'shadow-amber-500/25' },
-    danger: { bg: 'bg-gradient-to-br from-red-500 to-pink-500', shadow: 'shadow-red-500/25' },
-    info: { bg: 'bg-gradient-to-br from-blue-500 to-cyan-500', shadow: 'shadow-blue-500/25' },
-  };
-  const c = colors[color] || colors.brand;
-
+function WalletSummaryStrip({ s, isRefreshing }) {
   return (
-    <div className={cn('rounded-xl p-4 text-white shadow-lg', c.bg, c.shadow)}>
-      <div className="flex items-center justify-between">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-          <Icon className="h-5 w-5" />
-        </div>
-        {trend && (
-          <div className={cn(
-            'flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold',
-            trend === 'up' ? 'bg-emerald-500/20 text-emerald-100' :
-            trend === 'down' ? 'bg-red-500/20 text-red-100' :
-            'bg-white/20 text-white/80'
-          )}>
-            {trend === 'up' ? <ArrowUpRight className="h-3 w-3" /> :
-             trend === 'down' ? <ArrowDownRight className="h-3 w-3" /> :
-             <Minus className="h-3 w-3" />}
-            {trendValue}
+    <div
+      className={cn(
+        'relative overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-r from-white via-gray-50 to-white p-5 shadow-card transition-opacity duration-500',
+        isRefreshing && 'opacity-60'
+      )}
+    >
+      {/* Background decorations */}
+      <div className="pointer-events-none absolute -top-16 -right-10 h-44 w-44 rounded-full bg-emerald-100/60 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-16 left-1/3 h-36 w-36 rounded-full bg-indigo-100/50 blur-3xl" />
+
+      <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        {/* Available balance — the number that matters for a quick glance */}
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25">
+            <Wallet className="h-6 w-6" />
           </div>
-        )}
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Available Balance</p>
+            <p className="mt-0.5 text-2xl font-extrabold tracking-tight text-ink-900 lg:text-3xl">
+              {formatETB(s.availableBalance)}
+            </p>
+          </div>
+        </div>
+
+        {/* Secondary figures */}
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+          <div>
+            <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-600">
+              <Clock className="h-3.5 w-3.5" /> Pending
+            </p>
+            <p className="mt-0.5 text-lg font-bold text-ink-900">{formatETB(s.pendingBalance)}</p>
+          </div>
+          <div className="hidden h-9 w-px bg-gray-200 sm:block" />
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Earned</p>
+            <p className="mt-0.5 text-lg font-semibold text-gray-500">{formatETB(s.totalEarned)}</p>
+          </div>
+        </div>
+
+        {/* Link to the full Finance page */}
+        <Link
+          to="/freelancer/withdrawals"
+          className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-ink-900 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-ink-900/20 transition-all hover:-translate-y-0.5 hover:bg-ink-800 hover:shadow-xl hover:shadow-ink-900/25"
+        >
+          View Finance
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+        </Link>
       </div>
-      <p className="mt-3 text-2xl font-bold">{value}</p>
-      <p className="mt-1 text-xs text-white/70">{label}</p>
     </div>
   );
 }
@@ -397,7 +386,7 @@ export default function FreelancerDashboardPage() {
     ...(s.totalEarned > 0 ? [{
       icon: DollarSign, color: 'success',
       title: 'Earnings Available',
-      description: `${formatCurrency(s.availableBalance)} ready for withdrawal`,
+      description: `${formatETB(s.availableBalance)} ready for withdrawal`,
       time: 'Finance',
       link: '/freelancer/withdrawals',
     }] : []),
@@ -406,7 +395,7 @@ export default function FreelancerDashboardPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* ═══════════════════════════════════════════════════════════════════
-         HERO HEADER — White Cloud Design
+         GREETING HEADER — White Cloud Design
          ═══════════════════════════════════════════════════════════════════ */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white via-gray-50 to-gray-100 p-6 lg:p-8 text-gray-900 shadow-xl border border-gray-200">
         {/* Background decorations */}
@@ -418,7 +407,7 @@ export default function FreelancerDashboardPage() {
 
         <div className="relative z-10">
           {/* Header row */}
-          <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 border-gray-200 bg-gray-100 shadow-lg">
                 {profile?.avatar
@@ -464,131 +453,11 @@ export default function FreelancerDashboardPage() {
               </button>
             </div>
           </div>
-
-          {/* Primary stat cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Available Balance */}
-            <div className={cn(
-              'rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 transition-all duration-500',
-              isRefreshing && 'animate-pulse'
-            )}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500">
-                  <Wallet className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Available</span>
-              </div>
-              <p className="text-2xl lg:text-3xl font-bold text-gray-900">
-                {formatCurrency(s.availableBalance)}
-              </p>
-              <p className="text-xs text-emerald-600 mt-2">Ready for withdrawal</p>
-            </div>
-
-            {/* Pending Balance */}
-            <div className={cn(
-              'rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100 p-4 transition-all duration-500',
-              isRefreshing && 'animate-pulse'
-            )}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500">
-                  <Clock className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-xs font-semibold text-amber-700 uppercase tracking-wide">Pending</span>
-              </div>
-              <p className="text-2xl lg:text-3xl font-bold text-gray-900">
-                {formatCurrency(s.pendingBalance)}
-              </p>
-              <p className="text-xs text-amber-600 mt-2">Awaiting clearance</p>
-            </div>
-
-            {/* Total Earned */}
-            <div className={cn(
-              'rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 p-4 transition-all duration-500',
-              isRefreshing && 'animate-pulse'
-            )}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500">
-                  <TrendingUp className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Total Earned</span>
-              </div>
-              <p className="text-2xl lg:text-3xl font-bold text-gray-900">
-                {formatCurrency(s.totalEarned)}
-              </p>
-              <p className="text-xs text-blue-600 mt-2">All time earnings</p>
-            </div>
-
-            {/* Contracts */}
-            <div className={cn(
-              'rounded-xl border border-violet-200 bg-gradient-to-br from-violet-50 to-violet-100 p-4 transition-all duration-500',
-              isRefreshing && 'animate-pulse'
-            )}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500">
-                  <Handshake className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-xs font-semibold text-violet-700 uppercase tracking-wide">Contracts</span>
-              </div>
-              <p className="text-2xl lg:text-3xl font-bold text-gray-900">
-                {s.activeContractsCount}
-              </p>
-              <p className="text-xs text-violet-600 mt-2">{s.completedJobsCount} completed</p>
-            </div>
-          </div>
         </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════
-         PERFORMANCE METRICS — Like Fiverr
-         ═══════════════════════════════════════════════════════════════════ */}
-      <Card>
-        <CardHeader
-          title="Performance Metrics"
-          description="Your freelancer scorecard"
-          action={
-            <Link to="/freelancer/profile" className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700">
-              View Profile <ChevronRight className="h-3.5 w-3.5" />
-            </Link>
-          }
-        />
-        <CardBody>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <PerformanceMetric
-              icon={Star}
-              label="Rating"
-              value={s.rating.toFixed(1)}
-              maxValue={5}
-              color="warning"
-            />
-            <PerformanceMetric
-              icon={Target}
-              label="Success Score"
-              value={s.successScore}
-              maxValue={100}
-              color="success"
-              suffix="%"
-            />
-            <PerformanceMetric
-              icon={Zap}
-              label="Response Rate"
-              value={s.responseRate}
-              maxValue={100}
-              color="info"
-              suffix="%"
-            />
-            <PerformanceMetric
-              icon={CheckCircle2}
-              label="Jobs Completed"
-              value={s.completedJobsCount}
-              maxValue={Math.max(s.completedJobsCount, 10)}
-              color="brand"
-            />
-          </div>
-        </CardBody>
-      </Card>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-         PROFILE STRENGTH — Like Fiverr
+         PROFILE STRENGTH — Like Fiverr (most actionable item → right under greeting)
          ═══════════════════════════════════════════════════════════════════ */}
       {profileStrength < 100 && (
         <div className="rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4 shadow-sm">
@@ -627,62 +496,75 @@ export default function FreelancerDashboardPage() {
       )}
 
       {/* ═══════════════════════════════════════════════════════════════════
-         TODAY'S AGENDA — Active work items
+         COMPACT WALLET SUMMARY STRIP
+         Full detail (chart, transactions, withdrawals) lives on the Finance page.
          ═══════════════════════════════════════════════════════════════════ */}
-      {s.activeContractsCount > 0 && (
-        <Card>
-          <CardHeader
-            title="Today's Agenda"
-            description="Your active work items"
-            action={
-              <Link to="/freelancer/contracts" className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700">
-                View All <ChevronRight className="h-3.5 w-3.5" />
-              </Link>
-            }
-          />
-          <CardBody className="p-0">
-            <div className="divide-y divide-gray-50">
-              {activeContracts.slice(0, 3).map((contract) => (
-                <div key={contract.id} className="flex items-center gap-4 px-5 py-3 hover:bg-gray-50/50 transition-colors">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-500/25">
-                    <Handshake className="h-5 w-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-ink-900 truncate">{contract.title || `Contract #${contract.id}`}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      {contract.employer?.name || 'Employer'} · {formatETB(contract.amount)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge tone="primary" size="xs">{contract.status}</Badge>
-                    <Link
-                      to={`/freelancer/contracts/${contract.id}`}
-                      className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
-                    >
-                      View
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardBody>
-        </Card>
-      )}
+      <WalletSummaryStrip s={s} isRefreshing={isRefreshing} />
+
+      {/* ═══════════════════════════════════════════════════════════════════
+         PERFORMANCE METRICS — Like Fiverr
+         ═══════════════════════════════════════════════════════════════════ */}
+      <Card>
+        <CardHeader
+          title="Performance Metrics"
+          description="Your freelancer scorecard"
+          action={
+            <Link to="/freelancer/profile" className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+              View Profile <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
+          }
+        />
+        <CardBody>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <PerformanceMetric
+              icon={Star}
+              label="Rating"
+              value={s.rating.toFixed(1)}
+              maxValue={5}
+              color="warning"
+            />
+            <PerformanceMetric
+              icon={Target}
+              label="Success Score"
+              value={s.successScore}
+              maxValue={100}
+              color="success"
+              suffix="%"
+            />
+            <PerformanceMetric
+              icon={Zap}
+              label="Response Rate"
+              value={s.responseRate}
+              maxValue={100}
+              color="info"
+              suffix="%"
+            />
+            <PerformanceMetric
+              icon={CheckCircle2}
+              label="Jobs Completed"
+              value={s.completedJobsCount}
+              maxValue={Math.max(s.completedJobsCount, 10)}
+              color="brand"
+              sub={`${s.activeContractsCount} active contract${s.activeContractsCount !== 1 ? 's' : ''}`}
+              subTo="/freelancer/contracts"
+            />
+          </div>
+        </CardBody>
+      </Card>
 
       {/* ═══════════════════════════════════════════════════════════════════
          QUICK ACTIONS — Like Fiverr
          ═══════════════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <QuickAction icon={Briefcase} label="Find Jobs" description="Browse openings" to="/freelancer/jobs" color="brand" />
         <QuickAction icon={Send} label="Proposals" description={`${s.totalProposals} sent`} to="/freelancer/proposals" color="violet" />
         <QuickAction icon={Handshake} label="Contracts" description={`${s.activeContractsCount} active`} to="/freelancer/contracts" color="emerald" />
         <QuickAction icon={DollarSign} label="Finance" description="Earnings & withdrawals" to="/freelancer/withdrawals" color="amber" />
-        <QuickAction icon={MessageSquare} label="Messages" description="Chat with clients" to="/freelancer/messages" color="info" />
         <QuickAction icon={Pencil} label="Edit Profile" description="Update your page" to="/freelancer/profile/edit" color="brand" />
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════
-         MAIN 2-COLUMN BENTO — Recommendations + Proposals + Activity
+         MAIN 2-COLUMN BENTO — Recommendations + Activity
          ═══════════════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Recommended jobs — 2 columns */}
@@ -739,6 +621,49 @@ export default function FreelancerDashboardPage() {
           )}
         </div>
       </div>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+         TODAY'S AGENDA — Active work items
+         ═══════════════════════════════════════════════════════════════════ */}
+      {s.activeContractsCount > 0 && (
+        <Card>
+          <CardHeader
+            title="Today's Agenda"
+            description="Your active work items"
+            action={
+              <Link to="/freelancer/contracts" className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+                View All <ChevronRight className="h-3.5 w-3.5" />
+              </Link>
+            }
+          />
+          <CardBody className="p-0">
+            <div className="divide-y divide-gray-50">
+              {activeContracts.slice(0, 3).map((contract) => (
+                <div key={contract.id} className="flex items-center gap-4 px-5 py-3 hover:bg-gray-50/50 transition-colors">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-500/25">
+                    <Handshake className="h-5 w-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-ink-900 truncate">{contract.title || `Contract #${contract.id}`}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {contract.employer?.name || 'Employer'} · {formatETB(contract.amount)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge tone="primary" size="xs">{contract.status}</Badge>
+                    <Link
+                      to={`/freelancer/contracts/${contract.id}`}
+                      className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                    >
+                      View
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardBody>
+        </Card>
+      )}
 
       {/* ═══════════════════════════════════════════════════════════════════
          RECENT PROPOSALS TABLE
@@ -869,12 +794,13 @@ export default function FreelancerDashboardPage() {
 function Skeleton() {
   return (
     <div className="animate-pulse space-y-6">
-      <div className="h-48 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900" />
+      <div className="h-40 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900" />
+      <div className="h-16 rounded-2xl bg-gray-200" />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => <div key={i} className="h-32 rounded-xl bg-gray-200" />)}
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => <div key={i} className="h-24 rounded-xl bg-gray-200" />)}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {[...Array(6)].map((_, i) => <div key={i} className="h-24 rounded-2xl bg-gray-200" />)}
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 h-64 rounded-2xl bg-gray-200" />

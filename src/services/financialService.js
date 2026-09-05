@@ -70,10 +70,20 @@ export const financialService = {
     return res.data;
   },
 
+  deleteWithdrawal: async (id) => {
+    const res = await apiClient.delete(`/withdrawals/${id}`);
+    return res.data;
+  },
+
   // ── Transactions ────────────────────────────────────────────────────────
 
   getTransactions: async (params = {}) => {
     const res = await apiClient.get('/transactions', { params });
+    return res.data;
+  },
+
+  deleteTransaction: async (id) => {
+    const res = await apiClient.delete(`/transactions/${id}`);
     return res.data;
   },
 
@@ -135,6 +145,11 @@ export const financialService = {
     return res.data;
   },
 
+  getPlatformBanks: async () => {
+    const res = await apiClient.get('/admin/finance/banks');
+    return res.data;
+  },
+
   withdrawPlatformRevenue: async (payload) => {
     const res = await apiClient.post('/admin/finance/withdraw-revenue', payload);
     return res.data;
@@ -142,6 +157,16 @@ export const financialService = {
 
   addPlatformFunds: async (payload) => {
     const res = await apiClient.post('/admin/finance/add-funds', payload);
+    return res.data;
+  },
+
+  reconcilePlatformDeposit: async (reference) => {
+    const res = await apiClient.post(`/admin/finance/add-funds/reconcile/${reference}`);
+    return res.data;
+  },
+
+  reconcileAllPlatformDeposits: async () => {
+    const res = await apiClient.post('/admin/finance/add-funds/reconcile-all');
     return res.data;
   },
 
@@ -157,6 +182,16 @@ export const financialService = {
 
   approveWithdrawal: async (id) => {
     const res = await apiClient.post(`/admin/finance/withdrawals/${id}/approve`);
+    return res.data;
+  },
+
+  deleteAdminPayment: async (id) => {
+    const res = await apiClient.delete(`/admin/finance/payments/${id}`);
+    return res.data;
+  },
+
+  deleteAdminWithdrawal: async (id) => {
+    const res = await apiClient.delete(`/admin/finance/withdrawals/${id}`);
     return res.data;
   },
 };

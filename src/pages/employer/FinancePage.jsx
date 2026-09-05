@@ -353,6 +353,17 @@ export default function EmployerFinancePage() {
     }
   };
 
+  const handleDeleteTransaction = async (tx) => {
+    if (!window.confirm('Delete this transaction from your history? This only removes it from your view — your balance is not affected.')) return;
+    try {
+      await financialService.deleteTransaction(tx.id);
+      showToast('Transaction history entry deleted.', 'success');
+      load();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to delete entry.', 'error');
+    }
+  };
+
   const handleSaveBudget = async () => {
     if (!budgetForm.monthly_limit || parseFloat(budgetForm.monthly_limit) <= 0) {
       showToast('Please enter a valid budget amount.', 'error');
@@ -725,6 +736,7 @@ export default function EmployerFinancePage() {
                     <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Balance</th>
                     <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Date</th>
                     <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Invoice</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -750,6 +762,15 @@ export default function EmployerFinancePage() {
                             className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors cursor-pointer"
                           >
                             <FileDown className="h-3.5 w-3.5" /> PDF
+                          </button>
+                        </td>
+                        <td className="px-6 py-3.5 text-right">
+                          <button
+                            onClick={() => handleDeleteTransaction(tx)}
+                            title="Delete from history"
+                            className="rounded-lg p-2 text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         </td>
                       </tr>

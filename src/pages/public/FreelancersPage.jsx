@@ -150,19 +150,27 @@ function FreelancerCard({ freelancer, savedIds, onToggleSave, savingId }) {
             )}
           </div>
           <div className="flex items-center gap-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={handleToggleSave}
               disabled={isSaving}
               aria-pressed={isSaved}
               aria-label={isSaved ? t('freelancers.removeFromSaved') : t('freelancers.saveTalent')}
-              className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-brand-500 disabled:opacity-50"
+              className={cn(
+                'font-semibold transition-all',
+                isSaved
+                  ? 'border-brand-300 bg-brand-50 text-brand-700 hover:bg-brand-100 font-bold'
+                  : 'border-gray-200 text-gray-700 hover:border-brand-300 hover:bg-brand-50/50 hover:text-brand-600',
+              )}
             >
               <Bookmark
-                className={cn('h-4 w-4', isSaved && 'fill-brand-500 text-brand-500')}
+                className={cn('h-3.5 w-3.5 mr-1', isSaved ? 'fill-brand-600 text-brand-600' : 'text-gray-400')}
                 aria-hidden="true"
               />
-            </button>
+              {isSaved ? 'Saved' : 'Save'}
+            </Button>
             <Button as={Link} to={`/freelancers/${freelancer.id}`} variant="outline" size="sm">
               {t('common.viewDetails')}
             </Button>

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   Banknote, Briefcase, Building2, ClipboardList, MapPin, Pencil,
   PlusCircle, Send, Star, Users, RefreshCw, DollarSign, TrendingUp,
-  ArrowUpRight, ArrowDownRight, Handshake, Clock, CheckCircle2,
+  ArrowUpRight, ArrowDownRight, ArrowRight, Handshake, Clock, CheckCircle2,
   XCircle, AlertTriangle, FileText, MessageSquare, Bell, Target,
   Globe, Zap, ChevronRight, Calendar, Timer, Wallet, Eye, EyeOff,
   BarChart3, PieChart, Download, Upload, Search, Filter, MoreVertical,
@@ -27,6 +27,7 @@ import { financialService } from '../../services/financialService';
 import { recommendationService } from '../../services/recommendationService';
 import { normalizeEmployer } from '../../utils/employerMapper';
 import { normalizeJob } from '../../utils/jobMapper';
+import { normalizeFreelancer } from '../../utils/freelancerMapper';
 import { getErrorMessage } from '../../utils/errors';
 import { formatETB, formatDate, timeAgo, getPlatformCurrency } from '../../utils/format';
 import { useAuth } from '../../hooks/useAuth';
@@ -129,6 +130,100 @@ function PerformanceMetric({ icon: Icon, label, value, maxValue = 100, color = '
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   COMPONENT: Compact Budget Summary Strip
+   A single-row "at a glance" teaser for the employer budget. Full detail
+   (Available Balance, In Escrow, Total Spent, Platform Fees, charts, billing)
+   lives on the Finance page (/employer/settings/payment-methods), which
+   remains the source of truth for money.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function BudgetSummaryStrip({ finance, isRefreshing }) {
+  const monthlyLimit = Number(finance?.monthly_limit) || 0;
+  const monthlySpent = Number(finance?.monthly_spent) || 0;
+  const totalSpent = Number(finance?.total_spent) || 0;
+  const pendingPayments = Number(finance?.pending_payments) || 0;
+  const hasBudget = monthlyLimit > 0;
+  const usedPercent = hasBudget ? Math.min(100, Math.round((monthlySpent / monthlyLimit) * 100)) : 0;
+  const remaining = hasBudget ? monthlyLimit - monthlySpent : 0;
+
+  return (
+    <div
+      className={cn(
+        'relative overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-r from-white via-gray-50 to-white p-5 shadow-card transition-opacity duration-500',
+        isRefreshing && 'opacity-60'
+      )}
+    >
+      {/* Background decorations */}
+      <div className="pointer-events-none absolute -top-16 -right-10 h-44 w-44 rounded-full bg-indigo-100/60 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-16 left-1/3 h-36 w-36 rounded-full bg-emerald-100/50 blur-3xl" />
+
+      <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+        {/* Budget usage — the number that matters for a quick glance */}
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-500/25">
+            <Wallet className="h-6 w-6" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Budget</p>
+            {hasBudget ? (
+              <>
+                <p className="mt-0.5 text-xl font-extrabold tracking-tight text-ink-900 lg:text-2xl truncate">
+                  {formatCurrency(monthlySpent)}
+                  <span className="text-sm font-semibold text-gray-400"> of {formatCurrency(monthlyLimit)} limit</span>
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <div className="h-1.5 w-36 rounded-full bg-gray-100 overflow-hidden">
+                    <div
+                      className={cn('h-full rounded-full transition-all duration-1000', usedPercent >= 100 ? 'bg-red-500' : 'bg-indigo-500')}
+                      style={{ width: `${usedPercent}%` }}
+                    />
+                  </div>
+                  <span className={cn('text-[10px] font-semibold', usedPercent >= 100 ? 'text-red-500' : 'text-gray-400')}>
+                    {usedPercent}% used{remaining > 0
+                      ? ` · ${formatCurrency(remaining)} remaining this month`
+                      : ` · ${formatCurrency(Math.abs(remaining))} over budget`}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="mt-0.5 text-xl font-extrabold tracking-tight text-ink-900 lg:text-2xl">
+                  {formatCurrency(totalSpent)}
+                </p>
+                <p className="mt-1 text-[10px] font-medium text-gray-400">Total spent · no monthly budget set</p>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Secondary figures */}
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
+          <div>
+            <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-600">
+              <Clock className="h-3.5 w-3.5" /> In Escrow
+            </p>
+            <p className="mt-0.5 text-lg font-bold text-ink-900">{formatCurrency(pendingPayments)}</p>
+          </div>
+          <div className="hidden h-9 w-px bg-gray-200 sm:block" />
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Spent</p>
+            <p className="mt-0.5 text-lg font-semibold text-gray-500">{formatCurrency(totalSpent)}</p>
+          </div>
+        </div>
+
+        {/* Link to the full Finance page */}
+        <Link
+          to="/employer/settings/payment-methods"
+          className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-ink-900 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-ink-900/20 transition-all hover:-translate-y-0.5 hover:bg-ink-800 hover:shadow-xl hover:shadow-ink-900/25"
+        >
+          View Finance
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    COMPONENT: Earnings Card
    ═══════════════════════════════════════════════════════════════════════════ */
 function EarningsCard({ icon: Icon, label, value, color = 'brand', trend, trendValue }) {
@@ -201,38 +296,6 @@ function ActivityFeedItem({ icon: Icon, color, title, description, time, link })
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   COMPONENT: Hiring Pipeline Card
-   ═══════════════════════════════════════════════════════════════════════════ */
-function HiringPipelineCard({ stage, count, icon: Icon, color, linkTo }) {
-  const colors = {
-    brand: { bg: 'bg-indigo-50', icon: 'text-indigo-600', border: 'border-indigo-200' },
-    success: { bg: 'bg-emerald-50', icon: 'text-emerald-600', border: 'border-emerald-200' },
-    warning: { bg: 'bg-amber-50', icon: 'text-amber-600', border: 'border-amber-200' },
-    danger: { bg: 'bg-red-50', icon: 'text-red-600', border: 'border-red-200' },
-    info: { bg: 'bg-blue-50', icon: 'text-blue-600', border: 'border-blue-200' },
-  };
-  const c = colors[color] || colors.brand;
-
-  return (
-    <Link
-      to={linkTo}
-      className={cn(
-        'flex items-center gap-3 rounded-xl border p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg',
-        c.border, c.bg
-      )}
-    >
-      <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl bg-white/80', c.icon)}>
-        <Icon className="h-5 w-5" />
-      </div>
-      <div>
-        <p className="text-2xl font-bold text-ink-900">{count}</p>
-        <p className="text-xs font-medium text-gray-600">{stage}</p>
-      </div>
-    </Link>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
    MAIN: Employer Dashboard
    ═══════════════════════════════════════════════════════════════════════════ */
 export default function EmployerDashboardPage() {
@@ -292,10 +355,17 @@ export default function EmployerDashboardPage() {
       setPendingProposals(jobs.reduce((sum, job) => sum + (job.proposalsCount ?? 0), 0));
       setLastUpdated(new Date());
 
-      // Load recommendations
+      // Load recommendations (normalize so name/avatar resolve from the nested `user` object)
       recommendationService
         .getRecommendedFreelancers({ per_page: 5 })
-        .then((res) => { if (res.success) setRecommendations(res.data ?? []); })
+        .then((res) => {
+          if (res.success) {
+            const list = (res.data ?? [])
+              .map((rec) => normalizeFreelancer(rec.freelancer ?? rec))
+              .filter(Boolean);
+            setRecommendations(list);
+          }
+        })
         .catch(() => {});
     } catch (err) {
       if (!silent) setError(getErrorMessage(err, 'Unable to load your dashboard. Please try again.'));
@@ -387,24 +457,13 @@ export default function EmployerDashboardPage() {
   /* ── Calculate Stats ──────────────────────────────────────────────────── */
   const s = {
     totalSpent: finance?.total_spent ?? 0,
-    accountBalance: finance?.account_balance ?? 0,
     pendingPayments: finance?.pending_payments ?? 0,
     totalFees: finance?.total_fees ?? 0,
-    activeJobs: jobs.filter(j => j.status === 'open' || j.status === 'published').length,
     totalJobs: jobsTotal,
     activeContractsCount: activeContracts.length,
     completedContracts: jobs.filter(j => j.status === 'completed').length,
     totalProposalsReceived: pendingProposals,
-    proposalsReceivedThisWeek: Math.floor(pendingProposals * 0.3),
   };
-
-  /* ── Hiring Pipeline ──────────────────────────────────────────────────── */
-  const pipeline = [
-    { stage: 'Open Jobs', count: s.activeJobs, icon: Briefcase, color: 'brand', linkTo: '/employer/jobs' },
-    { stage: 'Proposals', count: s.totalProposalsReceived, icon: Send, color: 'info', linkTo: '/employer/jobs' },
-    { stage: 'Active Contracts', count: s.activeContractsCount, icon: Handshake, color: 'success', linkTo: '/employer/contracts' },
-    { stage: 'Completed', count: s.completedContracts, icon: CheckCircle2, color: 'warning', linkTo: '/employer/contracts' },
-  ];
 
   /* ── Build Activity Feed ────────────────────────────────────────────── */
   const activityItems = [
@@ -453,7 +512,7 @@ export default function EmployerDashboardPage() {
 
         <div className="relative z-10">
           {/* Header row */}
-          <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 border-gray-200 bg-gray-100 shadow-lg flex items-center justify-center">
                 {profile?.avatar
@@ -500,87 +559,13 @@ export default function EmployerDashboardPage() {
             </div>
           </div>
 
-          {/* Primary stat cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Account Balance */}
-            <div className={cn(
-              'rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 transition-all duration-500',
-              isRefreshing && 'animate-pulse'
-            )}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500">
-                  <Wallet className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Budget</span>
-              </div>
-              <p className="text-2xl lg:text-3xl font-bold text-gray-900">
-                {finance?.monthly_limit > 0 ? formatCurrency(s.accountBalance) : formatCurrency(s.totalSpent)}
-              </p>
-              <p className="text-xs text-emerald-600 mt-2">{finance?.monthly_limit > 0 ? `of ${formatCurrency(finance.monthly_limit)} limit` : 'Total spent'}</p>
-            </div>
-
-            {/* In Escrow */}
-            <div className={cn(
-              'rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100 p-4 transition-all duration-500',
-              isRefreshing && 'animate-pulse'
-            )}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500">
-                  <Clock className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-xs font-semibold text-amber-700 uppercase tracking-wide">In Escrow</span>
-              </div>
-              <p className="text-2xl lg:text-3xl font-bold text-gray-900">
-                {formatCurrency(s.pendingPayments)}
-              </p>
-              <p className="text-xs text-amber-600 mt-2">Awaiting release</p>
-            </div>
-
-            {/* Total Spent */}
-            <div className={cn(
-              'rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 p-4 transition-all duration-500',
-              isRefreshing && 'animate-pulse'
-            )}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500">
-                  <TrendingUp className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Total Spent</span>
-              </div>
-              <p className="text-2xl lg:text-3xl font-bold text-gray-900">
-                {formatCurrency(s.totalSpent)}
-              </p>
-              <p className="text-xs text-blue-600 mt-2">All time spending</p>
-            </div>
-
-            {/* Active Jobs */}
-            <div className={cn(
-              'rounded-xl border border-violet-200 bg-gradient-to-br from-violet-50 to-violet-100 p-4 transition-all duration-500',
-              isRefreshing && 'animate-pulse'
-            )}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500">
-                  <Briefcase className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-xs font-semibold text-violet-700 uppercase tracking-wide">Active Jobs</span>
-              </div>
-              <p className="text-2xl lg:text-3xl font-bold text-gray-900">
-                {s.activeJobs}
-              </p>
-              <p className="text-xs text-violet-600 mt-2">{s.totalJobs} total posted</p>
-            </div>
-          </div>
         </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════
-         HIRING PIPELINE — Track hiring stages
+         BUDGET SUMMARY STRIP — Quick glance; full detail on Finance page
          ═══════════════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {pipeline.map((item, i) => (
-          <HiringPipelineCard key={i} {...item} />
-        ))}
-      </div>
+      <BudgetSummaryStrip finance={finance} isRefreshing={isRefreshing} />
 
       {/* ═══════════════════════════════════════════════════════════════════
          PERFORMANCE METRICS — Like Upwork
@@ -632,12 +617,11 @@ export default function EmployerDashboardPage() {
       {/* ═══════════════════════════════════════════════════════════════════
          QUICK ACTIONS — Like Upwork/Fiverr
          ═══════════════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <QuickAction icon={PlusCircle} label="Post Job" description="Hire top talent" to="/employer/jobs/create" color="brand" />
         <QuickAction icon={ClipboardList} label="My Jobs" description={`${s.totalJobs} posted`} to="/employer/jobs" color="violet" />
         <QuickAction icon={Handshake} label="Contracts" description={`${s.activeContractsCount} active`} to="/employer/contracts" color="emerald" />
         <QuickAction icon={DollarSign} label="Finance" description="Spending & payments" to="/employer/settings/payment-methods" color="amber" />
-        <QuickAction icon={MessageSquare} label="Messages" description="Chat with talent" to="/employer/messages" color="info" />
         <QuickAction icon={Pencil} label="Edit Profile" description="Update company" to="/employer/profile/edit" color="brand" />
       </div>
 
@@ -747,8 +731,7 @@ export default function EmployerDashboardPage() {
         <CardBody className="p-0">
           {recommendations.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 p-5">
-              {recommendations.slice(0, 5).map((rec) => {
-                const fl = rec.freelancer ?? rec;
+              {recommendations.slice(0, 5).map((fl) => {
                 return (
                   <Link
                     key={fl.id}
@@ -766,7 +749,7 @@ export default function EmployerDashboardPage() {
                     </div>
                     <div className="text-center">
                       <p className="text-sm font-semibold text-ink-900 group-hover:text-indigo-600 line-clamp-1">{fl.name}</p>
-                      <p className="text-xs text-gray-400 line-clamp-1 mt-0.5">{fl.headline || fl.category}</p>
+                      <p className="text-xs text-gray-400 line-clamp-1 mt-0.5">{fl.headline || fl.categoryName}</p>
                     </div>
                     {fl.hourlyRate && (
                       <span className="text-xs font-medium text-emerald-600">{formatETB(fl.hourlyRate)}/hr</span>
@@ -925,10 +908,8 @@ export default function EmployerDashboardPage() {
 function Skeleton() {
   return (
     <div className="animate-pulse space-y-6">
-      <div className="h-48 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900" />
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => <div key={i} className="h-24 rounded-xl bg-gray-200" />)}
-      </div>
+      <div className="h-40 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900" />
+      <div className="h-28 rounded-2xl bg-gray-200" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => <div key={i} className="h-28 rounded-xl bg-gray-200" />)}
       </div>

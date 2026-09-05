@@ -220,18 +220,17 @@ export default function CredentialsPage() {
       ];
     }
     return [
-      { label: 'Type' }, { label: 'Details' }, { label: 'Verify' }, { label: 'Review' },
+      { label: 'Type' }, { label: 'Details' }, { label: 'Review' },
     ];
   };
 
-  const getTotalSteps = () => form.type === 'external_certificate' ? 5 : 4;
+  const getTotalSteps = () => form.type === 'external_certificate' ? 5 : 3;
 
   const handleNextStep = () => {
     const total = getTotalSteps();
     if (wizardStep === 1 && validateStep1()) { setWizardStep(2); }
     else if (wizardStep === 2 && validateStep2()) { setWizardStep(3); }
     else if (wizardStep === 3 && form.type === 'external_certificate' && validateStep3()) { setWizardStep(4); }
-    else if (wizardStep === 3 && form.type === 'dream_more_certificate') { setWizardStep(4); }
     else if (wizardStep < total) { setWizardStep(wizardStep + 1); }
   };
 
@@ -252,7 +251,9 @@ export default function CredentialsPage() {
       if (editingId) { if (!form.document && form.type === 'external_certificate') formData.delete('document'); await credentialService.updateCredential(editingId, formData); showToast('Certificate resubmitted!', 'success'); }
       else { await credentialService.createCredential(formData); showToast('Certificate submitted for verification.', 'success'); }
 
-      if (form.verification_document) {
+      // Identity verification is only required for external certificates;
+      // DreamMore certificates are already verified through the DreamMore LMS.
+      if (form.type === 'external_certificate' && form.verification_document) {
         try {
           const verifFormData = new FormData();
           verifFormData.append('type', 'identity');
@@ -539,8 +540,8 @@ export default function CredentialsPage() {
             </div>
           )}
 
-          {/* Step 3 (DreamMore) / Step 4 (External): Identity Verification */}
-          {wizardStep === (form.type === 'external_certificate' ? 4 : 3) && (
+          {/* Step 4 (External only): Identity Verification */}
+          {wizardStep === 4 && form.type === 'external_certificate' && (
             <div className="space-y-5 animate-fade-in">
               <div className="text-center mb-6">
                 <h3 className="text-lg font-bold text-ink-900">Identity Verification</h3>
@@ -575,7 +576,7 @@ export default function CredentialsPage() {
           )}
 
           {/* Step 3 (DreamMore) / Step 5 (External): Review */}
-          {wizardStep === (form.type === 'external_certificate' ? 5 : 4) && (
+          {wizardStep === (form.type === 'external_certificate' ? 5 : 3) && (
             <div className="space-y-5 animate-fade-in">
               <div className="text-center mb-6">
                 <h3 className="text-lg font-bold text-ink-900">Review & Submit</h3>

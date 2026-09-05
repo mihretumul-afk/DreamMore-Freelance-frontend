@@ -2,17 +2,22 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Award,
+  BadgeCheck,
   Banknote,
   Briefcase,
   BriefcaseBusiness,
   CheckCircle,
   Clock,
   Code,
+  ExternalLink,
   FolderOpen,
   Globe,
+  Image as ImageIcon,
   MapPin,
   Pencil,
+  Sparkles,
   Star,
+  TrendingUp,
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import PageHeader from '../../components/marketplace/PageHeader';
@@ -29,6 +34,8 @@ import { freelancerService } from '../../services/freelancerService';
 import { normalizeFreelancer } from '../../utils/freelancerMapper';
 import { getErrorMessage } from '../../utils/errors';
 import { formatETB } from '../../utils/format';
+import { API_BASE_URL } from '../../config/env';
+import { cn } from '../../utils/cn';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useToast } from '../../hooks/useToast';
 import { usePlatform } from '../../hooks/usePlatform';
@@ -36,6 +43,112 @@ import apiClient from '../../api/client';
 import Modal from '../../components/ui/Modal';
 
 import { useAuth } from '../../hooks/useAuth';
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HELPER: Resolve backend asset URLs (relative /storage paths or host
+   mismatches between localhost and 127.0.0.1).
+   ═══════════════════════════════════════════════════════════════════════════ */
+function resolveAssetUrl(src) {
+  if (!src) return null;
+  if (src.startsWith('data:') || src.startsWith('blob:')) return src;
+
+  const backendHost = API_BASE_URL.replace(/\/api\/v1\/?$/, '');
+
+  if (src.startsWith('/storage/')) {
+    return `${backendHost}${src}`;
+  }
+
+  if (
+    src.startsWith('http://localhost:8000/storage/') ||
+    src.startsWith('http://127.0.0.1:8000/storage/')
+  ) {
+    const path = src.substring(src.indexOf('/storage/'));
+    return `${backendHost}${path}`;
+  }
+
+  return src;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPONENT: Profile Stat (icon tile + label + value)
+   ═══════════════════════════════════════════════════════════════════════════ */
+function ProfileStat({ icon: Icon, label, value, tone = 'ink' }) {
+  const tones = {
+    brand: 'bg-brand-100 text-brand-600',
+    success: 'bg-emerald-100 text-emerald-600',
+    warning: 'bg-amber-100 text-amber-600',
+    ink: 'bg-ink-100 text-ink-600',
+    violet: 'bg-violet-100 text-violet-600',
+  };
+
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-gray-200/80 bg-white px-3.5 py-3 shadow-sm transition-colors hover:border-gray-300">
+      <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', tones[tone])}>
+        <Icon className="h-5 w-5" aria-hidden="true" />
+      </div>
+      <div className="min-w-0">
+        <p className="truncate text-[10px] font-bold uppercase tracking-wider text-gray-400">{label}</p>
+        <p className="mt-0.5 truncate text-base font-extrabold text-ink-900 sm:text-lg">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPONENT: Portfolio Tile (image grid card for a saved portfolio item)
+   ═══════════════════════════════════════════════════════════════════════════ */
+function PortfolioTile({ item }) {
+  const imageUrl = resolveAssetUrl(item.image_url);
+
+  return (
+    <div className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover">
+      <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-ink-50 to-gray-100">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={item.title ?? 'Portfolio project'}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full flex-col items-center justify-center gap-1.5 text-gray-300">
+            <ImageIcon className="h-8 w-8 stroke-1" aria-hidden="true" />
+            <span className="text-[10px] font-medium text-gray-400">No preview image</span>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-1 flex-col p-3.5">
+        <h4 className="truncate text-sm font-bold text-ink-900 transition-colors group-hover:text-brand-600">
+          {item.title}
+        </h4>
+        {item.description && (
+          <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-gray-500">{item.description}</p>
+        )}
+        <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5">
+          {item.category?.name ? (
+            <span className="truncate text-[10px] font-bold uppercase tracking-wider text-gray-400">
+              {item.category.name}
+            </span>
+          ) : (
+            <span />
+          )}
+          {item.project_url ? (
+            <a
+              href={item.project_url}
+              target="_blank"
+              rel="noreferrer"
+              title="Open live project in a new tab"
+              className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-brand-50 px-2 py-1 text-[11px] font-bold text-brand-600 transition-colors hover:bg-brand-100 hover:text-brand-700"
+            >
+              Live Demo <ExternalLink className="h-3 w-3" aria-hidden="true" />
+            </a>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function FreelancerProfilePage() {
   usePageTitle('My Profile');
@@ -115,6 +228,27 @@ export default function FreelancerProfilePage() {
     profile.website && { href: profile.website, label: 'Website', icon: Globe },
   ].filter(Boolean);
 
+  const portfolioItems = rawData?.portfolio_items ?? [];
+  const verifiedCredentials = rawData?.verified_credentials ?? [];
+  const reviewCount = rawData?.review_count ?? 0;
+
+  const uploadAvatar = async (file) => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    await apiClient.post('/avatar', formData);
+    await loadProfile();
+    if (refreshUser) await refreshUser();
+  };
+
+  const removeAvatar = async () => {
+    await apiClient.delete('/avatar');
+    await loadProfile();
+    if (refreshUser) await refreshUser();
+  };
+
+  const chipClass =
+    'inline-flex items-center gap-1.5 rounded-full border border-gray-200/70 bg-white/70 px-3 py-1 text-xs font-medium text-gray-600 shadow-sm backdrop-blur-sm';
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -145,106 +279,124 @@ export default function FreelancerProfilePage() {
         }
       />
 
-      {/* Header */}
-      <Card className="p-6 sm:p-8">
-        <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:items-start sm:text-left">
-          <AvatarUpload
-            name={profile.name}
-            src={profile.avatar}
-            onUpload={async (file) => {
-              const formData = new FormData();
-              formData.append('avatar', file);
-              await apiClient.post('/avatar', formData);
-              await loadProfile();
-              if (refreshUser) await refreshUser();
-            }}
-            onRemove={async () => {
-              await apiClient.delete('/avatar');
-              await loadProfile();
-              if (refreshUser) await refreshUser();
-            }}
-          />
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-              <h2 className="text-2xl font-extrabold tracking-tight text-ink-900">
-                {profile.name ?? 'Freelancer'}
-              </h2>
-              <StatusBadge status={profile.availability} dot />
-            </div>
-            <p className="mt-1 text-base font-medium text-gray-600">
-              {profile.headline ?? 'Professional headline not set yet.'}
-            </p>
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-gray-500 sm:justify-start">
-              {profile.location && (
-                <span className="inline-flex items-center gap-1.5">
-                  <MapPin className="h-4 w-4" aria-hidden="true" /> {profile.location}
-                </span>
-              )}
-              {profile.rating > 0 ? (
-                <RatingDisplay rating={profile.rating} />
-              ) : (
-                <span className="inline-flex items-center gap-1.5">
-                  <Star className="h-4 w-4 text-gray-300" aria-hidden="true" /> No ratings yet
-                </span>
-              )}
-              {profile.experienceLevelLabel && (
-                <span className="inline-flex items-center gap-1.5">
-                  <Briefcase className="h-4 w-4" aria-hidden="true" />
-                  {profile.experienceLevelLabel}
-                </span>
-              )}
-              {profile.memberSinceLabel && (
-                <span className="inline-flex items-center gap-1.5">
-                  <Clock className="h-4 w-4" aria-hidden="true" /> Member since{' '}
-                  {profile.memberSinceLabel}
-                </span>
-              )}
+      {/* ═══ Identity hero ═══ */}
+      <Card className="overflow-hidden p-0">
+        {/* Gradient band behind the identity */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-brand-50 via-white to-indigo-50/70 px-6 py-8 sm:px-10 sm:py-10">
+          <div className="pointer-events-none absolute -top-20 -right-12 h-52 w-52 rounded-full bg-brand-200/40 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 -left-10 h-48 w-48 rounded-full bg-indigo-200/40 blur-3xl" />
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand-500 via-brand-400 to-indigo-400" />
+
+          <div className="relative z-10 flex flex-col items-center gap-6 text-center sm:flex-row sm:items-center sm:gap-8 sm:text-left">
+            <AvatarUpload
+              overlay
+              size="2xl"
+              name={profile.name}
+              src={profile.avatar}
+              onUpload={uploadAvatar}
+              onRemove={removeAvatar}
+            />
+
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-2 sm:justify-start">
+                <h2 className="text-3xl font-extrabold tracking-tight text-ink-900 sm:text-4xl">
+                  {profile.name ?? 'Freelancer'}
+                </h2>
+                {rawData?.is_verified && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100/90 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
+                    <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" /> DreamMore Verified
+                  </span>
+                )}
+              </div>
+
+              <p className="mt-2 text-base font-medium text-gray-600 sm:text-lg">
+                {profile.headline ?? 'Professional headline not set yet.'}
+              </p>
+
+              {/* Meta chips row */}
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                <StatusBadge status={profile.availability} dot />
+
+                {profile.location && (
+                  <span className={chipClass}>
+                    <MapPin className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" /> {profile.location}
+                  </span>
+                )}
+
+                {profile.rating > 0 ? (
+                  <span className={cn(chipClass, 'px-2.5')}>
+                    <RatingDisplay rating={profile.rating} showValue count={reviewCount} />
+                  </span>
+                ) : (
+                  <span className={chipClass}>
+                    <Star className="h-3.5 w-3.5 text-gray-300" aria-hidden="true" /> No ratings yet
+                  </span>
+                )}
+
+                {profile.experienceLevelLabel && (
+                  <span className={chipClass}>
+                    <Briefcase className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
+                    {profile.experienceLevelLabel}
+                  </span>
+                )}
+
+                {profile.memberSinceLabel && (
+                  <span className={chipClass}>
+                    <Clock className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" /> Member since{' '}
+                    {profile.memberSinceLabel}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Stats — real API data */}
-        <div className="mt-8 grid grid-cols-2 gap-4 border-t border-gray-100 pt-6 sm:grid-cols-4">
-          <div>
-            <p className="text-xs font-medium text-gray-500">Hourly rate</p>
-            <p className="mt-1 text-lg font-extrabold text-ink-900">
-              {profile.hourlyRate != null && profile.hourlyRate > 0
-                ? `${formatETB(profile.hourlyRate)}/hr`
-                : 'Not set'}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs font-medium text-gray-500">Jobs completed</p>
-            <p className="mt-1 text-lg font-extrabold text-brand-500">
-              {profile.completedJobsCount}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs font-medium text-gray-500">Rating</p>
-            <p className="mt-1 text-lg font-extrabold text-ink-900">
-              {profile.rating > 0 ? profile.rating.toFixed(1) : '—'}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs font-medium text-gray-500">Total earnings</p>
-            <p className="mt-1 text-lg font-extrabold text-emerald-600">
-              {formatETB(profile.totalEarnings)}
-            </p>
+        <div className="border-t border-white/60 bg-white/70 px-5 py-4 sm:px-8 sm:py-5">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <ProfileStat
+              icon={Banknote}
+              tone="violet"
+              label="Hourly rate"
+              value={
+                profile.hourlyRate != null && profile.hourlyRate > 0
+                  ? `${formatETB(profile.hourlyRate)}/hr`
+                  : 'Not set'
+              }
+            />
+            <ProfileStat
+              icon={Briefcase}
+              tone="success"
+              label="Jobs completed"
+              value={profile.completedJobsCount}
+            />
+            <ProfileStat
+              icon={Star}
+              tone="warning"
+              label="Rating"
+              value={profile.rating > 0 ? profile.rating.toFixed(1) : '—'}
+            />
+            <ProfileStat
+              icon={TrendingUp}
+              tone="brand"
+              label="Total earnings"
+              value={formatETB(profile.totalEarnings)}
+            />
           </div>
         </div>
       </Card>
 
-      {/* Professional summary */}
+      {/* ═══ Professional summary ═══ */}
       <Card>
         <CardHeader title="Professional summary" />
         <CardBody>
-          <p className="whitespace-pre-line text-sm leading-relaxed text-gray-600">
+          <p className="whitespace-pre-line text-[15px] leading-7 text-gray-600">
             {profile.overview || 'You have not added a professional summary yet.'}
           </p>
         </CardBody>
       </Card>
 
-      {/* Skills */}
+      {/* ═══ Skills & expertise ═══ */}
       <Card>
         <CardHeader
           title="Skills & expertise"
@@ -284,60 +436,98 @@ export default function FreelancerProfilePage() {
         </CardBody>
       </Card>
 
-      {/* Verified Credentials */}
-      {rawData?.verified_credentials?.length > 0 && (
+      {/* ═══ Verified Credentials — platform-seal showcase ═══ */}
+      {verifiedCredentials.length > 0 && (
         <Card>
           <CardHeader
             title="Verified Credentials"
             description="Your approved certificates and professional qualifications."
+            action={
+              <span className="inline-flex shrink-0 items-center rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
+                <CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                {verifiedCredentials.length} approved
+              </span>
+            }
           />
           <CardBody>
             <ul className="space-y-3">
-              {rawData.verified_credentials.map((cred) => (
-                <li key={cred.id} className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-success-50">
-                    <Award className="h-4 w-4 text-success-600" />
+              {verifiedCredentials.map((cred) => (
+                <li
+                  key={cred.id}
+                  className="flex items-center gap-3.5 rounded-xl border border-emerald-100 bg-gradient-to-r from-emerald-50/70 via-white to-white p-3.5"
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-sm shadow-emerald-500/30">
+                    {cred.type === 'dream_more_certificate' ? (
+                      <Sparkles className="h-5 w-5" aria-hidden="true" />
+                    ) : (
+                      <Award className="h-5 w-5" aria-hidden="true" />
+                    )}
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-ink-900">{cred.title}</p>
-                    <p className="text-xs text-gray-500">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-ink-900">{cred.title}</p>
+                    <p className="mt-0.5 text-xs text-gray-500">
                       {cred.type === 'dream_more_certificate' ? 'Dream More Certified' : 'Verified Certificate'}
                       {cred.issuing_organization && ` — ${cred.issuing_organization}`}
                     </p>
                   </div>
-                  <CheckCircle className="ml-auto h-4 w-4 text-success-500" />
+                  <CheckCircle className="h-5 w-5 shrink-0 text-emerald-500" aria-hidden="true" />
                 </li>
               ))}
             </ul>
+            <p className="mt-4 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-[11px] leading-relaxed text-gray-500">
+              This is what clients see on your public profile. Add, download, or remove credentials —
+              including pending and rejected ones — under Credentials &amp; Certificates below.
+            </p>
           </CardBody>
         </Card>
       )}
 
-      {/* Reviews */}
-      <Card>
-        <CardHeader
-          title="Reviews"
-          description={rawData?.review_count > 0 ? `${rawData.review_count} review${rawData.review_count === 1 ? '' : 's'}` : 'No reviews yet'}
-        />
-        <CardBody>
-          <ReviewList
-            reviews={rawData?.reviews ?? []}
-            averageRating={rawData?.rating ?? null}
-            reviewCount={rawData?.review_count ?? 0}
-          />
-        </CardBody>
-      </Card>
-
-      {/* Credentials Manager */}
+      {/* ═══ Credentials & Certificates — full management list ═══ */}
       <CredentialManager />
 
-      {/* External links */}
+      {/* ═══ Portfolio & links ═══ */}
       <Card>
-        <CardHeader title="Links & portfolio" />
+        <CardHeader
+          title="Portfolio & Projects"
+          description="Saved work samples — shown to clients alongside your proposals."
+          action={
+            <Button as={Link} to="/freelancer/profile/edit" variant="outline" size="sm">
+              <Pencil className="h-4 w-4" aria-hidden="true" /> Manage
+            </Button>
+          }
+        />
         <CardBody>
-          {links.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {links.map((link) => {
+          {portfolioItems.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {portfolioItems.map((item) => (
+                <PortfolioTile key={item.id} item={item} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-start gap-4 rounded-xl border border-dashed border-gray-200 bg-gray-50/60 p-5 sm:flex-row sm:items-center">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                <FolderOpen className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-ink-900">No portfolio projects yet</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-gray-500">
+                  Add screenshots, links, or documents from your best work so clients can see what
+                  you deliver.
+                </p>
+              </div>
+              <Button as={Link} to="/freelancer/profile/edit" variant="outline" size="sm">
+                Add projects
+              </Button>
+            </div>
+          )}
+
+          {/* External links, separate from the visual portfolio pieces */}
+          <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-gray-100 pt-4">
+            <span className="mr-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+              Find me on
+            </span>
+            {links.length > 0 ? (
+              links.map((link) => {
                 const Icon = link.icon;
                 return (
                   <a
@@ -350,19 +540,41 @@ export default function FreelancerProfilePage() {
                     <Icon className="h-4 w-4" aria-hidden="true" /> {link.label}
                   </a>
                 );
-              })}
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100">
-                <Banknote className="h-4 w-4 text-gray-400" aria-hidden="true" />
-              </div>
+              })
+            ) : (
               <p className="text-sm text-gray-500">
                 No external links added yet — add GitHub, LinkedIn, or your website from the edit
                 form.
               </p>
-            </div>
-          )}
+            )}
+          </div>
+        </CardBody>
+      </Card>
+
+      {/* ═══ Reviews ═══ */}
+      <Card>
+        <CardHeader
+          title="Reviews"
+          description={
+            reviewCount > 0
+              ? `${reviewCount} review${reviewCount === 1 ? '' : 's'}`
+              : 'No reviews yet'
+          }
+          action={
+            reviewCount > 0 && rawData?.rating > 0 ? (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
+                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden="true" />
+                {Number(rawData.rating).toFixed(1)} average
+              </span>
+            ) : null
+          }
+        />
+        <CardBody>
+          <ReviewList
+            reviews={rawData?.reviews ?? []}
+            averageRating={rawData?.rating ?? null}
+            reviewCount={reviewCount}
+          />
         </CardBody>
       </Card>
 

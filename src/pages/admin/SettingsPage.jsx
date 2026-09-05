@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Save, Settings, ShieldCheck } from 'lucide-react';
+import { Save, Settings, ShieldCheck, Plus, X } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
@@ -15,6 +15,48 @@ import { useToast } from '../../hooks/useToast';
 import { usePlatform } from '../../hooks/usePlatform';
 import { usePageTitle } from '../../hooks/usePageTitle';
 
+/** Types available for admin-added extra contact entries. */
+const EXTRA_TYPE_OPTIONS = [
+  { value: 'email', label: 'Email' },
+  { value: 'phone', label: 'Phone' },
+  { value: 'website', label: 'Website' },
+  { value: 'social', label: 'Social / Other' },
+];
+
+const EXTRA_PLACEHOLDERS = {
+  email: 'e.g. hello@example.com',
+  phone: 'e.g. +251 911 234 567',
+  website: 'e.g. dreammore.et',
+  social: 'e.g. Telegram @dreammore',
+};
+
+/** Platforms available for the footer social media links. */
+const SOCIAL_PLATFORM_OPTIONS = [
+  { value: 'github', label: 'GitHub' },
+  { value: 'telegram', label: 'Telegram' },
+  { value: 'facebook', label: 'Facebook' },
+  { value: 'instagram', label: 'Instagram' },
+  { value: 'linkedin', label: 'LinkedIn' },
+  { value: 'youtube', label: 'YouTube' },
+  { value: 'x', label: 'X (Twitter)' },
+  { value: 'whatsapp', label: 'WhatsApp' },
+  { value: 'website', label: 'Website' },
+];
+
+/** Backend stores contact_extras as a JSON string or array — normalise to an array. */
+function parseExtras(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 /**
  * Flatten grouped settings from the backend into a single form object.
  * Backend returns: { general: { ... }, payments: { ... }, access: { ... } }
@@ -24,7 +66,12 @@ function flattenSettings(grouped) {
   return {
     platform_name:        grouped.general?.platform_name ?? '',
     platform_description: grouped.general?.platform_description ?? '',
-    support_email:        grouped.general?.support_email ?? '',
+    contact_email:        grouped.general?.contact_email ?? '',
+    contact_phone:        grouped.general?.contact_phone ?? '',
+    contact_location:     grouped.general?.contact_location ?? '',
+    contact_hours:        grouped.general?.contact_hours ?? '',
+    contact_extras:       parseExtras(grouped.general?.contact_extras),
+    social_links:         parseExtras(grouped.general?.social_links),
     default_currency:     grouped.payments?.default_currency ?? 'ETB',
     min_proposal_amount:  grouped.payments?.min_proposal_amount ?? '',
     max_proposal_amount:  grouped.payments?.max_proposal_amount ?? '',
@@ -46,7 +93,12 @@ function flattenSettings(grouped) {
 const INITIAL_FORM = {
   platform_name: '',
   platform_description: '',
-  support_email: '',
+  contact_email: '',
+  contact_phone: '',
+  contact_location: '',
+  contact_hours: '',
+  contact_extras: [],
+  social_links: [],
   default_currency: 'ETB',
   min_proposal_amount: '',
   max_proposal_amount: '',
@@ -150,6 +202,60 @@ export default function AdminSettingsPage() {
     }
   };
 
+  // ── Additional contact rows ──────────────────────────────────────────
+  const updateExtra = (index, patch) => {
+    setForm((prev) => {
+      const rows = [...(prev.contact_extras ?? [])];
+      rows[index] = { ...rows[index], ...patch };
+      return { ...prev, contact_extras: rows };
+    });
+    // Clear nested field errors for the edited row
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+      Object.keys(patch).forEach((k) => delete next[`contact_extras.${index}.${k}`]);
+      return next;
+    });
+  };
+
+  const addExtra = () =>
+    setForm((prev) => ({
+      ...prev,
+      contact_extras: [...(prev.contact_extras ?? []), { type: 'email', label: '', value: '' }],
+    }));
+
+  const removeExtra = (index) =>
+    setForm((prev) => ({
+      ...prev,
+      contact_extras: (prev.contact_extras ?? []).filter((_, i) => i !== index),
+    }));
+
+  // ── Social media link rows ────────────────────────────────────────
+  const updateSocial = (index, patch) => {
+    setForm((prev) => {
+      const rows = [...(prev.social_links ?? [])];
+      rows[index] = { ...rows[index], ...patch };
+      return { ...prev, social_links: rows };
+    });
+    // Clear nested field errors for the edited row
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+      Object.keys(patch).forEach((k) => delete next[`social_links.${index}.${k}`]);
+      return next;
+    });
+  };
+
+  const addSocial = () =>
+    setForm((prev) => ({
+      ...prev,
+      social_links: [...(prev.social_links ?? []), { platform: 'github', url: '' }],
+    }));
+
+  const removeSocial = (index) =>
+    setForm((prev) => ({
+      ...prev,
+      social_links: (prev.social_links ?? []).filter((_, i) => i !== index),
+    }));
+
   // ── Loading skeleton ──────────────────────────────────────────────────
   if (loading) {
     return (
@@ -196,13 +302,171 @@ export default function AdminSettingsPage() {
               error={fieldErrors.platform_description}
               rows={3}
             />
-            <Input
-              label="Support email"
-              type="email"
-              value={form.support_email}
-              onChange={update('support_email')}
-              error={fieldErrors.support_email}
-            />
+            {/* ── Contact page details ─────────────────────────────── */}
+            <div className="rounded-lg border border-gray-200 p-4 space-y-4">
+              <div>
+                <p className="text-sm font-semibold text-ink-900">Contact Information</p>
+                <p className="text-xs text-gray-500">
+                  Shown on the public Contact page (footer Contact button) — email, phone, location and working hours.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Input
+                  label="Contact email"
+                  type="email"
+                  value={form.contact_email}
+                  onChange={update('contact_email')}
+                  error={fieldErrors.contact_email}
+                  placeholder="support@example.com"
+                />
+                <Input
+                  label="Contact phone"
+                  value={form.contact_phone}
+                  onChange={update('contact_phone')}
+                  error={fieldErrors.contact_phone}
+                  placeholder="+251 911 234 567"
+                />
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <Input
+                  label="Location"
+                  value={form.contact_location}
+                  onChange={update('contact_location')}
+                  error={fieldErrors.contact_location}
+                  placeholder="Addis Ababa, Ethiopia"
+                />
+                <Input
+                  label="Working hours"
+                  value={form.contact_hours}
+                  onChange={update('contact_hours')}
+                  error={fieldErrors.contact_hours}
+                  placeholder="Mon–Fri, 9:00 AM – 6:00 PM (EAT)"
+                />
+              </div>
+
+              {/* Additional contacts (optional, admin-added) */}
+              <div className="space-y-3 border-t border-gray-100 pt-4">
+                <div>
+                  <p className="text-sm font-semibold text-ink-900">Additional contacts</p>
+                  <p className="text-xs text-gray-500">
+                    Add extra ways for visitors to reach you — e.g. WhatsApp, Telegram, social pages or a second email.
+                  </p>
+                </div>
+
+                {(form.contact_extras ?? []).length === 0 ? (
+                  <p className="rounded-lg border border-dashed border-gray-300 px-4 py-6 text-center text-xs text-gray-400">
+                    No additional contacts yet. Use the button below to add one.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {(form.contact_extras ?? []).map((extra, i) => (
+                      <div key={i} className="flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+                        <Select
+                          label="Type"
+                          value={extra.type ?? 'email'}
+                          onChange={(e) => updateExtra(i, { type: e.target.value })}
+                          error={fieldErrors[`contact_extras.${i}.type`]}
+                          className="w-40"
+                        >
+                          {EXTRA_TYPE_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </Select>
+                        <div className="min-w-40 flex-1">
+                          <Input
+                            label="Label (optional)"
+                            value={extra.label ?? ''}
+                            onChange={(e) => updateExtra(i, { label: e.target.value })}
+                            error={fieldErrors[`contact_extras.${i}.label`]}
+                            placeholder={EXTRA_TYPE_OPTIONS.find((o) => o.value === (extra.type ?? 'email'))?.label}
+                          />
+                        </div>
+                        <div className="min-w-48 flex-1">
+                          <Input
+                            label="Value"
+                            value={extra.value ?? ''}
+                            onChange={(e) => updateExtra(i, { value: e.target.value })}
+                            error={fieldErrors[`contact_extras.${i}.value`]}
+                            placeholder={EXTRA_PLACEHOLDERS[extra.type] ?? 'Value'}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeExtra(i)}
+                          aria-label="Remove contact"
+                          className="mb-1 shrink-0"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <Button type="button" variant="outline" size="sm" onClick={addExtra}>
+                  <Plus className="h-4 w-4" /> Add contact
+                </Button>
+              </div>
+
+              {/* Social media links (shown in the footer) */}
+              <div className="space-y-3 border-t border-gray-100 pt-4">
+                <div>
+                  <p className="text-sm font-semibold text-ink-900">Social media links</p>
+                  <p className="text-xs text-gray-500">
+                    Shown as icons in the footer — e.g. GitHub, Telegram, Facebook or Instagram. Links with an empty URL are hidden.
+                  </p>
+                </div>
+
+                {(form.social_links ?? []).length === 0 ? (
+                  <p className="rounded-lg border border-dashed border-gray-300 px-4 py-6 text-center text-xs text-gray-400">
+                    No social media links yet. Use the button below to add one.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {(form.social_links ?? []).map((link, i) => (
+                      <div key={i} className="flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
+                        <Select
+                          label="Platform"
+                          value={link.platform ?? 'github'}
+                          onChange={(e) => updateSocial(i, { platform: e.target.value })}
+                          error={fieldErrors[`social_links.${i}.platform`]}
+                          className="w-44"
+                        >
+                          {SOCIAL_PLATFORM_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </Select>
+                        <div className="min-w-56 flex-1">
+                          <Input
+                            label="URL"
+                            value={link.url ?? ''}
+                            onChange={(e) => updateSocial(i, { url: e.target.value })}
+                            error={fieldErrors[`social_links.${i}.url`]}
+                            placeholder="e.g. github.com/dreammore"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeSocial(i)}
+                          aria-label="Remove social link"
+                          className="mb-1 shrink-0"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <Button type="button" variant="outline" size="sm" onClick={addSocial}>
+                  <Plus className="h-4 w-4" /> Add social link
+                </Button>
+              </div>
+            </div>
             <div className="w-full sm:w-48">
               <Select
                 label="Default currency"

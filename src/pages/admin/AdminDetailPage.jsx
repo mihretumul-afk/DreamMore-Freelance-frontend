@@ -17,8 +17,8 @@ import { formatDate } from '../../utils/format';
 const statusTone = { active: 'success', suspended: 'danger', pending_verification: 'warning' };
 
 const GROUP_LABELS = {
-  users: 'Users', jobs: 'Jobs', disputes: 'Disputes', admins: 'Administrators',
-  roles: 'Roles', audit: 'Audit Logs', settings: 'Settings',
+  users: 'Users', jobs: 'Jobs', finance: 'Finance', disputes: 'Disputes', contacts: 'Contacts', admins: 'Administrators',
+  roles: 'Roles', audit: 'Audit Logs', settings: 'Settings', admin_account: 'Admin Account',
 };
 
 function Skeleton() {

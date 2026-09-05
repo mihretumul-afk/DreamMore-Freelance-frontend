@@ -103,7 +103,8 @@ export default function RolesPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-ink-900">Roles</h1>
           <p className="mt-0.5 text-sm text-gray-500">
-            System roles are built-in and cannot be deleted. Custom roles can be created and configured freely.
+            The Super Admin role is protected and cannot be deleted. Other roles — including the built-in
+            admin roles — can be deleted by a Super Admin. Custom roles can be created and configured freely.
           </p>
         </div>
         {isSuperAdmin && (
@@ -177,13 +178,25 @@ export default function RolesPage() {
                       >
                         <Eye className="h-3.5 w-3.5" /> View
                       </Link>
-                      {isSuperAdmin && role.slug !== 'super_admin' && (
-                        <Link
-                          to={`/admin/roles/${role.id}/edit`}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-ink-700 hover:border-gray-300 hover:bg-gray-50"
-                        >
-                          <Edit2 className="h-3.5 w-3.5" /> Edit Permissions
-                        </Link>
+                      {isSuperAdmin && (
+                        <>
+                          <Link
+                            to={`/admin/roles/${role.id}/edit`}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-ink-700 hover:border-gray-300 hover:bg-gray-50"
+                          >
+                            <Edit2 className="h-3.5 w-3.5" /> Edit Permissions
+                          </Link>
+                          {role.slug !== 'super_admin' && (
+                            <button
+                              type="button"
+                              onClick={() => setConfirmDelete(role)}
+                              className="ml-auto rounded-lg p-1.5 text-gray-300 hover:bg-danger-50 hover:text-danger-500"
+                              title="Delete role"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
+                        </>
                       )}
                     </div>
                   </Card>

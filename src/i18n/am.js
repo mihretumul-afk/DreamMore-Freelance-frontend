@@ -336,6 +336,7 @@ export const am = {
   'footer.privacy': 'ግላዊነት',
   'footer.rights': 'መብቱ በህግ የተጠበቀ ነው።',
   'footer.madeWith': 'በኢትዮጵያ በእንክብካቤ የተሰራ 🇪🇹',
+  'footer.followUs': 'ይከተሉን',
 
   // ---- Login ----
   'login.title': 'እንኳን ደህና መጡ',
@@ -349,9 +350,20 @@ export const am = {
   'login.newTo': 'ለድሪም ሞር አፕወርክስ አዲስ ነዎት?',
   'login.createAccount': 'መለያ ይፍጠሩ',
   'login.orContinueWith': 'ወይም በሌላ ይቀጥሉ',
-  'login.googleContinue': 'በGoogle ይቀጥሉ — በቅርቡ',
-  'login.googleSoon': 'የGoogle መግቢያ አሁን አይገኝም። ይህ ባህሪ በቅርቡ ይመጣል።',
+  'login.googleContinue': 'በGoogle ይቀጥሉ',
+  'login.googleSoon': 'በGoogle መለያዎ እንደ ፍሪላንሰር ወይም አሰሪ ይመዝገቡ።',
   'login.checkingSession': 'ክፍለ ጊዜ በመፈተሽ ላይ…',
+
+  // ---- Google sign-up role choice ----
+  'google.roleTitle': 'ሚናዎን ይምረጡ',
+  'google.roleDescription': 'ከሞላ ጎደለ ተጠናቋል! መለያዎን እንዴት መጠቀም እንደሚፈልጉ ይምረጡ።',
+  'google.freelancer': 'ፍሪላንሰር',
+  'google.freelancerDesc': 'ስራ ይፈልጉ፣ ያመልክቱ እና ይክፈሉ',
+  'google.employer': 'አሰሪ',
+  'google.employerDesc': 'ስራ ይለጥፉ እና ባለሙያ ይቅጠሩ',
+  'google.signingIn': 'የGoogle መግቢያ በመጠናቀቅ ላይ…',
+  'google.failed': 'የGoogle መግቢያ አልተሳካም።',
+  'google.backToLogin': 'ወደ መግቢያ ተመለስ',
 
   // ---- Register ----
   'register.title': 'መለያዎን ይፍጠሩ',
@@ -390,6 +402,7 @@ export const am = {
   'nav.admin': 'አስተዳዳሪ',
   'nav.administrators': 'አስተዳዳሪዎች',
   'nav.roles': 'ሚናዎች',
+  'nav.contacts': 'የእውቂያ መልዕክቶች',
   'nav.auditLogs': 'የግልጽ ሎግ',
   'nav.payments': 'ክፍያዎች',
   'nav.paymentMethods': 'ፋይናንስ',

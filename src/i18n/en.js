@@ -361,6 +361,7 @@ export const en = {
   'footer.privacy': 'Privacy',
   'footer.rights': 'All rights reserved.',
   'footer.madeWith': 'Made with care in Ethiopia 🇪🇹',
+  'footer.followUs': 'Follow us',
 
   // ---- Login ----
   'login.title': 'Welcome back',
@@ -374,9 +375,20 @@ export const en = {
   'login.newTo': 'New to Dream More AppWorks?',
   'login.createAccount': 'Create an account',
   'login.orContinueWith': 'or continue with',
-  'login.googleContinue': 'Continue with Google — Coming Soon',
-  'login.googleSoon': 'Google sign-in is not yet available. This feature is coming soon.',
+  'login.googleContinue': 'Continue with Google',
+  'login.googleSoon': 'Sign up as a freelancer or employer with your Google account.',
   'login.checkingSession': 'Checking session…',
+
+  // ---- Google sign-up role choice ----
+  'google.roleTitle': 'Choose Your Role',
+  'google.roleDescription': 'Almost done! Pick how you want to use your account.',
+  'google.freelancer': 'Freelancer',
+  'google.freelancerDesc': 'Find jobs, apply, and get paid',
+  'google.employer': 'Employer',
+  'google.employerDesc': 'Post jobs and hire talent',
+  'google.signingIn': 'Completing Google sign-in…',
+  'google.failed': 'Google sign-in failed.',
+  'google.backToLogin': 'Back to sign in',
 
   // ---- Register ----
   'register.title': 'Create your account',
@@ -416,6 +428,7 @@ export const en = {
   'nav.admin': 'Admin',
   'nav.administrators': 'Administrators',
   'nav.roles': 'Roles',
+  'nav.contacts': 'Contact Messages',
   'nav.auditLogs': 'Audit Logs',
   'nav.payments': 'Payments',
   'nav.paymentMethods': 'Finance',

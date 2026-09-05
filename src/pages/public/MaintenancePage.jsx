@@ -31,10 +31,10 @@ export default function MaintenancePage() {
           <p className="text-sm text-gray-600">
             Need urgent support? Contact us at{' '}
             <a
-              href={`mailto:${settings.support_email || 'support@dreammore.com'}`}
+              href={`mailto:${settings.contact_email || 'support@appworks.et'}`}
               className="font-semibold text-brand-600 hover:text-brand-700"
             >
-              {settings.support_email || 'support@dreammore.com'}
+              {settings.contact_email || 'support@appworks.et'}
             </a>
           </p>
         </div>

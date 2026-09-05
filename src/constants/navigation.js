@@ -54,10 +54,8 @@ export const FREELANCER_NAV_LINKS = [
   { key: 'nav.contracts', label: 'Contracts', to: '/freelancer/contracts', icon: Handshake, end: false },
   { label: 'Disputes', to: '/freelancer/disputes', icon: Flag, end: false },
   { key: 'nav.withdrawals', label: 'Finance', to: '/freelancer/withdrawals', icon: Wallet, end: true },
-  { key: 'nav.savedJobs', label: 'Saved Jobs', to: '/freelancer/saved-jobs', icon: Bookmark, end: true },
   { key: 'nav.credentials', label: 'Credentials', to: '/freelancer/credentials', icon: Award, end: true },
   { key: 'nav.proposals', label: 'Proposals', to: '/freelancer/proposals', icon: FileText, end: false },
-  { key: 'nav.messages', label: 'Messages', to: '/freelancer/messages', icon: MessageSquare, end: true },
   { key: 'nav.notifications', label: 'Notifications', to: '/freelancer/notifications', icon: Bell, end: true },
 ];
 
@@ -71,7 +69,6 @@ export const EMPLOYER_NAV_LINKS = [
   { key: 'nav.paymentMethods', label: 'Finance', to: '/employer/settings/payment-methods', icon: DollarSign, end: true },
   { key: 'nav.postJob', label: 'Post a Job', to: '/employer/jobs/create', icon: PlusCircle, end: true },
   { key: 'nav.savedTalent', label: 'Saved Talent', to: '/employer/saved-freelancers', icon: Bookmark, end: true },
-  { key: 'nav.messages', label: 'Messages', to: '/employer/messages', icon: MessageSquare, end: true },
   { key: 'nav.notifications', label: 'Notifications', to: '/employer/notifications', icon: Bell, end: true },
 ];
 
@@ -130,6 +127,13 @@ export const ADMIN_NAV_LINKS = [
     permission: 'jobs.view', group: 'moderation',
   },
 
+  // ── Support ───────────────────────────────────────────────────────────
+  {
+    key: 'nav.contacts', label: 'Contact Messages',
+    to: '/admin/contacts', icon: MessageSquare, end: false,
+    permission: 'contacts.manage', group: 'support',
+  },
+
   // ── Administration ────────────────────────────────────────────────────
   {
     key: 'nav.administrators', label: 'Administrators',
@@ -166,6 +170,7 @@ export const ADMIN_NAV_GROUPS = {
   people:       { label: 'People' },
   marketplace:  { label: 'Marketplace' },
   moderation:   { label: 'Moderation' },
+  support:      { label: 'Support' },
   admin:        { label: 'Administration' },
   system:       { label: 'System' },
 };

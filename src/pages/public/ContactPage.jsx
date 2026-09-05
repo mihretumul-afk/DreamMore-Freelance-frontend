@@ -1,21 +1,63 @@
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Send, Clock, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Clock, MessageSquare, Globe, CheckCircle2 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Textarea from '../../components/ui/Textarea';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { usePlatform } from '../../hooks/usePlatform';
 import { useToast } from '../../hooks/useToast';
+import { contactService } from '../../services/contactService';
+import { getErrorMessage } from '../../utils/errors';
 
-const CONTACT_INFO = [
-  { icon: Mail, label: 'Email', value: 'support@appworks.et', href: 'mailto:support@appworks.et' },
-  { icon: Phone, label: 'Phone', value: '+251 911 234 567', href: 'tel:+251911234567' },
-  { icon: MapPin, label: 'Location', value: 'Addis Ababa, Ethiopia', href: null },
-  { icon: Clock, label: 'Hours', value: 'Mon–Fri, 9:00 AM – 6:00 PM (EAT)', href: null },
-];
+/** Metadata for admin-added extra contacts (Admin → Settings → General). */
+const EXTRA_TYPE_META = {
+  email:   { defaultLabel: 'Email',   icon: Mail },
+  phone:   { defaultLabel: 'Phone',   icon: Phone },
+  website: { defaultLabel: 'Website', icon: Globe },
+  social:  { defaultLabel: 'Social',  icon: MessageSquare },
+};
+
+/** Build a clickable href for an extra contact entry (null = plain text). */
+function extraHref(type, value) {
+  const v = String(value || '').trim();
+  if (!v) return null;
+  if (/^https?:\/\//i.test(v)) return v;
+  switch (type) {
+    case 'email':   return `mailto:${v}`;
+    case 'phone':   return `tel:${v.replace(/[^+\d]/g, '')}`;
+    case 'website': return `https://${v}`;
+    default:        return null;
+  }
+}
 
 export default function ContactPage() {
   usePageTitle('Contact Us — Dream More AppWorks');
+  const { settings } = usePlatform();
   const { showToast } = useToast();
+
+  // Contact details are configurable by admins (Admin → Settings → General).
+  const contactEmail = settings.contact_email || 'support@appworks.et';
+  const contactPhone = settings.contact_phone || '+251 911 234 567';
+  const extras = (settings.contact_extras ?? [])
+    .filter((e) => e && String(e.value || '').trim())
+    .map((e, i) => {
+      const meta = EXTRA_TYPE_META[e.type] ?? EXTRA_TYPE_META.social;
+      return {
+        key: `extra-${i}`,
+        icon: meta.icon,
+        label: (e.label || '').trim() || meta.defaultLabel,
+        value: String(e.value).trim(),
+        href: extraHref(e.type, e.value),
+      };
+    });
+  const CONTACT_INFO = [
+    { key: 'email', icon: Mail, label: 'Email', value: contactEmail, href: `mailto:${contactEmail}` },
+    { key: 'phone', icon: Phone, label: 'Phone', value: contactPhone, href: `tel:${contactPhone.replace(/[^+\d]/g, '')}` },
+    { key: 'location', icon: MapPin, label: 'Location', value: settings.contact_location || 'Addis Ababa, Ethiopia', href: null },
+    { key: 'hours', icon: Clock, label: 'Hours', value: settings.contact_hours || 'Mon–Fri, 9:00 AM – 6:00 PM (EAT)', href: null },
+    ...extras,
+  ];
+
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
@@ -23,11 +65,20 @@ export default function ContactPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSending(true);
-    // Simulate sending
-    await new Promise((r) => setTimeout(r, 1500));
-    setSending(false);
-    setSent(true);
-    showToast('Message sent! We\'ll get back to you within 24 hours.', 'success');
+    try {
+      await contactService.sendMessage({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        subject: form.subject.trim(),
+        message: form.message.trim(),
+      });
+      setSent(true);
+      showToast('Message sent! We\'ll get back to you within 24 hours.', 'success');
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Unable to send your message. Please try again.'), 'error');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -51,7 +102,7 @@ export default function ContactPage() {
             </p>
             <div className="space-y-4">
               {CONTACT_INFO.map((c) => (
-                <div key={c.label} className="flex items-start gap-4 rounded-xl bg-gray-50 p-4">
+                <div key={c.key} className="flex items-start gap-4 rounded-xl bg-gray-50 p-4">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-100">
                     <c.icon className="h-5 w-5 text-brand-600" />
                   </div>

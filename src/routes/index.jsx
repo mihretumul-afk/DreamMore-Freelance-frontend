@@ -30,6 +30,9 @@ const CareersPage = lazy(() => import('../pages/public/CareersPage'));
 const LoginPage = lazy(() => import('../pages/auth/LoginPage'));
 const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'));
 const ForgotPasswordPage = lazy(() => import('../pages/auth/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('../pages/auth/ResetPasswordPage'));
+const GoogleCallbackPage = lazy(() => import('../pages/auth/GoogleCallbackPage'));
+const GoogleRolePickerPage = lazy(() => import('../pages/auth/GoogleRolePickerPage'));
 
 const FreelancerDashboardPage = lazy(() => import('../pages/freelancer/DashboardPage'));
 const FreelancerProfilePage = lazy(() => import('../pages/freelancer/ProfilePage'));
@@ -74,6 +77,7 @@ const AdminUserDetailPage = lazy(() => import('../pages/admin/UserDetailPage'));
 const AdminVerificationsPage = lazy(() => import('../pages/admin/VerificationsPage'));
 const AdminJobsPage = lazy(() => import('../pages/admin/JobsPage'));
 const AdminReportsPage = lazy(() => import('../pages/admin/ReportsPage'));
+const AdminContactsPage = lazy(() => import('../pages/admin/ContactsPage'));
 const AdminCategoriesPage = lazy(() => import('../pages/admin/CategoriesPage'));
 const AdminSkillsPage = lazy(() => import('../pages/admin/SkillsPage'));
 const AdminSettingsPage = lazy(() => import('../pages/admin/SettingsPage'));
@@ -106,6 +110,9 @@ export const router = createBrowserRouter([
       { path: 'login', element: lazyPage(<LoginPage />) },
       { path: 'register', element: lazyPage(<RegisterPage />) },
       { path: 'forgot-password', element: lazyPage(<ForgotPasswordPage />) },
+      { path: 'reset-password', element: lazyPage(<ResetPasswordPage />) },
+      { path: 'auth/google/callback', element: lazyPage(<GoogleCallbackPage />) },
+      { path: 'auth/choose-role', element: lazyPage(<GoogleRolePickerPage />) },
     ],
   },
 
@@ -163,6 +170,8 @@ export const router = createBrowserRouter([
           { path: 'jobs', element: lazyPage(<AdminJobsPage />) },
           { path: 'reports', element: lazyPage(<AdminReportsPage />) },
           { path: 'reports/:id', element: lazyPage(<AdminReportsPage />) },
+          { path: 'contacts', element: lazyPage(<AdminContactsPage />) },
+          { path: 'contacts/:id', element: lazyPage(<AdminContactsPage />) },
           { path: 'categories', element: lazyPage(<AdminCategoriesPage />) },
           { path: 'skills', element: lazyPage(<AdminSkillsPage />) },
           { path: 'freelancers', element: lazyPage(<AdminFreelancerApprovalPage />) },

@@ -18,16 +18,19 @@ import { getErrorMessage, getFieldErrors } from '../../utils/errors';
 import { cn } from '../../utils/cn';
 
 const GROUP_LABELS = {
-  users:        'Users',
-  jobs:         'Jobs',
-  disputes:     'Disputes',
-  admins:       'Administrators',
-  roles:        'Roles',
-  audit:        'Audit Logs',
-  settings:     'Settings',
+  users:         'Users',
+  jobs:          'Jobs',
+  finance:       'Finance',
+  disputes:      'Disputes',
+  contacts:      'Contacts',
+  admins:        'Administrators',
+  roles:         'Roles',
+  audit:         'Audit Logs',
+  settings:      'Settings',
+  admin_account: 'Admin Account',
 };
 
-const GROUP_ORDER = ['users','jobs','disputes','admins','roles','audit','settings'];
+const GROUP_ORDER = ['users','jobs','finance','disputes','contacts','admins','roles','audit','settings','admin_account'];
 
 export default function RoleFormPage() {
   const { id } = useParams(); // undefined = create mode
@@ -85,7 +88,7 @@ export default function RoleFormPage() {
     return <EmptyState icon={Shield} title="Access Restricted" description="Only Super Admin can create or edit roles." />;
   }
 
-  const isSystemRole = role?.is_system && role?.slug === 'super_admin';
+  const isSuperAdminRole = role?.is_system && role?.slug === 'super_admin';
 
   // Auto-generate slug from name (create mode only)
   const handleNameChange = (v) => {
@@ -131,9 +134,13 @@ export default function RoleFormPage() {
         permissions: [...selected],
       };
       if (isEdit) {
-        await rbacService.updateRole(id, { name, description });
+        if (!role?.is_system) {
+          await rbacService.updateRole(id, { name, description });
+        } else if (description !== role?.description) {
+          await rbacService.updateRole(id, { description });
+        }
         await rbacService.syncRolePermissions(id, [...selected]);
-        showToast('Role updated successfully.', 'success');
+        showToast('Role permissions updated successfully.', 'success');
       } else {
         await rbacService.createRole(payload);
         showToast('Role created successfully.', 'success');
@@ -235,6 +242,12 @@ export default function RoleFormPage() {
                 placeholder="What is this role responsible for?"
               />
             </div>
+            {role?.is_system && role?.slug === 'super_admin' && (
+              <div className="rounded-lg border border-info-200 bg-info-50 px-4 py-3 text-sm text-info-800">
+                ℹ This is your own role. You can uncheck any permissions you don&apos;t want listed on it and save your changes.
+                Super Admin accounts always keep full platform access, so you will never lose access here.
+              </div>
+            )}
             {role?.is_system && role?.slug !== 'super_admin' && (
               <div className="rounded-lg border border-info-200 bg-info-50 px-4 py-3 text-sm text-info-800">
                 ℹ System role names and descriptions cannot be changed. You can only modify its permissions.
@@ -250,13 +263,9 @@ export default function RoleFormPage() {
             description={`${totalSelected} of ${totalPerms} permissions selected`}
             action={
               <div className="flex items-center gap-2">
-                {!isSystemRole && (
-                  <>
-                    <button type="button" onClick={selectAll} className="text-xs font-semibold text-brand-600 hover:text-brand-700">Select All</button>
-                    <span className="text-gray-300">·</span>
-                    <button type="button" onClick={clearAll} className="text-xs font-semibold text-gray-500 hover:text-ink-900">Clear</button>
-                  </>
-                )}
+                <button type="button" onClick={selectAll} className="text-xs font-semibold text-brand-600 hover:text-brand-700">Select All</button>
+                <span className="text-gray-300">·</span>
+                <button type="button" onClick={clearAll} className="text-xs font-semibold text-gray-500 hover:text-ink-900">Clear</button>
               </div>
             }
           />
@@ -294,18 +303,16 @@ export default function RoleFormPage() {
                     className="flex w-full items-center justify-between bg-gray-50 px-4 py-3 text-left"
                   >
                     <div className="flex items-center gap-3">
-                      {!isSystemRole && (
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); toggleGroup(group); }}
-                          className="text-gray-400 hover:text-brand-600"
-                          aria-label={allGroupSelected ? 'Deselect all' : 'Select all'}
-                        >
-                          {allGroupSelected
-                            ? <CheckSquare className="h-4 w-4 text-brand-600" />
-                            : <Square className="h-4 w-4" />}
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); toggleGroup(group); }}
+                        className="text-gray-400 hover:text-brand-600"
+                        aria-label={allGroupSelected ? 'Deselect all' : 'Select all'}
+                      >
+                        {allGroupSelected
+                          ? <CheckSquare className="h-4 w-4 text-brand-600" />
+                          : <Square className="h-4 w-4" />}
+                      </button>
                       <span className="text-sm font-bold text-ink-900">
                         {GROUP_LABELS[group] ?? group}
                       </span>
@@ -327,13 +334,11 @@ export default function RoleFormPage() {
                             className={cn(
                               'flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors',
                               isSelected ? 'bg-brand-50/50' : 'hover:bg-gray-50',
-                              isSystemRole && 'pointer-events-none',
                             )}
                           >
                             <input
                               type="checkbox"
                               checked={isSelected}
-                              disabled={isSystemRole}
                               onChange={() => togglePerm(perm.slug)}
                               className="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500"
                             />
@@ -367,12 +372,10 @@ export default function RoleFormPage() {
                 <Button variant="outline" type="button" onClick={() => navigate('/admin/roles')}>
                   Cancel
                 </Button>
-                {!isSystemRole && (
-                  <Button type="submit" loading={saving}>
-                    <Save className="h-4 w-4" />
-                    {isEdit ? 'Save Changes' : 'Create Role'}
-                  </Button>
-                )}
+                <Button type="submit" loading={saving}>
+                  <Save className="h-4 w-4" />
+                  {isEdit ? 'Save Changes' : 'Create Role'}
+                </Button>
               </div>
             </div>
           </CardFooter>

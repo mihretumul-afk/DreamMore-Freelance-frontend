@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { CheckCircle2, Clock, Inbox, Star, XCircle, ShieldCheck, Briefcase, ExternalLink } from 'lucide-react';
+import { CheckCircle2, Clock, Inbox, Star, XCircle, ShieldCheck, Briefcase, ExternalLink, Bookmark } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
 import PageHeader from '../../components/marketplace/PageHeader';
@@ -15,12 +15,14 @@ import ProposalPortfolioGallery from '../../components/proposals/ProposalPortfol
 import { MapPin, DollarSign, Award, Code, Globe, User } from 'lucide-react';
 import { jobService } from '../../services/jobService';
 import { proposalService } from '../../services/proposalService';
+import { savedService } from '../../services/savedService';
 import { normalizeJob } from '../../utils/jobMapper';
 import { normalizeProposal } from '../../utils/proposalMapper';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate, formatETB } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useToast } from '../../hooks/useToast';
+import { cn } from '../../utils/cn';
 
 const ACTION_DIALOGS = {
   shortlist: {
@@ -58,10 +60,58 @@ export default function EmployerJobProposalsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [savedIds, setSavedIds] = useState(new Set());
+  const [savingId, setSavingId] = useState(null);
+
   const [actionTarget, setActionTarget] = useState(null); // { proposal, kind }
   const [acting, setActing] = useState(false);
   const [actionError, setActionError] = useState(null);
   const [notice, setNotice] = useState(null);
+
+  const loadSavedState = useCallback(async () => {
+    try {
+      const res = await savedService.getSavedFreelancers({ per_page: 100 });
+      if (res.success) {
+        const ids = (res.data ?? []).map(
+          (s) => String(s.freelancer_profile_id ?? s.freelancer_id ?? s.freelancer?.id ?? s.id)
+        );
+        setSavedIds(new Set(ids));
+      }
+    } catch {
+      // Silently ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    loadSavedState();
+  }, [loadSavedState]);
+
+  const handleToggleSave = async (freelancerProfileId) => {
+    if (!freelancerProfileId) return;
+    const targetId = String(freelancerProfileId);
+    setSavingId(targetId);
+    const isCurrentlySaved = savedIds.has(targetId);
+    try {
+      if (isCurrentlySaved) {
+        await savedService.unsaveFreelancer(targetId);
+        setSavedIds((prev) => {
+          const next = new Set(prev);
+          next.delete(targetId);
+          return next;
+        });
+        showToast('Freelancer removed from Saved Talent shortlist.', 'info');
+      } else {
+        await savedService.saveFreelancer(targetId);
+        setSavedIds((prev) => new Set(prev).add(targetId));
+        showToast('Freelancer saved to your Saved Talent shortlist!', 'success');
+      }
+    } catch (err) {
+      showToast(getErrorMessage(err, 'Failed to update saved talent status.'), 'error');
+      loadSavedState();
+    } finally {
+      setSavingId(null);
+    }
+  };
 
   const fetchAll = useCallback(
     async (silent = false) => {
@@ -344,6 +394,30 @@ export default function EmployerJobProposalsPage() {
 
                       {/* Employer Action Controls */}
                       <div className="flex shrink-0 flex-wrap gap-2 lg:flex-col lg:items-end">
+                        {proposal.freelancerId && (
+                          <Button
+                            size="xs"
+                            variant="outline"
+                            onClick={() => handleToggleSave(proposal.freelancerId)}
+                            disabled={String(savingId) === String(proposal.freelancerId)}
+                            className={cn(
+                              savedIds.has(String(proposal.freelancerId))
+                                ? 'border-brand-300 bg-brand-50 text-brand-700 hover:bg-brand-100 font-bold'
+                                : 'text-slate-700 hover:bg-slate-50 font-semibold',
+                            )}
+                          >
+                            <Bookmark
+                              className={cn(
+                                'h-3.5 w-3.5 mr-1',
+                                savedIds.has(String(proposal.freelancerId))
+                                  ? 'fill-brand-600 text-brand-600'
+                                  : 'text-slate-400',
+                              )}
+                              aria-hidden="true"
+                            />
+                            {savedIds.has(String(proposal.freelancerId)) ? 'Saved Talent' : 'Save Talent'}
+                          </Button>
+                        )}
                         {proposal.status === 'pending' && (
                           <Button size="xs" variant="outline" onClick={() => openAction(proposal, 'shortlist')}>
                             <Star className="h-3.5 w-3.5" aria-hidden="true" /> Shortlist Candidate

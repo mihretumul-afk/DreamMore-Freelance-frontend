@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import Container from '../common/Container';
 
 /**
  * VideoShowcase — autoplay background video with responsive handling.
@@ -27,31 +28,35 @@ export default function VideoShowcase({ children }) {
   const showVideo = !isReducedMotion && !hasError;
 
   return (
-    <section className="relative w-full min-h-[650px] overflow-hidden flex items-center justify-center bg-ink-900">
-      {showVideo && (
-        <video
-          ref={videoRef}
-          className="absolute inset-0 w-full h-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          poster="/videos/hero-freelancers.mp4"
-          onError={() => setHasError(true)}
-          aria-hidden="true"
-        >
-          <source src="/videos/hero-freelancers.mp4" type="video/mp4" />
-        </video>
-      )}
+    <section className="relative w-full">
+      <Container className="py-6 lg:py-10">
+        <div className="relative flex min-h-[650px] w-full items-center justify-center overflow-hidden rounded-[2rem] bg-ink-900">
+          {showVideo && (
+            <video
+              ref={videoRef}
+              className="absolute inset-0 w-full h-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster="/videos/hero-freelancers.mp4"
+              onError={() => setHasError(true)}
+              aria-hidden="true"
+            >
+              <source src="/videos/hero-freelancers.mp4" type="video/mp4" />
+            </video>
+          )}
 
-      {/* Dark overlay for text contrast */}
-      <div className="absolute inset-0 bg-black/45" />
+          {/* Dark overlay for text contrast */}
+          <div className="absolute inset-0 bg-black/45" />
 
-      {/* Content */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto px-6 py-16">
-        {children}
-      </div>
+          {/* Content */}
+          <div className="relative z-10 w-full max-w-4xl mx-auto px-6 py-16">
+            {children}
+          </div>
+        </div>
+      </Container>
     </section>
   );
 }

@@ -11,6 +11,7 @@ import { useI18n } from '../../i18n';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { getDashboardPath } from '../../utils/auth';
 import { getErrorMessage, getFieldErrors } from '../../utils/errors';
+import { API_ORIGIN } from '../../config/env';
 
 export default function LoginPage() {
   usePageTitle('Sign In');
@@ -35,6 +36,12 @@ export default function LoginPage() {
   if (user) {
     return <Navigate to={from ?? getDashboardPath(user.role, user)} replace />;
   }
+
+  // Kick off Google OAuth — the browser leaves the SPA, comes back to
+  // /auth/google/callback with a Sanctum token, and that page signs us in.
+  const handleGoogle = () => {
+    window.location.href = `${API_ORIGIN}/auth/google/redirect`;
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -83,15 +90,13 @@ export default function LoginPage() {
         <h1 className="mt-5 text-2xl font-bold tracking-tight text-ink-900">{t('login.title')}</h1>
         <p className="mt-1 text-sm text-gray-500">{t('login.description')}</p>
 
-        {/* Google sign-in — coming soon, no backend endpoint */}
+        {/* Google sign-in — freelancer/employer accounts (admins use email+password) */}
         <div className="mt-6">
           <Button
             type="button"
             variant="outline"
-            className="w-full opacity-60 cursor-not-allowed"
-            disabled
-            aria-disabled="true"
-            title={t('login.googleSoon')}
+            className="w-full"
+            onClick={handleGoogle}
           >
             <GoogleIcon className="h-4 w-4" />
             {t('login.googleContinue')}
@@ -99,7 +104,7 @@ export default function LoginPage() {
           <p
             role="status"
             aria-live="polite"
-            className="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-center text-xs text-gray-500"
+            className="mt-2 text-center text-xs text-gray-500"
           >
             {t('login.googleSoon')}
           </p>
