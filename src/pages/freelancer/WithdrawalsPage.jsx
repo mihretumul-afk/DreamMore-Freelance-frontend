@@ -228,24 +228,65 @@ export default function WithdrawalsPage() {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // On page load: load data immediately, reconcile in background
+  // On page load: check for returned payment reference from Chapa checkout
   useEffect(() => {
+    const returnedRef = searchParams.get('ref') || searchParams.get('trx_ref') || searchParams.get('reference');
     const depositReturn = searchParams.get('deposit');
-    const isReturn = depositReturn === 'return';
 
-    if (isReturn) {
+    if (returnedRef || depositReturn) {
       setSearchParams({}, { replace: true });
     }
 
     // Always load data FIRST so the page shows immediately
     load();
 
-    // Fire reconcile in background — don't block the page
+    // If returning from Chapa with a specific reference, verify with server
+    if (returnedRef) {
+      const sessionKey = `reconciled_dep_${returnedRef}`;
+      if (!sessionStorage.getItem(sessionKey)) {
+        sessionStorage.setItem(sessionKey, '1');
+
+        financialService.reconcileDeposit(returnedRef)
+          .then((res) => {
+            const data = res.data?.data ?? res.data ?? res;
+            const payment = data.payment || {};
+            const wallet = data.wallet || {};
+            const prevBalance = data.previous_balance ?? Math.max(0, (wallet.available_balance || 0) - (payment.amount || 0));
+
+            if (payment.status === 'completed') {
+              setDepositResult({
+                payment: payment,
+                wallet: wallet,
+                previous_balance: prevBalance,
+              });
+              setDepositStep('success');
+              setShowAddFunds(true);
+              load();
+              showToast(
+                `Funds Added Successfully! ${formatETB(payment.amount || 0)} has been added to your available balance.`,
+                'success'
+              );
+            } else if (payment.status === 'pending') {
+              showToast('Payment is still processing. Your balance will update automatically once confirmed.', 'info');
+            } else if (payment.status === 'failed') {
+              showToast(`Payment failed: ${payment.failure_reason || 'Transaction could not be completed.'}`, 'error');
+            } else if (payment.status === 'cancelled') {
+              showToast('Payment was cancelled.', 'warning');
+            }
+          })
+          .catch(() => {
+            load();
+            showToast('Payment verification failed. If charged, your balance will update automatically.', 'error');
+          });
+      }
+    }
+
+    // Fire background reconcile for any pending deposits
     financialService.reconcileAllDeposits()
-      .then(() => {
-        load();
-        if (isReturn) {
-          showToast('Payment processed. Your wallet balance has been updated.', 'success');
+      .then((res) => {
+        const data = res.data ?? res;
+        if ((data?.reconciled ?? 0) > 0) {
+          load();
         }
       })
       .catch(() => { /* reconcile failed — page still shows data */ });

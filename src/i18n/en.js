@@ -321,17 +321,17 @@ export const en = {
   'trusted.statRating': 'Avg Rating',
   'trusted.statResponse': 'Response Time',
   'trusted.testimonial1Quote':
-    'DreamMore helped us find a UI/UX designer in under 24 hours. The quality was exceptional and the milestone system gave us complete peace of mind.',
-  'trusted.testimonial1Name': 'Abebe Kebede',
-  'trusted.testimonial1Role': 'CTO, TechEthiopia',
+    '"After us, there was no big change. The community health hospital and our special health services were introduced to the wider community to understand. Because of this, many clients came to us and they worked hard to provide healing and let the public know."',
+  'trusted.testimonial1Name': 'Diyako Yonate',
+  'trusted.testimonial1Role': 'Work Manager • Afilas General Hospital',
   'trusted.testimonial2Quote':
-    'As a freelancer, DreamMore changed my life. I went from struggling to find clients to earning a stable income within the first month.',
-  'trusted.testimonial2Name': 'Selam Tesfaye',
-  'trusted.testimonial2Role': 'Full-Stack Developer',
+    '"Since we started Visual Media Marketing, the result we got is better than we expected. Clients in Addis Ababa have seen our services in visual media and many started messaging us. For this reason, it helped our work to operate and stand firm in a difficult situation."',
+  'trusted.testimonial2Name': 'Wro Ber Selomom',
+  'trusted.testimonial2Role': 'Owner • Salt Properties Agent and Partner',
   'trusted.testimonial3Quote':
-    'The transparent pricing and verified talent pool make DreamMore our go-to platform for all development projects.',
-  'trusted.testimonial3Name': 'Daniel Mulugeta',
-  'trusted.testimonial3Role': 'Head of Digital, Bank of Abyssinia',
+    '" It is real. After we tried our best with those who understand us, after we sorted our visual media, new clients started coming to us a lot. We are very grateful for the big change to guide our business!"',
+  'trusted.testimonial3Name': 'Ato Zelleke',
+  'trusted.testimonial3Role': 'Owner • House of Kirim Owner',
 
   // ---- CTA ----
   'cta.title': 'Ready to build something great?',
@@ -549,6 +549,7 @@ export const en = {
   'freelancers.description': 'Discover top Ethiopian freelancers, developers, designers, and creatives.',
   'freelancers.loading': 'Loading talent…',
   'freelancers.foundCount': '{count} freelancers found',
+  'freelancers.noFreelancers': 'No freelancers match your search or filters. Try a different category or clear your filters.',
   'freelancers.complete': '{count}% complete',
   'freelancers.hire': 'Hire Freelancer',
   'freelancers.contact': 'Contact Freelancer',

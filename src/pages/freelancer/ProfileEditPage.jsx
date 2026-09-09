@@ -5,7 +5,7 @@ import {
   Briefcase, MapPin, DollarSign, Clock, Link2, Award,
   Globe, Code, ExternalLink, Eye, CheckCircle2, Star,
   Zap, Shield, Image as ImageIcon, ChevronRight, Sparkles,
-  AlertCircle, Trash2, Upload,
+  AlertCircle, Trash2, Upload, Layers,
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
@@ -18,6 +18,7 @@ import PortfolioManager from '../../components/freelancers/PortfolioManager';
 import { freelancerService } from '../../services/freelancerService';
 import { avatarService } from '../../services/avatarService';
 import { skillService } from '../../services/skillService';
+import { categoryService } from '../../services/categoryService';
 import {
   normalizeFreelancer,
   freelancerProfileToForm,
@@ -37,6 +38,7 @@ import { cn } from '../../utils/cn';
 
 /** Backend error field name → form state key. */
 const ERROR_FIELD_MAP = {
+  category_id: 'categoryId',
   headline: 'headline',
   overview: 'overview',
   hourly_rate: 'hourlyRate',
@@ -211,6 +213,7 @@ function ProfileStrengthMeter({ form, avatar }) {
   const checks = [
     { label: 'Photo', done: !!avatar, icon: Camera },
     { label: 'Headline', done: !!form.headline?.trim(), icon: Briefcase },
+    { label: 'Category', done: !!form.categoryId, icon: Layers },
     { label: 'Overview', done: !!form.overview?.trim() && form.overview.trim().length >= 50, icon: Sparkles },
     { label: 'Rate', done: form.hourlyRate !== '' && Number(form.hourlyRate) > 0, icon: DollarSign },
     { label: 'Skills', done: form.skills.length > 0, icon: Zap },
@@ -441,6 +444,7 @@ export default function FreelancerProfileEditPage() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [generalError, setGeneralError] = useState(null);
   const [avatar, setAvatar] = useState(null);
+  const [categories, setCategories] = useState([]);
 
   const loadProfile = useCallback(async () => {
     setLoading(true);
@@ -462,6 +466,17 @@ export default function FreelancerProfileEditPage() {
   }, [user?.avatar]);
 
   useEffect(() => { loadProfile(); }, [loadProfile]);
+
+  // Load categories for the category selector
+  useEffect(() => {
+    categoryService
+      .getCategories()
+      .then((res) => {
+        const list = res?.data ?? (Array.isArray(res) ? res : []);
+        setCategories(list);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -672,6 +687,23 @@ export default function FreelancerProfileEditPage() {
                 error={fieldErrors.headline}
                 disabled={submitting}
               />
+
+              <Select
+                label="Category"
+                name="categoryId"
+                value={form.categoryId ?? ''}
+                onChange={handleChange}
+                error={fieldErrors.categoryId}
+                hint="Choose the category clients will filter you under (e.g. Software Developers, Graphics Design)"
+                disabled={submitting || categories.length === 0}
+              >
+                <option value="">Select a category</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </Select>
 
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <Input

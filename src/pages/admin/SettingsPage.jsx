@@ -1,8 +1,28 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Save, Settings, ShieldCheck, Plus, X } from 'lucide-react';
+import {
+  Save,
+  Globe,
+  CreditCard,
+  ShieldCheck,
+  Sparkles,
+  Lock,
+  RotateCcw,
+  Plus,
+  X,
+  Check,
+  Building,
+  Phone,
+  Mail,
+  Share2,
+  Clock,
+  MapPin,
+  HelpCircle,
+  Percent,
+  Calendar,
+  AlertCircle
+} from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
-import EmptyState from '../../components/common/EmptyState';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -43,6 +63,34 @@ const SOCIAL_PLATFORM_OPTIONS = [
   { value: 'website', label: 'Website' },
 ];
 
+/** Modern Accessible Toggle Switch */
+function ToggleSwitch({ checked, onChange, label, description, disabled }) {
+  return (
+    <div className="flex items-center justify-between gap-4 p-4 rounded-xl border border-gray-200 bg-white hover:border-gray-300 transition-all shadow-2xs">
+      <div className="space-y-0.5">
+        {label && <p className="text-sm font-semibold text-gray-900">{label}</p>}
+        {description && <p className="text-xs text-gray-500">{description}</p>}
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        disabled={disabled}
+        onClick={() => onChange(!checked)}
+        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 ${
+          checked ? 'bg-brand-600' : 'bg-gray-200'
+        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      >
+        <span
+          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-xs ring-0 transition duration-200 ease-in-out ${
+            checked ? 'translate-x-5' : 'translate-x-0'
+          }`}
+        />
+      </button>
+    </div>
+  );
+}
+
 /** Backend stores contact_extras as a JSON string or array — normalise to an array. */
 function parseExtras(value) {
   if (Array.isArray(value)) return value;
@@ -59,7 +107,7 @@ function parseExtras(value) {
 
 /**
  * Flatten grouped settings from the backend into a single form object.
- * Backend returns: { general: { ... }, payments: { ... }, access: { ... } }
+ * Backend returns: { general: { ... }, payments: { ... }, access: { ... }, featured: { ... } }
  */
 function flattenSettings(grouped) {
   if (!grouped) return {};
@@ -73,10 +121,8 @@ function flattenSettings(grouped) {
     contact_extras:       parseExtras(grouped.general?.contact_extras),
     social_links:         parseExtras(grouped.general?.social_links),
     default_currency:     grouped.payments?.default_currency ?? 'ETB',
-    min_proposal_amount:  grouped.payments?.min_proposal_amount ?? '',
-    max_proposal_amount:  grouped.payments?.max_proposal_amount ?? '',
-    platform_fee_percent: grouped.platform_fee_percent ?? '8',
-    auto_approve_days:    grouped.auto_approve_days ?? '5',
+    platform_fee_percent: String(grouped.payments?.platform_fee_percent ?? grouped.platform_fee_percent ?? '8'),
+    auto_release_days:    String(grouped.payments?.auto_release_days ?? grouped.auto_release_days ?? '14'),
     registration_open:    String(grouped.access?.registration_open ?? 'true'),
     maintenance_mode:     String(grouped.access?.maintenance_mode ?? 'false'),
 
@@ -100,10 +146,8 @@ const INITIAL_FORM = {
   contact_extras: [],
   social_links: [],
   default_currency: 'ETB',
-  min_proposal_amount: '',
-  max_proposal_amount: '',
   platform_fee_percent: '8',
-  auto_approve_days: '5',
+  auto_release_days: '14',
   registration_open: 'true',
   maintenance_mode: 'false',
 
@@ -116,11 +160,20 @@ const INITIAL_FORM = {
   featured_profile_duration_days: '7',
 };
 
+const TABS = [
+  { id: 'general', label: 'General & Contact', icon: Globe, description: 'Branding, footer info & social links' },
+  { id: 'payments', label: 'Payments & Fees', icon: CreditCard, description: 'Platform fees & auto-release rules' },
+  { id: 'access', label: 'Access Control', icon: ShieldCheck, description: 'Registration & maintenance mode' },
+  { id: 'featured', label: 'Featured Listings', icon: Sparkles, description: 'Paid job & profile boost options' },
+  { id: 'security', label: 'Account Security', icon: Lock, description: 'Admin password & credentials' },
+];
+
 export default function AdminSettingsPage() {
   usePageTitle('Platform Settings — Admin');
   const { showToast } = useToast();
   const { refresh: refreshPlatformSettings } = usePlatform();
 
+  const [activeTab, setActiveTab] = useState('general');
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -145,6 +198,7 @@ export default function AdminSettingsPage() {
       const response = await adminService.getSettings();
       const data = response.data ?? response;
       const flat = flattenSettings(data);
+      setSettings(data);
       setForm(flat);
       savedFormRef.current = flat;
       setFieldErrors({});
@@ -161,7 +215,7 @@ export default function AdminSettingsPage() {
 
   // ── Save ──────────────────────────────────────────────────────────────
   const handleSave = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setSaving(true);
     setFieldErrors({});
     try {
@@ -173,7 +227,6 @@ export default function AdminSettingsPage() {
       setFieldErrors({});
       setSavedBadge(true);
       showToast('Settings saved successfully.', 'success');
-      // Refresh platform settings across the app
       refreshPlatformSettings();
       setTimeout(() => setSavedBadge(false), 3000);
     } catch (err) {
@@ -190,9 +243,19 @@ export default function AdminSettingsPage() {
 
   // ── Handlers ──────────────────────────────────────────────────────────
   const update = (key) => (e) => {
-    const value = e.target.value;
+    const value = e.target ? e.target.value : e;
     setForm((prev) => ({ ...prev, [key]: value }));
-    // Clear field error on change
+    if (fieldErrors[key]) {
+      setFieldErrors((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
+  };
+
+  const toggle = (key) => (checked) => {
+    setForm((prev) => ({ ...prev, [key]: checked ? 'true' : 'false' }));
     if (fieldErrors[key]) {
       setFieldErrors((prev) => {
         const next = { ...prev };
@@ -209,7 +272,6 @@ export default function AdminSettingsPage() {
       rows[index] = { ...rows[index], ...patch };
       return { ...prev, contact_extras: rows };
     });
-    // Clear nested field errors for the edited row
     setFieldErrors((prev) => {
       const next = { ...prev };
       Object.keys(patch).forEach((k) => delete next[`contact_extras.${index}.${k}`]);
@@ -236,7 +298,6 @@ export default function AdminSettingsPage() {
       rows[index] = { ...rows[index], ...patch };
       return { ...prev, social_links: rows };
     });
-    // Clear nested field errors for the edited row
     setFieldErrors((prev) => {
       const next = { ...prev };
       Object.keys(patch).forEach((k) => delete next[`social_links.${index}.${k}`]);
@@ -256,14 +317,17 @@ export default function AdminSettingsPage() {
       social_links: (prev.social_links ?? []).filter((_, i) => i !== index),
     }));
 
-  // ── Loading skeleton ──────────────────────────────────────────────────
+  // ── Loading Skeleton ──────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="h-8 w-48 animate-pulse rounded bg-gray-100" />
-        <div className="h-64 animate-pulse rounded-card border border-gray-200 bg-white" />
-        <div className="h-48 animate-pulse rounded-card border border-gray-200 bg-white" />
-        <div className="h-48 animate-pulse rounded-card border border-gray-200 bg-white" />
+      <div className="space-y-6 max-w-6xl mx-auto">
+        <div className="h-10 w-64 animate-pulse rounded-lg bg-gray-200" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="h-64 animate-pulse rounded-xl bg-gray-100" />
+          <div className="md:col-span-3 space-y-6">
+            <div className="h-96 animate-pulse rounded-xl bg-gray-100" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -274,412 +338,549 @@ export default function AdminSettingsPage() {
 
   // ── Render ────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-ink-900">Platform Settings</h1>
-        <p className="text-sm text-gray-500">
-          Configure global platform settings and behavior.
-        </p>
-      </div>
+    <div className="space-y-8 max-w-6xl mx-auto pb-24">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 pb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Platform Settings</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Manage global marketplace preferences, fee structures, access controls, and social links.
+          </p>
+        </div>
 
-      <form onSubmit={handleSave} className="space-y-6">
-        {/* ── General ────────────────────────────────────────────────── */}
-        <Card>
-          <CardHeader title="General" description="Basic platform configuration." />
-          <CardBody className="space-y-4">
-            <Input
-              label="Platform name"
-              value={form.platform_name}
-              onChange={update('platform_name')}
-              error={fieldErrors.platform_name}
-              required
-            />
-            <Textarea
-              label="Platform description"
-              value={form.platform_description}
-              onChange={update('platform_description')}
-              error={fieldErrors.platform_description}
-              rows={3}
-            />
-            {/* ── Contact page details ─────────────────────────────── */}
-            <div className="rounded-lg border border-gray-200 p-4 space-y-4">
-              <div>
-                <p className="text-sm font-semibold text-ink-900">Contact Information</p>
-                <p className="text-xs text-gray-500">
-                  Shown on the public Contact page (footer Contact button) — email, phone, location and working hours.
-                </p>
-              </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Input
-                  label="Contact email"
-                  type="email"
-                  value={form.contact_email}
-                  onChange={update('contact_email')}
-                  error={fieldErrors.contact_email}
-                  placeholder="support@example.com"
-                />
-                <Input
-                  label="Contact phone"
-                  value={form.contact_phone}
-                  onChange={update('contact_phone')}
-                  error={fieldErrors.contact_phone}
-                  placeholder="+251 911 234 567"
-                />
-              </div>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Input
-                  label="Location"
-                  value={form.contact_location}
-                  onChange={update('contact_location')}
-                  error={fieldErrors.contact_location}
-                  placeholder="Addis Ababa, Ethiopia"
-                />
-                <Input
-                  label="Working hours"
-                  value={form.contact_hours}
-                  onChange={update('contact_hours')}
-                  error={fieldErrors.contact_hours}
-                  placeholder="Mon–Fri, 9:00 AM – 6:00 PM (EAT)"
-                />
-              </div>
-
-              {/* Additional contacts (optional, admin-added) */}
-              <div className="space-y-3 border-t border-gray-100 pt-4">
-                <div>
-                  <p className="text-sm font-semibold text-ink-900">Additional contacts</p>
-                  <p className="text-xs text-gray-500">
-                    Add extra ways for visitors to reach you — e.g. WhatsApp, Telegram, social pages or a second email.
-                  </p>
-                </div>
-
-                {(form.contact_extras ?? []).length === 0 ? (
-                  <p className="rounded-lg border border-dashed border-gray-300 px-4 py-6 text-center text-xs text-gray-400">
-                    No additional contacts yet. Use the button below to add one.
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {(form.contact_extras ?? []).map((extra, i) => (
-                      <div key={i} className="flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
-                        <Select
-                          label="Type"
-                          value={extra.type ?? 'email'}
-                          onChange={(e) => updateExtra(i, { type: e.target.value })}
-                          error={fieldErrors[`contact_extras.${i}.type`]}
-                          className="w-40"
-                        >
-                          {EXTRA_TYPE_OPTIONS.map((opt) => (
-                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                          ))}
-                        </Select>
-                        <div className="min-w-40 flex-1">
-                          <Input
-                            label="Label (optional)"
-                            value={extra.label ?? ''}
-                            onChange={(e) => updateExtra(i, { label: e.target.value })}
-                            error={fieldErrors[`contact_extras.${i}.label`]}
-                            placeholder={EXTRA_TYPE_OPTIONS.find((o) => o.value === (extra.type ?? 'email'))?.label}
-                          />
-                        </div>
-                        <div className="min-w-48 flex-1">
-                          <Input
-                            label="Value"
-                            value={extra.value ?? ''}
-                            onChange={(e) => updateExtra(i, { value: e.target.value })}
-                            error={fieldErrors[`contact_extras.${i}.value`]}
-                            placeholder={EXTRA_PLACEHOLDERS[extra.type] ?? 'Value'}
-                          />
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeExtra(i)}
-                          aria-label="Remove contact"
-                          className="mb-1 shrink-0"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <Button type="button" variant="outline" size="sm" onClick={addExtra}>
-                  <Plus className="h-4 w-4" /> Add contact
-                </Button>
-              </div>
-
-              {/* Social media links (shown in the footer) */}
-              <div className="space-y-3 border-t border-gray-100 pt-4">
-                <div>
-                  <p className="text-sm font-semibold text-ink-900">Social media links</p>
-                  <p className="text-xs text-gray-500">
-                    Shown as icons in the footer — e.g. GitHub, Telegram, Facebook or Instagram. Links with an empty URL are hidden.
-                  </p>
-                </div>
-
-                {(form.social_links ?? []).length === 0 ? (
-                  <p className="rounded-lg border border-dashed border-gray-300 px-4 py-6 text-center text-xs text-gray-400">
-                    No social media links yet. Use the button below to add one.
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {(form.social_links ?? []).map((link, i) => (
-                      <div key={i} className="flex flex-wrap items-end gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3">
-                        <Select
-                          label="Platform"
-                          value={link.platform ?? 'github'}
-                          onChange={(e) => updateSocial(i, { platform: e.target.value })}
-                          error={fieldErrors[`social_links.${i}.platform`]}
-                          className="w-44"
-                        >
-                          {SOCIAL_PLATFORM_OPTIONS.map((opt) => (
-                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                          ))}
-                        </Select>
-                        <div className="min-w-56 flex-1">
-                          <Input
-                            label="URL"
-                            value={link.url ?? ''}
-                            onChange={(e) => updateSocial(i, { url: e.target.value })}
-                            error={fieldErrors[`social_links.${i}.url`]}
-                            placeholder="e.g. github.com/dreammore"
-                          />
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeSocial(i)}
-                          aria-label="Remove social link"
-                          className="mb-1 shrink-0"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <Button type="button" variant="outline" size="sm" onClick={addSocial}>
-                  <Plus className="h-4 w-4" /> Add social link
-                </Button>
-              </div>
-            </div>
-            <div className="w-full sm:w-48">
-              <Select
-                label="Default currency"
-                value={form.default_currency}
-                onChange={update('default_currency')}
-                error={fieldErrors.default_currency}
-              >
-                <option value="ETB">ETB (Ethiopian Birr)</option>
-                <option value="USD">USD (US Dollar)</option>
-              </Select>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* ── Proposal Limits ────────────────────────────────────────── */}
-        <Card>
-          <CardHeader title="Proposal Limits" description="Control proposal amount boundaries." />
-          <CardBody className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Input
-                label="Minimum proposal amount"
-                type="number"
-                value={form.min_proposal_amount}
-                onChange={update('min_proposal_amount')}
-                error={fieldErrors.min_proposal_amount}
-                hint="Leave empty for no minimum"
-              />
-              <Input
-                label="Maximum proposal amount"
-                type="number"
-                value={form.max_proposal_amount}
-                onChange={update('max_proposal_amount')}
-                error={fieldErrors.max_proposal_amount}
-                hint="Leave empty for no maximum"
-              />
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* ── Access Control ─────────────────────────────────────────── */}
-        <Card>
-          <CardHeader title="Access Control" description="Control registration and maintenance." />
-          <CardBody className="space-y-4">
-            <div className="flex items-center justify-between gap-4 rounded-lg border border-gray-200 p-4">
-              <div>
-                <p className="text-sm font-semibold text-ink-900">Open Registration</p>
-                <p className="text-xs text-gray-500">Allow new users to register on the platform.</p>
-              </div>
-              <Select
-                value={form.registration_open}
-                onChange={update('registration_open')}
-                error={fieldErrors.registration_open}
-                className="w-32"
-              >
-                <option value="true">Open</option>
-                <option value="false">Closed</option>
-              </Select>
-            </div>
-            <div className="flex items-center justify-between gap-4 rounded-lg border border-gray-200 p-4">
-              <div>
-                <p className="text-sm font-semibold text-ink-900">Maintenance Mode</p>
-                <p className="text-xs text-gray-500">Temporarily disable public access for maintenance.</p>
-              </div>
-              <Select
-                value={form.maintenance_mode}
-                onChange={update('maintenance_mode')}
-                error={fieldErrors.maintenance_mode}
-                className="w-32"
-              >
-                <option value="false">Off</option>
-                <option value="true">On</option>
-              </Select>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* ── Account & Security ─────────────────────────────────────── */}
-        <Card>
-          <CardHeader
-            title="Account & Security"
-            description="Manage your admin account email and password."
-          />
-          <CardBody>
-            <Link
-              to="/admin/settings/security"
-              className="flex items-center justify-between gap-4 rounded-lg border border-gray-200 p-4 transition-colors hover:border-brand-300 hover:bg-brand-50/30 cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50">
-                  <ShieldCheck className="h-5 w-5 text-brand-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-ink-900">Account & Security</p>
-                  <p className="text-xs text-gray-500">Change your admin email address or password.</p>
-                </div>
-              </div>
-              <span className="text-sm text-brand-600 font-medium">Manage →</span>
-            </Link>
-          </CardBody>
-        </Card>
-
-        {/* ── Featured Listings (Revenue) ────────────────────────────────── */}
-        <Card>
-          <CardHeader
-            title="Featured Listings"
-            description="Enable paid listing boosts for jobs and freelancer profiles."
-          />
-          <CardBody className="space-y-6">
-            {/* Featured Jobs */}
-            <div className="rounded-lg border border-gray-200 p-4 space-y-4">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold text-ink-900">Featured Jobs</p>
-                  <p className="text-xs text-gray-500">Allow employers to pay to boost job visibility in search results.</p>
-                </div>
-                <Select
-                  value={form.featured_jobs_enabled}
-                  onChange={update('featured_jobs_enabled')}
-                  error={fieldErrors.featured_jobs_enabled}
-                  className="w-32"
-                >
-                  <option value="false">Disabled</option>
-                  <option value="true">Enabled</option>
-                </Select>
-              </div>
-              {form.featured_jobs_enabled === 'true' && (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 pl-0 sm:pl-4 border-l-0 sm:border-l-2 sm:border-brand-200">
-                  <Input
-                    label="Price per featured job"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={form.featured_job_price}
-                    onChange={update('featured_job_price')}
-                    error={fieldErrors.featured_job_price}
-                    hint="Amount in ETB"
-                  />
-                  <Input
-                    label="Duration (days)"
-                    type="number"
-                    min="1"
-                    max="90"
-                    value={form.featured_job_duration_days}
-                    onChange={update('featured_job_duration_days')}
-                    error={fieldErrors.featured_job_duration_days}
-                    hint="How long the boost lasts"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Featured Profiles */}
-            <div className="rounded-lg border border-gray-200 p-4 space-y-4">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold text-ink-900">Featured Freelancer Profiles</p>
-                  <p className="text-xs text-gray-500">Allow freelancers to pay to boost profile visibility in search results.</p>
-                </div>
-                <Select
-                  value={form.featured_profiles_enabled}
-                  onChange={update('featured_profiles_enabled')}
-                  error={fieldErrors.featured_profiles_enabled}
-                  className="w-32"
-                >
-                  <option value="false">Disabled</option>
-                  <option value="true">Enabled</option>
-                </Select>
-              </div>
-              {form.featured_profiles_enabled === 'true' && (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 pl-0 sm:pl-4 border-l-0 sm:border-l-2 sm:border-brand-200">
-                  <Input
-                    label="Price per featured profile"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={form.featured_profile_price}
-                    onChange={update('featured_profile_price')}
-                    error={fieldErrors.featured_profile_price}
-                    hint="Amount in ETB"
-                  />
-                  <Input
-                    label="Duration (days)"
-                    type="number"
-                    min="1"
-                    max="90"
-                    value={form.featured_profile_duration_days}
-                    onChange={update('featured_profile_duration_days')}
-                    error={fieldErrors.featured_profile_duration_days}
-                    hint="How long the boost lasts"
-                  />
-                </div>
-              )}
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* ── Save Bar ───────────────────────────────────────────────── */}
         <div className="flex items-center gap-3">
-          <Button type="submit" loading={saving} disabled={!isDirty}>
+          {savedBadge && (
+            <Badge tone="success" size="md" className="flex items-center gap-1.5 py-1 px-3">
+              <Check className="h-3.5 w-3.5" /> Saved successfully
+            </Badge>
+          )}
+          <Button
+            type="button"
+            onClick={handleSave}
+            loading={saving}
+            disabled={!isDirty}
+            className="shadow-xs"
+          >
             <Save className="h-4 w-4" /> Save Settings
           </Button>
-          {savedBadge && (
-            <Badge tone="success" size="md">
-              Settings saved successfully
-            </Badge>
-          )}
-          {isDirty && !savedBadge && (
-            <Badge tone="warning" size="md">
-              Unsaved changes
-            </Badge>
-          )}
         </div>
-      </form>
+      </div>
+
+      {/* Main Tabbed Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
+        {/* Navigation Sidebar Tabs */}
+        <nav className="flex md:flex-col gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
+          {TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all shrink-0 md:shrink border ${
+                  isActive
+                    ? 'bg-brand-50 text-brand-700 border-brand-200 font-semibold shadow-2xs'
+                    : 'text-gray-600 border-transparent hover:bg-gray-100 hover:text-gray-900'
+                }`}
+              >
+                <Icon className={`h-5 w-5 shrink-0 ${isActive ? 'text-brand-600' : 'text-gray-400'}`} />
+                <div className="hidden md:block overflow-hidden">
+                  <p className="text-sm leading-tight truncate">{tab.label}</p>
+                  <p className={`text-xs mt-0.5 truncate ${isActive ? 'text-brand-600/80' : 'text-gray-400'}`}>
+                    {tab.description}
+                  </p>
+                </div>
+                <span className="md:hidden text-sm font-medium">{tab.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Tab Content Panels */}
+        <div className="md:col-span-3 space-y-6">
+          <form onSubmit={handleSave} className="space-y-6">
+            {/* ── TAB 1: General Settings ────────────────────────────── */}
+            {activeTab === 'general' && (
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader
+                    title="Platform Identity"
+                    description="Configure the primary marketplace name and description displayed across the app."
+                  />
+                  <CardBody className="space-y-5">
+                    <Input
+                      label="Platform Name"
+                      value={form.platform_name}
+                      onChange={update('platform_name')}
+                      error={fieldErrors.platform_name}
+                      placeholder="Dream More AppWorks"
+                      required
+                    />
+                    <Textarea
+                      label="Platform Description"
+                      value={form.platform_description}
+                      onChange={update('platform_description')}
+                      error={fieldErrors.platform_description}
+                      placeholder="The premier Ethiopian freelance marketplace connecting top talent with client projects."
+                      rows={3}
+                    />
+                    <div className="w-full sm:w-64 pt-2">
+                      <Select
+                        label="Default Currency"
+                        value={form.default_currency}
+                        onChange={update('default_currency')}
+                        error={fieldErrors.default_currency}
+                      >
+                        <option value="ETB">ETB — Ethiopian Birr (Br)</option>
+                        <option value="USD">USD — US Dollar ($)</option>
+                      </Select>
+                    </div>
+                  </CardBody>
+                </Card>
+
+                {/* Footer & Public Contact Info */}
+                <Card>
+                  <CardHeader
+                    title="Public Contact Information"
+                    description="Information shown on the public Contact page (/contact) and platform footer."
+                  />
+                  <CardBody className="space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Input
+                        label="Contact Email"
+                        type="email"
+                        value={form.contact_email}
+                        onChange={update('contact_email')}
+                        error={fieldErrors.contact_email}
+                        placeholder="support@appworks.et"
+                      />
+                      <Input
+                        label="Contact Phone"
+                        value={form.contact_phone}
+                        onChange={update('contact_phone')}
+                        error={fieldErrors.contact_phone}
+                        placeholder="+251 911 234 567"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Input
+                        label="Location"
+                        value={form.contact_location}
+                        onChange={update('contact_location')}
+                        error={fieldErrors.contact_location}
+                        placeholder="Addis Ababa, Ethiopia"
+                      />
+                      <Input
+                        label="Working Hours"
+                        value={form.contact_hours}
+                        onChange={update('contact_hours')}
+                        error={fieldErrors.contact_hours}
+                        placeholder="Mon–Fri, 9:00 AM – 6:00 PM (EAT)"
+                      />
+                    </div>
+
+                    {/* Additional Contact Methods */}
+                    <div className="border-t border-gray-100 pt-5 space-y-4">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">Additional Contact Channels</p>
+                        <p className="text-xs text-gray-500">
+                          Add custom communication links such as Telegram support desks, WhatsApp numbers, or secondary emails.
+                        </p>
+                      </div>
+
+                      {(form.contact_extras ?? []).length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-gray-200 p-6 text-center text-xs text-gray-400 bg-gray-50/50">
+                          No additional contact channels configured. Click below to add one.
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {(form.contact_extras ?? []).map((extra, i) => (
+                            <div key={i} className="flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-gray-50/60 p-3.5">
+                              <Select
+                                label="Type"
+                                value={extra.type ?? 'email'}
+                                onChange={(e) => updateExtra(i, { type: e.target.value })}
+                                error={fieldErrors[`contact_extras.${i}.type`]}
+                                className="w-36"
+                              >
+                                {EXTRA_TYPE_OPTIONS.map((opt) => (
+                                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                              </Select>
+                              <div className="min-w-36 flex-1">
+                                <Input
+                                  label="Label (optional)"
+                                  value={extra.label ?? ''}
+                                  onChange={(e) => updateExtra(i, { label: e.target.value })}
+                                  error={fieldErrors[`contact_extras.${i}.label`]}
+                                  placeholder={EXTRA_TYPE_OPTIONS.find((o) => o.value === (extra.type ?? 'email'))?.label}
+                                />
+                              </div>
+                              <div className="min-w-48 flex-1">
+                                <Input
+                                  label="Value / Address"
+                                  value={extra.value ?? ''}
+                                  onChange={(e) => updateExtra(i, { value: e.target.value })}
+                                  error={fieldErrors[`contact_extras.${i}.value`]}
+                                  placeholder={EXTRA_PLACEHOLDERS[extra.type] ?? 'Value'}
+                                />
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeExtra(i)}
+                                aria-label="Remove contact"
+                                className="mb-0.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <Button type="button" variant="outline" size="sm" onClick={addExtra} className="mt-2">
+                        <Plus className="h-4 w-4" /> Add Contact Channel
+                      </Button>
+                    </div>
+
+                    {/* Social Media Links */}
+                    <div className="border-t border-gray-100 pt-5 space-y-4">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">Social Media Links</p>
+                        <p className="text-xs text-gray-500">
+                          Configure social media profile links displayed as icons in the footer.
+                        </p>
+                      </div>
+
+                      {(form.social_links ?? []).length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-gray-200 p-6 text-center text-xs text-gray-400 bg-gray-50/50">
+                          No social profiles added yet. Click below to add your platform handles.
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {(form.social_links ?? []).map((link, i) => (
+                            <div key={i} className="flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-gray-50/60 p-3.5">
+                              <Select
+                                label="Platform"
+                                value={link.platform ?? 'github'}
+                                onChange={(e) => updateSocial(i, { platform: e.target.value })}
+                                error={fieldErrors[`social_links.${i}.platform`]}
+                                className="w-40"
+                              >
+                                {SOCIAL_PLATFORM_OPTIONS.map((opt) => (
+                                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                              </Select>
+                              <div className="min-w-56 flex-1">
+                                <Input
+                                  label="Profile URL"
+                                  value={link.url ?? ''}
+                                  onChange={(e) => updateSocial(i, { url: e.target.value })}
+                                  error={fieldErrors[`social_links.${i}.url`]}
+                                  placeholder="e.g. https://telegram.me/dreammore"
+                                />
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => removeSocial(i)}
+                                aria-label="Remove social link"
+                                className="mb-0.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <Button type="button" variant="outline" size="sm" onClick={addSocial} className="mt-2">
+                        <Plus className="h-4 w-4" /> Add Social Profile
+                      </Button>
+                    </div>
+                  </CardBody>
+                </Card>
+              </div>
+            )}
+
+            {/* ── TAB 2: Payments & Fees ─────────────────────────────── */}
+            {activeTab === 'payments' && (
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader
+                    title="Platform Commission & Release Rules"
+                    description="Decide the platform percentage fee collected from contract milestones and the auto-release timeframe for unreviewed work."
+                  />
+                  <CardBody className="space-y-6">
+                    {/* Platform Fee Percent Card Input */}
+                    <div className="rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50/80 p-5 space-y-3">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
+                            <Percent className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">Contract / Milestone Platform Fee</p>
+                            <p className="text-xs text-gray-500">
+                              Percentage fee automatically deducted from completed contract milestones upon payout.
+                            </p>
+                          </div>
+                        </div>
+                        <Badge tone="brand" size="md">
+                          Current: {form.platform_fee_percent}%
+                        </Badge>
+                      </div>
+
+                      <div className="pt-2 max-w-xs">
+                        <Input
+                          label="Fee Percentage (%)"
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="50"
+                          value={form.platform_fee_percent}
+                          onChange={update('platform_fee_percent')}
+                          error={fieldErrors.platform_fee_percent}
+                          hint="Allowed range: 0.0% to 50.0%"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Auto-Release Days Input */}
+                    <div className="rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50/80 p-5 space-y-3">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                            <Clock className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">Milestone Auto-Release Timeframe</p>
+                            <p className="text-xs text-gray-500">
+                              If an employer does not approve or request revisions after work is submitted, escrow funds auto-release after this timeframe.
+                            </p>
+                          </div>
+                        </div>
+                        <Badge tone="success" size="md">
+                          Current: {form.auto_release_days} Days
+                        </Badge>
+                      </div>
+
+                      <div className="pt-2 max-w-xs">
+                        <Input
+                          label="Auto-Release Timeframe (Days)"
+                          type="number"
+                          min="1"
+                          max="90"
+                          value={form.auto_release_days}
+                          onChange={update('auto_release_days')}
+                          error={fieldErrors.auto_release_days}
+                          hint="Allowed range: 1 to 90 days"
+                        />
+                      </div>
+                    </div>
+                  </CardBody>
+                </Card>
+              </div>
+            )}
+
+            {/* ── TAB 3: Access Control ──────────────────────────────── */}
+            {activeTab === 'access' && (
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader
+                    title="Platform Access & Registration"
+                    description="Control account registration policies and toggle global maintenance mode."
+                  />
+                  <CardBody className="space-y-4">
+                    <ToggleSwitch
+                      checked={form.registration_open === 'true'}
+                      onChange={toggle('registration_open')}
+                      label="Open User Registration"
+                      description="Allow new freelancers and employers to create accounts on the platform."
+                    />
+
+                    <ToggleSwitch
+                      checked={form.maintenance_mode === 'true'}
+                      onChange={toggle('maintenance_mode')}
+                      label="Maintenance Mode"
+                      description="Temporarily pause public marketplace access and display a maintenance splash page to non-admin users."
+                    />
+
+                    {form.maintenance_mode === 'true' && (
+                      <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4 flex items-start gap-3 text-amber-800 text-xs">
+                        <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-amber-600" />
+                        <div>
+                          <p className="font-semibold text-amber-900">Maintenance mode is active</p>
+                          <p className="mt-0.5">Only logged-in platform administrators can access administration panels.</p>
+                        </div>
+                      </div>
+                    )}
+                  </CardBody>
+                </Card>
+              </div>
+            )}
+
+            {/* ── TAB 4: Featured Listings ───────────────────────────── */}
+            {activeTab === 'featured' && (
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader
+                    title="Featured Listing Monetization"
+                    description="Configure paid listing boosts for job posts and freelancer profile discoverability."
+                  />
+                  <CardBody className="space-y-6">
+                    {/* Featured Jobs */}
+                    <div className="space-y-4">
+                      <ToggleSwitch
+                        checked={form.featured_jobs_enabled === 'true'}
+                        onChange={toggle('featured_jobs_enabled')}
+                        label="Enable Featured Job Boosts"
+                        description="Allow employers to pay a fee to highlight their job postings at the top of search results."
+                      />
+
+                      {form.featured_jobs_enabled === 'true' && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-gray-50 border border-gray-200">
+                          <Input
+                            label="Job Boost Price (ETB)"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={form.featured_job_price}
+                            onChange={update('featured_job_price')}
+                            error={fieldErrors.featured_job_price}
+                            placeholder="150"
+                            hint="Price charged to promote a job"
+                          />
+                          <Input
+                            label="Boost Duration (Days)"
+                            type="number"
+                            min="1"
+                            max="90"
+                            value={form.featured_job_duration_days}
+                            onChange={update('featured_job_duration_days')}
+                            error={fieldErrors.featured_job_duration_days}
+                            placeholder="7"
+                            hint="Number of days the boost remains active"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Featured Profiles */}
+                    <div className="border-t border-gray-100 pt-5 space-y-4">
+                      <ToggleSwitch
+                        checked={form.featured_profiles_enabled === 'true'}
+                        onChange={toggle('featured_profiles_enabled')}
+                        label="Enable Featured Freelancer Profile Boosts"
+                        description="Allow freelancers to pay a fee to highlight their profile in talent directory searches."
+                      />
+
+                      {form.featured_profiles_enabled === 'true' && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-gray-50 border border-gray-200">
+                          <Input
+                            label="Profile Boost Price (ETB)"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={form.featured_profile_price}
+                            onChange={update('featured_profile_price')}
+                            error={fieldErrors.featured_profile_price}
+                            placeholder="100"
+                            hint="Price charged to feature a profile"
+                          />
+                          <Input
+                            label="Boost Duration (Days)"
+                            type="number"
+                            min="1"
+                            max="90"
+                            value={form.featured_profile_duration_days}
+                            onChange={update('featured_profile_duration_days')}
+                            error={fieldErrors.featured_profile_duration_days}
+                            placeholder="7"
+                            hint="Number of days profile boost remains active"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </CardBody>
+                </Card>
+              </div>
+            )}
+
+            {/* ── TAB 5: Account Security ────────────────────────────── */}
+            {activeTab === 'security' && (
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader
+                    title="Admin Account & Credentials"
+                    description="Update your administrator login email, password, and security authentication parameters."
+                  />
+                  <CardBody>
+                    <Link
+                      to="/admin/settings/security"
+                      className="flex items-center justify-between gap-4 rounded-xl border border-gray-200 p-5 transition-all hover:border-brand-300 hover:bg-brand-50/40 group cursor-pointer shadow-2xs"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-100 text-brand-600 group-hover:bg-brand-600 group-hover:text-white transition-colors">
+                          <ShieldCheck className="h-6 w-6" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-700">
+                            Manage Admin Security Settings
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Change admin email address, reset password, and review active security sessions.
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-sm text-brand-600 font-semibold group-hover:translate-x-1 transition-transform">
+                        Manage Credentials →
+                      </span>
+                    </Link>
+                  </CardBody>
+                </Card>
+              </div>
+            )}
+          </form>
+        </div>
+      </div>
+
+      {/* Floating Sticky Save Bar on Unsaved Changes */}
+      {isDirty && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center justify-between gap-4 rounded-2xl bg-gray-900/95 backdrop-blur-md px-6 py-3.5 text-white shadow-2xl border border-gray-800 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="flex items-center gap-2.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-amber-400 animate-pulse" />
+            <p className="text-sm font-medium text-gray-200">You have unsaved changes</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setForm(savedFormRef.current);
+                setFieldErrors({});
+              }}
+              className="text-gray-300 hover:text-white hover:bg-gray-800"
+            >
+              <RotateCcw className="h-3.5 w-3.5" /> Discard
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              loading={saving}
+              onClick={handleSave}
+              className="bg-brand-600 hover:bg-brand-700 text-white font-semibold shadow-xs"
+            >
+              <Save className="h-4 w-4" /> Save Settings
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

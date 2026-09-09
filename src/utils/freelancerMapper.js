@@ -80,6 +80,7 @@ export function normalizeFreelancer(profile) {
 export function freelancerProfileToForm(profile) {
   if (!profile) return null;
   return {
+    categoryId: profile.categoryId != null ? String(profile.categoryId) : '',
     headline: profile.headline ?? '',
     overview: profile.overview ?? '',
     hourlyRate: profile.hourlyRate != null ? String(profile.hourlyRate) : '',
@@ -103,6 +104,7 @@ export function freelancerProfileToForm(profile) {
  */
 export function freelancerFormToPayload(form) {
   return {
+    category_id: form.categoryId ? Number(form.categoryId) : null,
     headline: form.headline.trim() || null,
     overview: form.overview.trim() || null,
     hourly_rate: form.hourlyRate === '' ? null : Number(form.hourlyRate),

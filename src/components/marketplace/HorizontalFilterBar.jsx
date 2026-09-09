@@ -221,7 +221,7 @@ export default function HorizontalFilterBar({
               <option value="">Availability</option>
               <option value="available">Available Now</option>
               <option value="busy">Busy</option>
-              <option value="unavailable">Unavailable</option>
+              <option value="not_available">Unavailable</option>
             </select>
             <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
           </div>

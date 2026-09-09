@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import axios from 'axios';
 import {
   Award, FileText, Plus, Trash2, Pencil, CheckCircle, XCircle, Clock,
   Upload, Key, Building2, Sparkles, RefreshCw, Eye, Download,
@@ -15,6 +16,7 @@ import Badge from '../../components/ui/Badge';
 import Modal from '../../components/ui/Modal';
 import DocumentPreview from '../../components/ui/DocumentPreview';
 import { credentialService } from '../../services/credentialService';
+import { getToken } from '../../utils/authStorage';
 import { verificationService } from '../../services/verificationService';
 import { adminService } from '../../services/adminService';
 import { getErrorMessage } from '../../utils/errors';
@@ -248,22 +250,17 @@ export default function CredentialsPage() {
       else { if (form.document) formData.append('document', form.document); if (form.issuing_organization) formData.append('issuing_organization', form.issuing_organization.trim()); if (form.certificate_identifier) formData.append('certificate_identifier', form.certificate_identifier.trim()); }
       if (form.issue_date) formData.append('issue_date', form.issue_date);
       if (form.expiry_date) formData.append('expiry_date', form.expiry_date);
-      if (editingId) { if (!form.document && form.type === 'external_certificate') formData.delete('document'); await credentialService.updateCredential(editingId, formData); showToast('Certificate resubmitted!', 'success'); }
-      else { await credentialService.createCredential(formData); showToast('Certificate submitted for verification.', 'success'); }
-
-      // Identity verification is only required for external certificates;
-      // DreamMore certificates are already verified through the DreamMore LMS.
       if (form.type === 'external_certificate' && form.verification_document) {
-        try {
-          const verifFormData = new FormData();
-          verifFormData.append('type', 'identity');
-          verifFormData.append('document', form.verification_document);
-          if (form.verification_notes?.trim()) verifFormData.append('notes', form.verification_notes.trim());
-          await verificationService.submitVerification(verifFormData);
-          showToast('Identity document submitted successfully.', 'success');
-        } catch (vErr) {
-          console.warn('Identity verification skipped:', vErr?.message);
-        }
+        formData.append('verification_document', form.verification_document);
+        if (form.verification_notes?.trim()) formData.append('verification_notes', form.verification_notes.trim());
+      }
+      if (editingId) {
+        if (!form.document && form.type === 'external_certificate') formData.delete('document');
+        await credentialService.updateCredential(editingId, formData);
+        showToast('Certificate resubmitted!', 'success');
+      } else {
+        await credentialService.createCredential(formData);
+        showToast('Certificate submitted for verification.', 'success');
       }
 
       setShowWizardModal(false); resetForm(); loadCredentials();
@@ -283,27 +280,49 @@ export default function CredentialsPage() {
   const handlePreview = useCallback(async (cred) => {
     setPreviewLoading(true); setPreviewTarget(cred);
     try {
-      const response = await adminService.downloadCredential(cred.id);
+      // Use a fresh axios instance without the JSON Accept header for file downloads
+      const fileClient = axios.create({
+        baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1',
+        timeout: 15000,
+        responseType: 'blob',
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      const response = await fileClient.get(`/credentials/${cred.id}/download`);
       const contentType = response.headers?.['content-type'] || '';
-      if (contentType.includes('application/json') || !response.data || response.data.size === 0) { setPreviewUrl(null); return; }
+      if (!response.data || response.data.size === 0) { setPreviewUrl(null); showToast('This certificate has no file attached.', 'warning'); return; }
       const mime = getMimeType(cred.file_original_name) || contentType || 'application/pdf';
       const blob = new Blob([response.data], { type: mime });
       setPreviewUrl(window.URL.createObjectURL(blob));
-    } catch { setPreviewUrl(null); }
+    } catch (err) {
+      setPreviewUrl(null);
+      const msg = err?.response?.data?.message || err?.message || 'Unable to load preview.';
+      showToast(msg, 'error');
+    }
     finally { setPreviewLoading(false); }
-  }, []);
+  }, [showToast]);
 
   const handleDownload = useCallback(async (cred) => {
     try {
-      const response = await credentialService.downloadCredential(cred.id);
-      const contentType = response.headers?.['content-type'] || '';
+      // Use a fresh axios instance without the JSON Accept header for file downloads
+      const fileClient = axios.create({
+        baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000/api/v1',
+        timeout: 15000,
+        responseType: 'blob',
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      const response = await fileClient.get(`/credentials/${cred.id}/download`);
       if (!response.data || response.data.size === 0) { showToast('This certificate has no file attached.', 'warning'); return; }
+      const contentType = response.headers?.['content-type'] || '';
       const mime = getMimeType(cred.file_original_name) || contentType || 'application/octet-stream';
       const blob = new Blob([response.data], { type: mime });
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a'); link.href = url; link.download = cred.file_original_name || `certificate-${cred.id}`;
+      const link = document.createElement('a'); link.href = url; link.download = cred.file_original_name || `credential-${cred.id}`;
       document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-    } catch (err) { showToast(err?.response?.data?.message || 'Unable to download.', 'error'); }
+      showToast('Credential downloaded.', 'success');
+    } catch (err) {
+      const msg = err?.response?.data?.message || err?.message || 'Unable to download.';
+      showToast(msg, 'error');
+    }
   }, [showToast]);
 
   const approvedCount = credentials.filter((c) => c.status === 'approved').length;

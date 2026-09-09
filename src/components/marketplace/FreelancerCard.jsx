@@ -111,26 +111,8 @@ export default function FreelancerCard({
         className,
       )}
     >
-      {/* Portrait Photo Container */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
-        <img
-          src={portrait}
-          alt={name}
-          className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-        />
-
-        {/* Verified Badge Overlay - Bottom Left */}
-        {isVerified && (
-          <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1 rounded-md bg-white/95 px-2 py-1 shadow-md border border-gray-100 backdrop-blur-xs">
-            <ShieldCheck className="h-4 w-4 text-blue-600 fill-blue-50" />
-            <span className="text-[10px] font-bold text-blue-900 tracking-wider uppercase">
-              Verified
-            </span>
-          </div>
-        )}
-
-        {/* Top-Right Bookmark Button */}
+      {/* Banner & Bookmark */}
+      <div className="relative h-16 w-full bg-gradient-to-r from-brand-500/10 via-blue-500/10 to-emerald-500/10 dark:from-brand-900/30 dark:via-blue-900/30 dark:to-emerald-900/30">
         {savable && (
           <button
             type="button"
@@ -139,52 +121,72 @@ export default function FreelancerCard({
             aria-pressed={isSaved}
             aria-label={isSaved ? 'Remove from saved' : 'Save freelancer'}
             title={isSaved ? 'Remove from saved' : 'Save freelancer'}
-            className="absolute top-3 left-3 z-10 rounded-xl bg-white/90 p-2 shadow-md backdrop-blur-xs transition-all hover:bg-white hover:scale-110 disabled:opacity-50"
+            className="absolute top-2.5 right-2.5 z-10 rounded-full bg-white/90 dark:bg-slate-800/90 p-2 shadow-xs backdrop-blur-xs transition-all hover:bg-white hover:scale-110 disabled:opacity-50"
           >
             <Bookmark
               className={cn(
                 'h-4 w-4 transition-colors',
-                isSaved ? 'fill-brand-600 text-brand-600' : 'text-gray-600 hover:text-brand-600',
+                isSaved ? 'fill-brand-600 text-brand-600' : 'text-gray-600 dark:text-gray-300 hover:text-brand-600',
               )}
             />
           </button>
         )}
       </div>
 
+      {/* Circle Profile Avatar Header */}
+      <div className="relative -mt-10 mb-1 flex justify-center px-4">
+        <div className="relative h-20 w-20 sm:h-24 sm:w-24 shrink-0 rounded-full border-4 border-white dark:border-slate-900 bg-slate-100 dark:bg-slate-800 shadow-md overflow-hidden">
+          <img
+            src={portrait}
+            alt={name}
+            className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-110"
+            loading="lazy"
+          />
+        </div>
+
+        {/* Verified Badge Overlay on Circle */}
+        {isVerified && (
+          <div className="absolute bottom-0 right-1/2 translate-x-8 sm:translate-x-10 translate-y-1 flex items-center gap-0.5 rounded-full bg-white dark:bg-slate-800 px-1.5 py-0.5 shadow-md border border-blue-100 dark:border-blue-900" title="Verified Freelancer">
+            <ShieldCheck className="h-4 w-4 text-blue-600 fill-blue-50 dark:text-blue-400 dark:fill-blue-950" />
+          </div>
+        )}
+      </div>
+
       {/* Card Details Body */}
-      <div className="flex flex-1 flex-col justify-between p-4">
+      <div className="flex flex-1 flex-col justify-between p-4 pt-1 text-center">
         <div>
           {/* Freelancer Name */}
-          <h3 className="text-[15px] font-bold text-gray-900 transition-colors group-hover:text-brand-600 line-clamp-1">
+          <h3 className="text-base font-bold text-gray-900 dark:text-white transition-colors group-hover:text-brand-600 dark:group-hover:text-brand-400 line-clamp-1">
             {name}
           </h3>
 
+          {/* Professional Headline */}
+          <p className="mt-1 text-xs text-gray-500 dark:text-slate-400 line-clamp-2 leading-relaxed min-h-[32px]">
+            {headline}
+          </p>
+
           {/* Availability & Hourly Rate Row */}
-          <div className="mt-2 flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
+          <div className="mt-3 flex items-center justify-center gap-2">
+            <div className="flex items-center gap-1.5 rounded-full bg-gray-50 dark:bg-slate-800/80 px-2.5 py-1 border border-gray-100 dark:border-slate-750">
               <span className={cn('h-2 w-2 rounded-full', availStyle.dot)} />
               <span className={cn('text-[11px] font-semibold', availStyle.text)}>{availStyle.label}</span>
             </div>
+
             {hourlyRate != null && (
-              <div className="flex items-center gap-1 rounded-lg bg-emerald-50 border border-emerald-200 px-2 py-0.5">
-                <span className="text-[11px] font-black text-emerald-700">
+              <div className="flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 px-2.5 py-1">
+                <span className="text-[11px] font-black text-emerald-700 dark:text-emerald-400">
                   {getPlatformCurrency()} {Number(hourlyRate).toLocaleString('en-US')}
                 </span>
-                <span className="text-[9px] font-medium text-emerald-500">/hr</span>
+                <span className="text-[9px] font-medium text-emerald-500 dark:text-emerald-400">/hr</span>
               </div>
             )}
           </div>
 
-          {/* Professional Headline */}
-          <p className="mt-1.5 text-xs text-gray-500 line-clamp-2 leading-relaxed">
-            {headline}
-          </p>
-
           {/* Experience Level & Rating Row */}
-          <div className="mt-2.5 flex items-center gap-2">
+          <div className="mt-2.5 flex items-center justify-center gap-2">
             {experienceLevel && (
               <span className={cn(
-                'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
+                'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide',
                 experienceStyle.bg, experienceStyle.text, experienceStyle.border
               )}>
                 <span>{experienceStyle.icon}</span>
@@ -192,17 +194,17 @@ export default function FreelancerCard({
               </span>
             )}
             {rating > 0 && (
-              <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-amber-600">
+              <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
                 <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
                 {Number(rating).toFixed(1)}
-                {reviews > 0 && <span className="text-gray-400 font-normal">({reviews})</span>}
+                {reviews > 0 && <span className="text-gray-400 dark:text-slate-500 font-normal">({reviews})</span>}
               </span>
             )}
           </div>
 
           {/* Location */}
           {location && (
-            <div className="mt-2 flex items-center gap-1 text-[11px] text-gray-400">
+            <div className="mt-2 flex items-center justify-center gap-1 text-[11px] text-gray-400 dark:text-slate-500">
               <MapPin className="h-3 w-3 shrink-0" />
               <span className="truncate">{location}</span>
             </div>
@@ -211,17 +213,14 @@ export default function FreelancerCard({
           {/* Skills with Colorful Pills */}
           {skills.length > 0 && (
             <div className="mt-3">
-              <div className="text-[9px] font-bold uppercase tracking-wider text-gray-300 mb-1.5">
-                Skills
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {skills.slice(0, 4).map((skill, i) => {
+              <div className="flex flex-wrap justify-center gap-1.5">
+                {skills.slice(0, 3).map((skill, i) => {
                   const color = SKILL_COLORS[i % SKILL_COLORS.length];
                   return (
                     <span
                       key={i}
                       className={cn(
-                        'inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold transition-colors',
+                        'inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold transition-colors',
                         color.bg, color.text, color.border, color.hover
                       )}
                     >
@@ -229,9 +228,9 @@ export default function FreelancerCard({
                     </span>
                   );
                 })}
-                {skills.length > 4 && (
-                  <span className="inline-flex items-center rounded-full bg-gray-50 border border-gray-200 px-2 py-0.5 text-[10px] font-medium text-gray-500">
-                    +{skills.length - 4} more
+                {skills.length > 3 && (
+                  <span className="inline-flex items-center rounded-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 px-2 py-0.5 text-[10px] font-medium text-gray-500 dark:text-slate-400">
+                    +{skills.length - 3} more
                   </span>
                 )}
               </div>
@@ -241,10 +240,10 @@ export default function FreelancerCard({
 
         {/* Footer: Completed Jobs */}
         {reviews > 0 && (
-          <div className="mt-3 flex items-center gap-1.5 border-t border-gray-100 pt-2.5 text-[11px] text-gray-400">
+          <div className="mt-3 flex items-center justify-center gap-1.5 border-t border-gray-100 dark:border-slate-800 pt-2.5 text-[11px] text-gray-400 dark:text-slate-500">
             <Zap className="h-3 w-3 text-emerald-500" />
             <span>
-              <span className="font-semibold text-gray-600">{reviews}</span> completed job{reviews !== 1 ? 's' : ''}
+              <span className="font-semibold text-gray-600 dark:text-slate-300">{reviews}</span> completed job{reviews !== 1 ? 's' : ''}
             </span>
           </div>
         )}

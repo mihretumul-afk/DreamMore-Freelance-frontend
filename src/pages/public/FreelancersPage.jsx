@@ -84,6 +84,11 @@ function FreelancerCard({ freelancer, savedIds, onToggleSave, savingId }) {
                 {freelancer.location}
               </p>
             )}
+            {freelancer.categoryName && (
+              <span className="mt-1.5 inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-[11px] font-semibold text-brand-700">
+                {freelancer.categoryName}
+              </span>
+            )}
           </div>
           <div className="text-right">
             {freelancer.hourly_rate > 0 && (

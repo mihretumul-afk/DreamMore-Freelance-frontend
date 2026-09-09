@@ -13,10 +13,10 @@ const DEFAULT_SETTINGS = {
   contact_extras: [],
   social_links: [],
   default_currency: 'ETB',
-  min_proposal_amount: '',
-  max_proposal_amount: '',
   registration_open: true,
   maintenance_mode: false,
+  platform_fee_percent: 8,
+  auto_release_days: 14,
 };
 
 /**
@@ -45,10 +45,10 @@ export function PlatformProvider({ children }) {
         contact_extras: Array.isArray(data.contact_extras) ? data.contact_extras : [],
         social_links: Array.isArray(data.social_links) ? data.social_links : [],
         default_currency: currency,
-        min_proposal_amount: data.min_proposal_amount ?? DEFAULT_SETTINGS.min_proposal_amount,
-        max_proposal_amount: data.max_proposal_amount ?? DEFAULT_SETTINGS.max_proposal_amount,
         registration_open: data.registration_open ?? DEFAULT_SETTINGS.registration_open,
         maintenance_mode: data.maintenance_mode ?? DEFAULT_SETTINGS.maintenance_mode,
+        platform_fee_percent: data.platform_fee_percent ?? 8,
+        auto_release_days: data.auto_release_days ?? 14,
         featured_jobs_enabled: data.featured_jobs_enabled ?? false,
         featured_profiles_enabled: data.featured_profiles_enabled ?? false,
       });

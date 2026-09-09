@@ -353,6 +353,7 @@ export default function FreelancerDashboardPage() {
   const profileChecks = [
     { label: 'Profile Photo', done: !!profile?.avatar },
     { label: 'Headline', done: !!profile?.headline },
+    { label: 'Category', done: !!profile?.categoryId },
     { label: 'Bio', done: !!profile?.bio },
     { label: 'Location', done: !!profile?.location },
     { label: 'Skills', done: profile?.skills?.length > 0 },

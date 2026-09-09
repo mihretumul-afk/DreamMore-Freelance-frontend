@@ -132,17 +132,17 @@ export const am = {
   'category.other.description': 'ማንኛውም በብቃት እንዲሰራ የሚፈልጉት ስራ።',
 
   // ---- Featured Jobs section ----
-  'featuredJobs.eyebrow': 'ተለይተው የቀረቡ',
-  'featuredJobs.title': 'Latest Job Opportunities',
-  'featuredJobs.description': 'በኢትዮጵያ እና ከዚያ ውጭ ካሉ ቀጣሪዎች የተመረጡ ክፍት የስራ እድሎች።',
+  'featuredJobs.eyebrow': '探究 ኮፒ ጥራት',
+  'featuredJobs.title': 'Explore Open Gigs',
+  'featuredJobs.description': 'Hand-picked jobs from employers across Ethiopia and beyond.',
   'featuredJobs.viewAll': 'ሁሉንም ስራዎች ይመልከቱ',
   'featuredJobs.empty': 'በአሁኑ ሰዓት ምንም ክፍት ስራዎች የሉም።',
 
   // ---- Featured Freelancers section ----
-  'featuredFreelancers.eyebrow': 'ምርጥ ባለሙያዎች',
+  'featuredFreelancers.eyebrow': 'Top Talent',
   'featuredFreelancers.title': 'Find a Freelancer for Every Work',
   'featuredFreelancers.description':
-    'አልሚዎች፣ ዲዛይነሮች፣ የገበያ ባለሙያዎች እና ሌሎችም — ለቀጣዩ ፕሮጀክትዎ ዝግጁ ናቸው።',
+    'Developers, designers, marketers, and more — ready for your next project.',
   'featuredFreelancers.viewAll': 'ሁሉንም ባለሙያዎች ይመልከቱ',
   'featuredFreelancers.emptyTitle': 'እስካሁን ምንም ፍሪላንሰሮች የሉም',
   'featuredFreelancers.emptyDescription': 'የገበያውን የመጀመሪያ አባል ይሁኑ።',
@@ -296,17 +296,17 @@ export const am = {
   'trusted.statRating': 'አverage ደረጃ',
   'trusted.statResponse': 'የምላሽ ጊዜ',
   'trusted.testimonial1Quote':
-    'ድሪም ሞር በ24 ሰዓት ውስጥ UI/UX ዲዛይነር ለማግኘት ረድቶናል። ጥራቱ ልዩ ነበር እና የደረጃ ስርዓቱ ሙሉ ሰላም ሰጥቷል።',
-  'trusted.testimonial1Name': 'አበበ ከበደ',
-  'trusted.testimonial1Role': 'ስ责任፣ TechEthiopia',
+    '"ከሰሰሰን በኋላ ትልቅ ለውጥ አይተናል። ማህበረሰብ ሰላ ሆስፒታላችው እና ስለግንዛቤው ልዩ ልዩ የህክምና አገልግሎቶች በሰፊው እንዲያውቁ አድርገዋል። በዚህም ምክንያት በርካታ ታካሚዎች ወደ እኛ መምጣት ተገቢውን ህክምና እንዲያገኙ እና የህዝብ አመራን እንዲገነባ በጥርፌናል ስራቸው ፈተውታል፡፤"',
+  'trusted.testimonial1Name': 'ዲያቆን ዮናታ',
+  'trusted.testimonial1Role': 'ስራ አስኪያጅ • የ አፊላ ስላላ ሆስፒታል (Afilas General Hospital)',
   'trusted.testimonial2Quote':
-    'እንደ ፍሪላንሰር፣ ድሪም ሞር ህይወቴን ቀይሷል። ከመጀመሪያው ወር ጀምሮ ተደራሽ ገቢ እየሰበሰብኩ ነው።',
-  'trusted.testimonial2Name': 'ሰላም ተስፋዬ',
-  'trusted.testimonial2Role': 'ሙሉ ተሞክሮ ያለው አልሚ',
+    '" ቮሻል ሚዲያ ማርኬቲንግን ከጀመርን በኋላ ያገኘነው ውጤት ከጠበቅነው በላይ ነው፡፡ በአዲስ አበባ ያለ ደንበኞች ምርቶቻችንን በቮሻል ሚዲያ አየተው በብዙ ማዘዝ ጀምረዋል፡፡ በዚህም የምክንያት ስራችን በጥፍተኛ ሁኔታ እንዲዳብር እንዲንቀሳቀስ ትልቅ እጅ አድርጐታል፡፤"',
+  'trusted.testimonial2Name': 'ወ/ሮ በር ሰለሞም',
+  'trusted.testimonial2Role': 'Owner • የሳልት ውብቶች አምራችና አከፋፋይ',
   'trusted.testimonial3Quote':
-    'ግልጽ ዋጋ እና የተረጋገጡ ባለሙያዎች ድርጅት ድሪም ሞርን ለሁሉም የልማት ፕሮጀክቶች የምንጠቀመው መመሪያ አድርገዋል።',
-  'trusted.testimonial3Name': 'ዳኒኤል ሙሉጌታ',
-  'trusted.testimonial3Role': 'የድি঒ጂታል ኃላፊ፣ የimentary ባንክ',
+    '" እውነተኛ ነው። የኛን ስራ ሰወች በሚገባ በሚያስደ አባሉ ቮሻል ሚዲያዎቻችንን ከተንተከራፈድን በኋላ፣ አዲስ ደንበኞች በብዙ ወደ እኛ መምጣት ጀምረዋል፡፡ አኘጫችንን ላይ ለመመራት ትልቅ ለውጥ በጣም አናመሰግናለን!"',
+  'trusted.testimonial3Name': 'አቶ ዘለቀ',
+  'trusted.testimonial3Role': 'Owner • የቅርም ቤት ባለቤት',
 
   // ---- CTA ----
   'cta.title': 'ታላቅ ነገር ለመገንባት ዝግጁ ነዎት?',
@@ -524,6 +524,7 @@ export const am = {
   'freelancers.description': 'ምርጥ የኢትዮጵያ ፍሪላንሰሮችን፣ አልሚዎችን፣ ዲዛይነሮችን እና ፈጣሪዎችን ያግኙ።',
   'freelancers.loading': 'ባለሙያዎችን በመጫን ላይ…',
   'freelancers.foundCount': '{count} ባለሙያዎች ተገኝተዋል',
+  'freelancers.noFreelancers': 'ከፍለጋዎ ወይም ከማጣሪያዎችዎ ጋር የሚስማማ ባለሙያ አልተገኘም። ሌላ ምድብ ይሞክሩ ወይም ማጣሪያዎችን ያጽዱ።',
   'freelancers.complete': '{count}% ተጠናቋል',
   'freelancers.hire': 'ባለሙያውን ይቅጠሩ',
   'freelancers.contact': 'ባለሙያውን ያግኙ',

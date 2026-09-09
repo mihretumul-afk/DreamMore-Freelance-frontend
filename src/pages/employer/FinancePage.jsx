@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
-  ArrowUpRight, Clock, CheckCircle2, AlertTriangle, ChevronLeft, ChevronRight,
+  ArrowDownRight, ArrowUpRight, Clock, CheckCircle2, AlertTriangle, ChevronLeft, ChevronRight,
   Wallet, CreditCard, Plus, Trash2, Star, Banknote, TrendingUp,
   RefreshCw, PiggyBank, DollarSign, BadgeDollarSign, Receipt, Download,
   FileText, FileSpreadsheet, ChevronDown, Calendar, X, Shield, Zap, FileDown, ArrowUpCircle
@@ -128,6 +128,9 @@ export default function EmployerFinancePage() {
   const [earnings, setEarnings] = useState(null);
   const [methods, setMethods] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [withdrawals, setWithdrawals] = useState([]);
+  const [wdMeta, setWdMeta] = useState({ current_page: 1, last_page: 1, total: 0 });
+  const [wdPage, setWdPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -136,7 +139,7 @@ export default function EmployerFinancePage() {
   const [txPage, setTxPage] = useState(1);
 
   // Tab state
-  const [activeTab, setActiveTab] = useState('transactions'); // transactions | methods
+  const [activeTab, setActiveTab] = useState('transactions'); // transactions | withdrawals | methods
 
   // Export dropdown
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -163,6 +166,12 @@ export default function EmployerFinancePage() {
   const [depositResult, setDepositResult] = useState(null);
   const [depositError, setDepositError] = useState('');
 
+  // Withdraw modal
+  const [showWithdraw, setShowWithdraw] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawMethodId, setWithdrawMethodId] = useState('');
+  const [withdrawing, setWithdrawing] = useState(false);
+
   // Add method modal
   const [showAddMethod, setShowAddMethod] = useState(false);
   const [methodForm, setMethodForm] = useState({
@@ -178,10 +187,11 @@ export default function EmployerFinancePage() {
     setLoading(true);
     setError(null);
     try {
-      const [financeRes, methodRes, txRes, budgetRes] = await Promise.all([
+      const [financeRes, methodRes, txRes, wdRes, budgetRes] = await Promise.all([
         financialService.getEmployerFinance(),
         financialService.getPaymentMethods(),
         financialService.getTransactions({ page: txPage }),
+        financialService.getWithdrawals({ page: wdPage }),
         financialService.getBudget(),
       ]);
       setEarnings(financeRes.data ?? null);
@@ -189,6 +199,9 @@ export default function EmployerFinancePage() {
       const txData = txRes.data ?? [];
       setTransactions(Array.isArray(txData) ? txData : (txData.data ?? []));
       setTxMeta(txRes.meta ?? txData.meta ?? { current_page: 1, last_page: 1, total: 0 });
+      const wdData = wdRes?.data ?? [];
+      setWithdrawals(Array.isArray(wdData) ? wdData : (wdData.data ?? []));
+      setWdMeta(wdRes?.meta ?? wdData.meta ?? { current_page: 1, last_page: 1, total: 0 });
       if (budgetRes.data) {
         setBudget(budgetRes.data.budget);
         setBudgetSpending(budgetRes.data.spending);
@@ -203,29 +216,72 @@ export default function EmployerFinancePage() {
     } finally {
       setLoading(false);
     }
-  }, [txPage]);
+  }, [txPage, wdPage]);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // On page load: load data immediately, then reconcile in background
-  useEffect(() => {
-    const depositReturn = searchParams.get('deposit');
-    const isReturn = depositReturn === 'return';
+  // Reload when pagination changes
+  useEffect(() => { load(); }, [load]);
 
-    if (isReturn) {
+  // On page load: check for returned payment reference from Chapa checkout
+  useEffect(() => {
+    const returnedRef = searchParams.get('ref') || searchParams.get('trx_ref') || searchParams.get('reference');
+    const depositReturn = searchParams.get('deposit');
+
+    if (returnedRef || depositReturn) {
       setSearchParams({}, { replace: true });
     }
 
     // Always load data FIRST so the page shows immediately
     load();
 
-    // Fire reconcile in background — don't block the page
+    // If returning from Chapa with a specific reference, verify with server
+    if (returnedRef) {
+      const sessionKey = `reconciled_dep_${returnedRef}`;
+      if (!sessionStorage.getItem(sessionKey)) {
+        sessionStorage.setItem(sessionKey, '1');
+
+        financialService.reconcileDeposit(returnedRef)
+          .then((res) => {
+            const data = res.data?.data ?? res.data ?? res;
+            const payment = data.payment || {};
+            const wallet = data.wallet || {};
+            const prevBalance = data.previous_balance ?? Math.max(0, (wallet.available_balance || 0) - (payment.amount || 0));
+
+            if (payment.status === 'completed') {
+              setDepositResult({
+                payment: payment,
+                wallet: wallet,
+                previous_balance: prevBalance,
+              });
+              setDepositStep('success');
+              setShowAddFunds(true);
+              load();
+              showToast(
+                `Funds Added Successfully! ${formatETB(payment.amount || 0)} has been added to your available balance.`,
+                'success'
+              );
+            } else if (payment.status === 'pending') {
+              showToast('Payment is still processing. Your balance will update automatically once confirmed.', 'info');
+            } else if (payment.status === 'failed') {
+              showToast(`Payment failed: ${payment.failure_reason || 'Transaction could not be completed.'}`, 'error');
+            } else if (payment.status === 'cancelled') {
+              showToast('Payment was cancelled.', 'warning');
+            }
+          })
+          .catch(() => {
+            load();
+            showToast('Payment verification failed. If charged, your balance will update automatically.', 'error');
+          });
+      }
+    }
+
+    // Fire background reconcile for any pending deposits
     financialService.reconcileAllDeposits()
-      .then(() => {
-        // After reconcile completes, reload to get updated balance
-        load();
-        if (isReturn) {
-          showToast('Payment processed. Your wallet balance has been updated.', 'success');
+      .then((res) => {
+        const data = res.data ?? res;
+        if ((data?.reconciled ?? 0) > 0) {
+          load();
         }
       })
       .catch(() => { /* reconcile failed — page still shows data */ });
@@ -353,6 +409,45 @@ export default function EmployerFinancePage() {
     }
   };
 
+  const handleWithdraw = async () => {
+    if (!withdrawAmount || !withdrawMethodId) { showToast('Please enter amount and select a method.', 'error'); return; }
+    if (parseFloat(withdrawAmount) < 100) { showToast('Minimum withdrawal amount is 100 ETB.', 'error'); return; }
+    setWithdrawing(true);
+    try {
+      const res = await financialService.requestWithdrawal(parseFloat(withdrawAmount), parseInt(withdrawMethodId));
+      showToast('Withdrawal request submitted successfully!', 'success');
+      setShowWithdraw(false);
+      setWithdrawAmount('');
+      setWithdrawMethodId('');
+      load();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to submit withdrawal.', 'error');
+    } finally {
+      setWithdrawing(false);
+    }
+  };
+
+  const handleCancelWithdrawal = async (id) => {
+    try {
+      await financialService.cancelWithdrawal(id);
+      showToast('Withdrawal cancelled.', 'success');
+      load();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to cancel.', 'error');
+    }
+  };
+
+  const handleDeleteWithdrawal = async (w) => {
+    if (!window.confirm(`Delete withdrawal ${w.reference} from your history?`)) return;
+    try {
+      await financialService.deleteWithdrawal(w.id);
+      showToast('Withdrawal history entry deleted.', 'success');
+      load();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed to delete entry.', 'error');
+    }
+  };
+
   const handleDeleteTransaction = async (tx) => {
     if (!window.confirm('Delete this transaction from your history? This only removes it from your view — your balance is not affected.')) return;
     try {
@@ -427,12 +522,7 @@ export default function EmployerFinancePage() {
                 <div className="flex items-center gap-2 text-xs font-semibold text-brand-600">
                   <Wallet className="h-3.5 w-3.5" /> Available Balance
                 </div>
-                <button
-                  onClick={() => setShowAddFunds(true)}
-                  className="inline-flex items-center gap-1 rounded-full bg-brand-500 px-2.5 py-1 text-[10px] font-bold text-white hover:bg-brand-600 transition-colors cursor-pointer"
-                >
-                  <ArrowUpCircle className="h-3 w-3" /> Add Funds
-                </button>
+
               </div>
               <p className="mt-1.5 text-xl font-extrabold text-brand-900">{formatETB(e.available_balance || 0)}</p>
               <p className="text-[10px] text-brand-500 mt-0.5">Use for milestones, featured jobs, and more</p>
@@ -613,10 +703,38 @@ export default function EmployerFinancePage() {
         )}
       </div>
 
+      {/* ─── Quick Actions Bar ────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => setShowAddFunds(true)}
+          className="shadow-lg shadow-brand-500/20"
+        >
+          <ArrowUpCircle className="h-4 w-4" /> Add Funds
+        </Button>
+        <Button
+          variant="success"
+          size="sm"
+          onClick={() => setShowWithdraw(true)}
+          disabled={!e.available_balance || e.available_balance < 100}
+          className="shadow-lg shadow-emerald-500/20"
+        >
+          <ArrowDownRight className="h-4 w-4" /> Request Withdrawal
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => setShowAddMethod(true)}>
+          <Plus className="h-4 w-4" /> Add Method
+        </Button>
+        <Button variant="ghost" size="sm" onClick={load}>
+          <RefreshCw className="h-4 w-4" /> Refresh
+        </Button>
+      </div>
+
       {/* ─── Tab Navigation ──────────────────────────────────────────── */}
       <div className="flex gap-1 rounded-2xl bg-gray-100 p-1">
         {[
           { key: 'transactions', label: 'Billing History', icon: BadgeDollarSign },
+          { key: 'withdrawals', label: 'Withdrawal History', icon: ArrowDownRight },
           { key: 'methods', label: 'Payment Methods', icon: CreditCard },
         ].map((tab) => (
           <button
@@ -789,6 +907,97 @@ export default function EmployerFinancePage() {
                   <ChevronLeft className="h-3 w-3" /> Prev
                 </Button>
                 <Button variant="outline" size="xs" disabled={txMeta.current_page >= txMeta.last_page} onClick={() => setTxPage((p) => p + 1)}>
+                  Next <ChevronRight className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ─── Withdrawal History Tab ──────────────────────────────────── */}
+      {activeTab === 'withdrawals' && (
+        <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-bold text-ink-900">Withdrawal History</h2>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {wdMeta.total || 0} withdrawals
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {withdrawals.length === 0 ? (
+            <div className="p-8">
+              <EmptyState icon={ArrowDownRight} title="No withdrawals yet" description="Request a withdrawal to move funds from your wallet to your bank or mobile money account." />
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50/80 text-left">
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Reference</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Amount</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Fee</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Net</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Status</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Date</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {withdrawals.map((w) => {
+                    const isPending = w.status === 'requested' || w.status === 'processing';
+                    const isCompleted = w.status === 'completed';
+                    return (
+                      <tr key={w.id} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="px-6 py-3.5 font-mono text-xs text-gray-600">{w.reference}</td>
+                        <td className="px-6 py-3.5 font-bold text-ink-900">{formatETB(w.amount)}</td>
+                        <td className="px-6 py-3.5 text-red-400 text-xs">−{formatETB(w.fee)}</td>
+                        <td className="px-6 py-3.5 font-bold text-emerald-600">{formatETB(w.net_amount)}</td>
+                        <td className="px-6 py-3.5">
+                          <Badge tone={isCompleted ? 'success' : isPending ? 'warning' : 'neutral'} size="xs">
+                            {w.status}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-3.5 text-xs text-gray-400 whitespace-nowrap">{formatDate(w.created_at)}</td>
+                        <td className="px-6 py-3.5 text-right">
+                          {isPending && (
+                            <button
+                              onClick={() => handleCancelWithdrawal(w.id)}
+                              className="rounded-lg px-2.5 py-1 text-xs font-semibold text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                          )}
+                          {isCompleted && (
+                            <button
+                              onClick={() => handleDeleteWithdrawal(w)}
+                              title="Delete from history"
+                              className="rounded-lg p-2 text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {wdMeta.last_page > 1 && (
+            <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3">
+              <p className="text-xs text-gray-400">Page {wdMeta.current_page} of {wdMeta.last_page}</p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="xs" disabled={wdPage <= 1} onClick={() => setWdPage((p) => p - 1)}>
+                  <ChevronLeft className="h-3 w-3" /> Prev
+                </Button>
+                <Button variant="outline" size="xs" disabled={wdPage >= wdMeta.last_page} onClick={() => setWdPage((p) => p + 1)}>
                   Next <ChevronRight className="h-3 w-3" />
                 </Button>
               </div>
@@ -975,6 +1184,81 @@ export default function EmployerFinancePage() {
               </div>
             </div>
           )}
+        </div>
+      </Modal>
+
+      {/* ─── Withdraw Modal ─────────────────────────────────────────── */}
+      <Modal open={showWithdraw} onClose={() => setShowWithdraw(false)} title="Request Withdrawal" size="md">
+        <div className="space-y-5">
+          {/* Available Balance Banner */}
+          <div className="rounded-2xl bg-gradient-to-r from-emerald-500 to-green-500 p-6 text-center text-white">
+            <p className="text-xs font-bold uppercase tracking-wider text-emerald-100">Available Balance</p>
+            <p className="mt-1 text-4xl font-extrabold">{formatETB(e.available_balance || 0)}</p>
+          </div>
+
+          {methods.length === 0 && (
+            <div className="rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50 p-6 text-center">
+              <CreditCard className="mx-auto h-10 w-10 text-amber-400" />
+              <p className="mt-3 font-bold text-amber-800">No Withdrawal Methods</p>
+              <p className="mt-1 text-xs text-amber-600">Add a method to receive your earnings.</p>
+              <Button variant="outline" size="sm" className="mt-3" onClick={() => { setShowWithdraw(false); setShowAddMethod(true); }}>
+                <Plus className="h-3 w-3" /> Add Method
+              </Button>
+            </div>
+          )}
+
+          <Input
+            label={`Amount (${getPlatformCurrency()})`}
+            type="number"
+            min="100"
+            step="0.01"
+            value={withdrawAmount}
+            onChange={(e) => setWithdrawAmount(e.target.value)}
+            placeholder={`Minimum 100 ${getPlatformCurrency()}`}
+            required
+          />
+
+          {methods.length > 0 && (
+            <Select label="Withdraw To" value={withdrawMethodId} onChange={(e) => setWithdrawMethodId(e.target.value)}>
+              <option value="">Select where to withdraw</option>
+              {methods.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.display_label || m.nickname || m.bank_name || `Method #${m.id}`}
+                </option>
+              ))}
+            </Select>
+          )}
+
+          {/* Fee Breakdown */}
+          {withdrawAmount && parseFloat(withdrawAmount) > 0 && (
+            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm space-y-2">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Amount</span>
+                <span className="font-semibold">{formatETB(parseFloat(withdrawAmount) || 0)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Fee (1.5%)</span>
+                <span className="text-red-500 font-semibold">−{formatETB((parseFloat(withdrawAmount) || 0) * 0.015)}</span>
+              </div>
+              <div className="border-t border-gray-200 pt-2 flex justify-between font-bold">
+                <span>You'll receive</span>
+                <span className="text-emerald-600 text-lg">{formatETB((parseFloat(withdrawAmount) || 0) * 0.985)}</span>
+              </div>
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="outline" onClick={() => setShowWithdraw(false)}>Cancel</Button>
+            <Button
+              variant="success"
+              loading={withdrawing}
+              onClick={handleWithdraw}
+              disabled={!withdrawAmount || !withdrawMethodId || methods.length === 0}
+              className="shadow-lg shadow-emerald-500/20"
+            >
+              <ArrowDownRight className="h-4 w-4" /> Request Withdrawal
+            </Button>
+          </div>
         </div>
       </Modal>
 

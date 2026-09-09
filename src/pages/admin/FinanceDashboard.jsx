@@ -171,19 +171,42 @@ export default function FinanceDashboard() {
     if (reconcileRunRef.current) return;
     reconcileRunRef.current = true;
 
-    const returnedRef = searchParams.get('ref');
+    const returnedRef = searchParams.get('ref') || searchParams.get('trx_ref') || searchParams.get('reference');
     if (returnedRef) {
       setSearchParams({}, { replace: true });
+    }
+
+    if (returnedRef) {
+      const sessionKey = `reconciled_admin_dep_${returnedRef}`;
+      if (!sessionStorage.getItem(sessionKey)) {
+        sessionStorage.setItem(sessionKey, '1');
+
+        financialService.reconcilePlatformDeposit(returnedRef)
+          .then((res) => {
+            const data = res.data?.data ?? res.data ?? res;
+            const deposit = data.deposit || {};
+            if (deposit.status === 'completed') {
+              load();
+              showToast(
+                `Funds Added Successfully! ${formatETB(deposit.amount || 0)} has been added to platform reserves.`,
+                'success'
+              );
+            } else if (deposit.status === 'failed') {
+              showToast(`Deposit failed: ${deposit.failure_reason || 'Transaction failed.'}`, 'error');
+            }
+          })
+          .catch(() => {
+            load();
+            showToast('Deposit verification failed.', 'error');
+          });
+      }
     }
 
     financialService.reconcileAllPlatformDeposits()
       .then((res) => {
         const result = res.data ?? res;
-        if ((result?.reconciled ?? 0) > 0 || returnedRef) {
+        if ((result?.reconciled ?? 0) > 0) {
           load();
-        }
-        if (returnedRef) {
-          showToast('Payment processed. Platform balance updated.', 'success');
         }
       })
       .catch(() => { /* reconciliation is best-effort */ });

@@ -9,11 +9,6 @@ import {
   Sparkles,
   CheckCircle2,
   ChevronRight,
-  Layers,
-  Code2,
-  Palette,
-  Clapperboard,
-  Megaphone,
 } from 'lucide-react';
 import Container from '../common/Container';
 import Badge from '../ui/Badge';
@@ -26,17 +21,6 @@ import { normalizeJob } from '../../utils/jobMapper';
 import { useI18n } from '../../i18n';
 import { useAuth } from '../../hooks/useAuth';
 import { cn } from '../../utils/cn';
-
-/* ─── Filter Tabs Config ─────────────────────────────────────────────────── */
-const FILTER_TABS = [
-  { id: 'all', label: 'All Jobs', icon: Layers },
-  { id: 'design', label: 'Graphics & Design', icon: Palette, categoryMatch: ['design', 'graphic', 'ui'] },
-  { id: 'video', label: 'Video & Audio', icon: Clapperboard, categoryMatch: ['video', 'editing', 'audio'] },
-  { id: 'web', label: 'Web & Tech', icon: Code2, categoryMatch: ['web', 'dev', 'tech', 'software', 'app'] },
-  { id: 'marketing', label: 'Marketing', icon: Megaphone, categoryMatch: ['market', 'seo', 'social'] },
-  { id: 'fixed', label: 'Fixed Price', filterType: 'budget_type', filterVal: 'fixed' },
-  { id: 'hourly', label: 'Hourly Rate', filterType: 'budget_type', filterVal: 'hourly' },
-];
 
 /* ─── Upwork / Guru Style Job Card ─────────────────────────────────────── */
 function FeaturedJobCard({ job }) {
@@ -198,7 +182,6 @@ export default function FeaturedJobsSection() {
   const { t } = useI18n();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('all');
 
   useEffect(() => {
     let active = true;
@@ -218,26 +201,6 @@ export default function FeaturedJobsSection() {
     };
   }, []);
 
-  // Filter jobs based on active Tab
-  const filteredJobs = jobs.filter((job) => {
-    if (activeTab === 'all') return true;
-    const tabConfig = FILTER_TABS.find((t) => t.id === activeTab);
-    if (!tabConfig) return true;
-
-    if (tabConfig.filterType === 'budget_type') {
-      return job.budget_type === tabConfig.filterVal || job.interval === tabConfig.filterVal;
-    }
-
-    if (tabConfig.categoryMatch) {
-      const catName = (job.category || '').toLowerCase();
-      const jobTitle = (job.title || '').toLowerCase();
-      return tabConfig.categoryMatch.some(
-        (kw) => catName.includes(kw) || jobTitle.includes(kw)
-      );
-    }
-    return true;
-  });
-
   return (
     <section className="bg-slate-50/70 dark:bg-slate-950/70 py-8 lg:py-10 border-b border-gray-100 dark:border-slate-800 transition-colors" aria-labelledby="featured-jobs-heading">
       <Container>
@@ -246,7 +209,7 @@ export default function FeaturedJobsSection() {
           renderControls={({ controls }) => (
             <div>
               {/* Section Header */}
-              <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
+              <div className="flex flex-col items-center gap-4 text-center">
                 <div>
                   <span className="inline-block rounded-full bg-brand-50 dark:bg-brand-950/60 px-3 py-1 text-xs font-semibold text-brand-700 dark:text-brand-400">
                     Explore Open Gigs
@@ -272,30 +235,6 @@ export default function FeaturedJobsSection() {
                   {controls}
                 </div>
               </div>
-
-              {/* Interactive Category Filter Pills Bar */}
-              <div className="mt-5 flex overflow-x-auto no-scrollbar items-center gap-2 pb-2">
-                {FILTER_TABS.map((tab) => {
-                  const Icon = tab.icon;
-                  const isActive = activeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setActiveTab(tab.id)}
-                      className={cn(
-                        'flex items-center gap-1.5 shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition-all duration-200',
-                        isActive
-                          ? 'bg-brand-600 text-white shadow-md shadow-brand-500/20'
-                          : 'bg-white dark:bg-slate-900 text-ink-700 dark:text-slate-200 border border-gray-200/80 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-brand-600'
-                      )}
-                    >
-                      {Icon && <Icon className="h-3.5 w-3.5" />}
-                      {tab.label}
-                    </button>
-                  );
-                })}
-              </div>
             </div>
           )}
         >
@@ -304,23 +243,16 @@ export default function FeaturedJobsSection() {
             Array.from({ length: 5 }).map((_, i) => (
               <CardSkeleton key={i} />
             ))
-          ) : filteredJobs.length === 0 ? (
+          ) : jobs.length === 0 ? (
             <div className="w-full rounded-2xl border border-dashed border-gray-300 bg-white p-10 text-center my-2">
               <Briefcase className="mx-auto h-10 w-10 text-gray-300" />
-              <p className="mt-3 text-sm font-semibold text-ink-900">No jobs found in this filter</p>
+              <p className="mt-3 text-sm font-semibold text-ink-900">No open jobs available</p>
               <p className="mt-1 text-xs text-gray-500">
-                Try selecting "All Jobs" or explore all open listings.
+                Check back soon or explore all open listings.
               </p>
-              <button
-                type="button"
-                onClick={() => setActiveTab('all')}
-                className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-brand-600 hover:text-brand-700"
-              >
-                Reset Filter
-              </button>
             </div>
           ) : (
-            filteredJobs.map((job) => (
+            jobs.map((job) => (
               <div
                 key={job.id}
                 className="w-[310px] sm:w-[340px] md:w-[360px] shrink-0 snap-start flex"
