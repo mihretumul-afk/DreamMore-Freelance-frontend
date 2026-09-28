@@ -138,8 +138,8 @@ export default function AdminSkillsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-ink-900">Skills</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-bold tracking-tight text-ink-900 dark:text-slate-100">Skills</h1>
+          <p className="text-sm text-gray-500 dark:text-slate-400">
             Manage skills on the platform. {meta.total || skills.length} total.
           </p>
         </div>
@@ -173,7 +173,7 @@ export default function AdminSkillsPage() {
       ) : loading ? (
         <div className="space-y-3">
           {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-14 animate-pulse rounded-card border border-gray-200 bg-white" />
+            <div key={i} className="h-14 animate-pulse rounded-card border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900" />
           ))}
         </div>
       ) : skills.length === 0 ? (
@@ -185,40 +185,40 @@ export default function AdminSkillsPage() {
         />
       ) : (
         <>
-          <div className="overflow-x-auto rounded-card border border-gray-200 bg-white shadow-card">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="overflow-x-auto rounded-card border border-gray-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
+              <thead className="bg-gray-50 dark:bg-slate-800/50">
                 <tr>
-                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500">
+                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                     Name
                   </th>
-                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500">
+                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                     Slug
                   </th>
-                  <th className="hidden px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 md:table-cell">
+                  <th className="hidden px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400 md:table-cell">
                     Category
                   </th>
-                  <th className="hidden px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 md:table-cell">
+                  <th className="hidden px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400 md:table-cell">
                     Freelancers
                   </th>
-                  <th className="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-gray-500">
+                  <th className="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                 {skills.map((skill) => (
-                  <tr key={skill.id} className="hover:bg-gray-50/50">
+                  <tr key={skill.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50">
                     <td className="px-5 py-3">
-                      <p className="text-sm font-bold text-ink-900">{skill.name}</p>
+                      <p className="text-sm font-bold text-ink-900 dark:text-slate-100">{skill.name}</p>
                     </td>
                     <td className="px-5 py-3">
                       <Badge tone="neutral" size="xs">{skill.slug}</Badge>
                     </td>
-                    <td className="hidden px-5 py-3 text-xs text-gray-500 md:table-cell">
+                    <td className="hidden px-5 py-3 text-xs text-gray-500 dark:text-slate-400 md:table-cell">
                       {getCategoryName(skill.category)}
                     </td>
-                    <td className="hidden px-5 py-3 text-sm text-gray-600 md:table-cell">
+                    <td className="hidden px-5 py-3 text-sm text-gray-600 dark:text-slate-300 md:table-cell">
                       {skill.freelancers_count ?? skill.freelancersCount ?? 0}
                     </td>
                     <td className="px-5 py-3 text-right">
@@ -240,7 +240,7 @@ export default function AdminSkillsPage() {
           {/* Pagination */}
           {meta.last_page > 1 && (
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-slate-400">
                 Page {meta.current_page} of {meta.last_page}
               </p>
               <div className="flex gap-2">

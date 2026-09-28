@@ -108,18 +108,18 @@ function PerformanceMetric({ icon: Icon, label, value, maxValue = 100, color = '
   const c = colors[color] || colors.brand;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-all duration-300">
+    <div className="rounded-xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-4 shadow-sm hover:shadow-md transition-all duration-300">
       <div className="flex items-center gap-3 mb-3">
         <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', c.light)}>
           <Icon className={cn('h-4 w-4', c.text)} />
         </div>
-        <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{label}</span>
+        <span className="text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wide">{label}</span>
       </div>
       <div className="flex items-end gap-2">
-        <span className="text-2xl font-bold text-ink-900">{value}{suffix}</span>
-        {maxValue < 100 && <span className="text-xs text-gray-400 mb-1">/ {maxValue}</span>}
+        <span className="text-2xl font-bold text-ink-900 dark:text-slate-100">{value}{suffix}</span>
+        {maxValue < 100 && <span className="text-xs text-gray-400 dark:text-slate-400 mb-1">/ {maxValue}</span>}
       </div>
-      <div className="mt-3 h-2 rounded-full bg-gray-100 overflow-hidden">
+      <div className="mt-3 h-2 rounded-full bg-gray-100 dark:bg-slate-800 overflow-hidden">
         <div
           className={cn('h-full rounded-full transition-all duration-1000', c.bg)}
           style={{ width: `${percentage}%` }}
@@ -148,13 +148,13 @@ function BudgetSummaryStrip({ finance, isRefreshing }) {
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-r from-white via-gray-50 to-white p-5 shadow-card transition-opacity duration-500',
+        'relative overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-r from-white via-gray-50 to-white dark:border-slate-800 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-5 shadow-card transition-opacity duration-500',
         isRefreshing && 'opacity-60'
       )}
     >
       {/* Background decorations */}
-      <div className="pointer-events-none absolute -top-16 -right-10 h-44 w-44 rounded-full bg-indigo-100/60 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-16 left-1/3 h-36 w-36 rounded-full bg-emerald-100/50 blur-3xl" />
+      <div className="pointer-events-none absolute -top-16 -right-10 h-44 w-44 rounded-full bg-indigo-100/60 dark:bg-indigo-900/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-16 left-1/3 h-36 w-36 rounded-full bg-emerald-100/50 dark:bg-emerald-900/20 blur-3xl" />
 
       <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         {/* Budget usage — the number that matters for a quick glance */}
@@ -163,21 +163,21 @@ function BudgetSummaryStrip({ finance, isRefreshing }) {
             <Wallet className="h-6 w-6" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Budget</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Budget</p>
             {hasBudget ? (
               <>
-                <p className="mt-0.5 text-xl font-extrabold tracking-tight text-ink-900 lg:text-2xl truncate">
+                <p className="mt-0.5 text-xl font-extrabold tracking-tight text-ink-900 dark:text-slate-100 lg:text-2xl truncate">
                   {formatCurrency(monthlySpent)}
-                  <span className="text-sm font-semibold text-gray-400"> of {formatCurrency(monthlyLimit)} limit</span>
+                  <span className="text-sm font-semibold text-gray-400 dark:text-slate-400"> of {formatCurrency(monthlyLimit)} limit</span>
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <div className="h-1.5 w-36 rounded-full bg-gray-100 overflow-hidden">
+                  <div className="h-1.5 w-36 rounded-full bg-gray-100 dark:bg-slate-800 overflow-hidden">
                     <div
                       className={cn('h-full rounded-full transition-all duration-1000', usedPercent >= 100 ? 'bg-red-500' : 'bg-indigo-500')}
                       style={{ width: `${usedPercent}%` }}
                     />
                   </div>
-                  <span className={cn('text-[10px] font-semibold', usedPercent >= 100 ? 'text-red-500' : 'text-gray-400')}>
+                  <span className={cn('text-[10px] font-semibold', usedPercent >= 100 ? 'text-red-500' : 'text-gray-400 dark:text-slate-400')}>
                     {usedPercent}% used{remaining > 0
                       ? ` · ${formatCurrency(remaining)} remaining this month`
                       : ` · ${formatCurrency(Math.abs(remaining))} over budget`}
@@ -186,10 +186,10 @@ function BudgetSummaryStrip({ finance, isRefreshing }) {
               </>
             ) : (
               <>
-                <p className="mt-0.5 text-xl font-extrabold tracking-tight text-ink-900 lg:text-2xl">
+                <p className="mt-0.5 text-xl font-extrabold tracking-tight text-ink-900 dark:text-slate-100 lg:text-2xl">
                   {formatCurrency(totalSpent)}
                 </p>
-                <p className="mt-1 text-[10px] font-medium text-gray-400">Total spent · no monthly budget set</p>
+                <p className="mt-1 text-[10px] font-medium text-gray-400 dark:text-slate-400">Total spent · no monthly budget set</p>
               </>
             )}
           </div>
@@ -198,22 +198,22 @@ function BudgetSummaryStrip({ finance, isRefreshing }) {
         {/* Secondary figures */}
         <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
           <div>
-            <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-600">
+            <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
               <Clock className="h-3.5 w-3.5" /> In Escrow
             </p>
-            <p className="mt-0.5 text-lg font-bold text-ink-900">{formatCurrency(pendingPayments)}</p>
+            <p className="mt-0.5 text-lg font-bold text-ink-900 dark:text-slate-100">{formatCurrency(pendingPayments)}</p>
           </div>
-          <div className="hidden h-9 w-px bg-gray-200 sm:block" />
+          <div className="hidden h-9 w-px bg-gray-200 dark:bg-slate-700 sm:block" />
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Spent</p>
-            <p className="mt-0.5 text-lg font-semibold text-gray-500">{formatCurrency(totalSpent)}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Total Spent</p>
+            <p className="mt-0.5 text-lg font-semibold text-gray-500 dark:text-slate-300">{formatCurrency(totalSpent)}</p>
           </div>
         </div>
 
         {/* Link to the full Finance page */}
         <Link
           to="/employer/settings/payment-methods"
-          className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-ink-900 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-ink-900/20 transition-all hover:-translate-y-0.5 hover:bg-ink-800 hover:shadow-xl hover:shadow-ink-900/25"
+          className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-ink-900 dark:bg-slate-100 px-5 py-3 text-sm font-bold text-white dark:text-slate-900 shadow-lg shadow-ink-900/20 transition-all hover:-translate-y-0.5 hover:bg-ink-800 dark:hover:bg-white hover:shadow-xl hover:shadow-ink-900/25"
         >
           View Finance
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -267,26 +267,26 @@ function EarningsCard({ icon: Icon, label, value, color = 'brand', trend, trendV
    ═══════════════════════════════════════════════════════════════════════════ */
 function ActivityFeedItem({ icon: Icon, color, title, description, time, link }) {
   const colorMap = {
-    brand: 'bg-indigo-50 text-indigo-600',
-    success: 'bg-emerald-50 text-emerald-600',
-    warning: 'bg-amber-50 text-amber-600',
-    danger: 'bg-red-50 text-red-600',
-    info: 'bg-blue-50 text-blue-600',
+    brand: 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400',
+    success: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400',
+    warning: 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400',
+    danger: 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400',
+    info: 'bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400',
   };
 
   return (
-    <div className="flex items-start gap-3 py-3 border-b border-gray-50 last:border-0">
+    <div className="flex items-start gap-3 py-3 border-b border-gray-50 dark:border-slate-800 last:border-0">
       <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', colorMap[color] || colorMap.brand)}>
         <Icon className="h-4 w-4" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-ink-900">{title}</p>
-        <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+        <p className="text-sm font-medium text-ink-900 dark:text-slate-100">{title}</p>
+        <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{description}</p>
       </div>
       <div className="flex flex-col items-end gap-1">
-        <span className="text-[10px] text-gray-400">{time}</span>
+        <span className="text-[10px] text-gray-400 dark:text-slate-400">{time}</span>
         {link && (
-          <Link to={link} className="text-[10px] font-medium text-indigo-600 hover:text-indigo-700">
+          <Link to={link} className="text-[10px] font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700">
             View
           </Link>
         )}
@@ -502,49 +502,49 @@ export default function EmployerDashboardPage() {
       {/* ═══════════════════════════════════════════════════════════════════
          HERO HEADER — White Cloud Design
          ═══════════════════════════════════════════════════════════════════ */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white via-gray-50 to-gray-100 p-6 lg:p-8 text-gray-900 shadow-xl border border-gray-200">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6 lg:p-8 text-gray-900 dark:text-slate-100 shadow-xl border border-gray-200 dark:border-slate-800">
         {/* Background decorations */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-indigo-100/50 blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-emerald-100/50 blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-violet-100/30 blur-3xl" />
+          <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-indigo-100/50 dark:bg-indigo-900/20 blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-emerald-100/50 dark:bg-emerald-900/20 blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-violet-100/30 dark:bg-violet-900/10 blur-3xl" />
         </div>
 
         <div className="relative z-10">
           {/* Header row */}
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 border-gray-200 bg-gray-100 shadow-lg flex items-center justify-center">
+              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800 shadow-lg flex items-center justify-center">
                 {profile?.avatar
                   ? <img src={profile.avatar} alt={profile.companyName} className="h-full w-full object-cover" />
                   : (
-                    <div className="flex h-full w-full items-center justify-center text-2xl font-extrabold text-gray-600">
+                    <div className="flex h-full w-full items-center justify-center text-2xl font-extrabold text-gray-600 dark:text-slate-300">
                       {(profile?.companyName || firstName).charAt(0).toUpperCase()}
                     </div>
                   )
                 }
               </div>
               <div>
-                <p className="text-indigo-600 text-sm font-medium tracking-wider uppercase mb-1">{greeting} 👋</p>
-                <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900">
+                <p className="text-indigo-600 dark:text-indigo-400 text-sm font-medium tracking-wider uppercase mb-1">{greeting} 👋</p>
+                <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 dark:text-slate-100">
                   {firstName}
                 </h1>
-                <p className="text-gray-500 text-sm mt-1">
+                <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">
                   {profile?.companyName ? `${profile.companyName} · Employer` : 'Employer on DreamMore'}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               {lastUpdated && (
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-400 dark:text-slate-400">
                   Updated {timeAgo(lastUpdated)}
                 </span>
               )}
               <div className={cn(
                 'flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold',
                 isRefreshing
-                  ? 'bg-indigo-100 text-indigo-600'
-                  : 'bg-emerald-100 text-emerald-600'
+                  ? 'bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400'
+                  : 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400'
               )}>
                 <RefreshCw className={cn('h-3 w-3', isRefreshing && 'animate-spin')} />
                 {isRefreshing ? 'Refreshing...' : 'Live'}
@@ -575,7 +575,7 @@ export default function EmployerDashboardPage() {
           title="Hiring Performance"
           description="Your employer metrics"
           action={
-            <Link to="/employer/profile" className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+            <Link to="/employer/profile" className="flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700">
               View Profile <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           }
@@ -630,13 +630,13 @@ export default function EmployerDashboardPage() {
          ═══════════════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Posted Jobs — 2 columns */}
-        <div className="lg:col-span-2 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div className="lg:col-span-2 rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h2 className="text-base font-bold text-ink-900">Your Posted Jobs</h2>
-              <p className="text-xs text-gray-500 mt-0.5">Manage your job listings</p>
+              <h2 className="text-base font-bold text-ink-900 dark:text-slate-100">Your Posted Jobs</h2>
+              <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Manage your job listings</p>
             </div>
-            <Link to="/employer/jobs" className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+            <Link to="/employer/jobs" className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700">
               View all →
             </Link>
           </div>
@@ -644,34 +644,34 @@ export default function EmployerDashboardPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50/50">
-                    <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Job</th>
-                    <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Proposals</th>
-                    <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Budget</th>
-                    <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Status</th>
+                  <tr className="border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50">
+                    <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Job</th>
+                    <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Proposals</th>
+                    <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Budget</th>
+                    <th className="px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                   {recentJobs.map((job) => (
-                    <tr key={job.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={job.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
                       <td className="px-4 py-3">
                         <Link
                           to={`/employer/jobs/${job.id}`}
-                          className="text-sm font-semibold text-ink-900 hover:text-indigo-600 line-clamp-1"
+                          className="text-sm font-semibold text-ink-900 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400 line-clamp-1"
                         >
                           {job.title}
                         </Link>
                         {job.category && (
-                          <p className="text-xs text-gray-400 mt-0.5">{job.category}</p>
+                          <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">{job.category}</p>
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="inline-flex items-center gap-1 text-sm text-gray-600">
+                        <span className="inline-flex items-center gap-1 text-sm text-gray-600 dark:text-slate-300">
                           <Send className="h-3 w-3" />
                           {job.proposalsCount ?? 0}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm font-medium text-ink-900">
+                      <td className="px-4 py-3 text-sm font-medium text-ink-900 dark:text-slate-100">
                         {formatETB(job.budget)}
                       </td>
                       <td className="px-4 py-3">
@@ -701,16 +701,16 @@ export default function EmployerDashboardPage() {
         </div>
 
         {/* Activity Feed */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-          <h2 className="text-base font-bold text-ink-900 mb-4">Activity Feed</h2>
+        <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+          <h2 className="text-base font-bold text-ink-900 dark:text-slate-100 mb-4">Activity Feed</h2>
           {activityItems.length > 0 ? (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-gray-50 dark:divide-slate-800">
               {activityItems.slice(0, 5).map((item, i) => (
                 <ActivityFeedItem key={i} {...item} />
               ))}
             </div>
           ) : (
-            <p className="py-8 text-center text-sm text-gray-400">No recent activity.</p>
+            <p className="py-8 text-center text-sm text-gray-400 dark:text-slate-400">No recent activity.</p>
           )}
         </div>
       </div>
@@ -723,7 +723,7 @@ export default function EmployerDashboardPage() {
           title="Top Freelancers"
           description="AI-powered talent recommendations"
           action={
-            <Link to="/freelancers" className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+            <Link to="/freelancers" className="flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700">
               Browse All <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           }
@@ -736,7 +736,7 @@ export default function EmployerDashboardPage() {
                   <Link
                     key={fl.id}
                     to={`/freelancers/${fl.id}`}
-                    className="group flex flex-col items-center gap-3 rounded-xl border border-gray-100 bg-white p-4 transition-all hover:-translate-y-1 hover:shadow-lg hover:border-indigo-200"
+                    className="group flex flex-col items-center gap-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 transition-all hover:-translate-y-1 hover:shadow-lg hover:border-indigo-200 dark:hover:border-indigo-800"
                   >
                     <div className="relative">
                       <Avatar name={fl.name} src={fl.avatar} size="lg" />
@@ -748,11 +748,11 @@ export default function EmployerDashboardPage() {
                       )}
                     </div>
                     <div className="text-center">
-                      <p className="text-sm font-semibold text-ink-900 group-hover:text-indigo-600 line-clamp-1">{fl.name}</p>
-                      <p className="text-xs text-gray-400 line-clamp-1 mt-0.5">{fl.headline || fl.categoryName}</p>
+                      <p className="text-sm font-semibold text-ink-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 line-clamp-1">{fl.name}</p>
+                      <p className="text-xs text-gray-400 dark:text-slate-400 line-clamp-1 mt-0.5">{fl.headline || fl.categoryName}</p>
                     </div>
                     {fl.hourlyRate && (
-                      <span className="text-xs font-medium text-emerald-600">{formatETB(fl.hourlyRate)}/hr</span>
+                      <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">{formatETB(fl.hourlyRate)}/hr</span>
                     )}
                   </Link>
                 );
@@ -778,7 +778,7 @@ export default function EmployerDashboardPage() {
             title="Active Contracts"
             description="Work in progress with freelancers"
             action={
-              <Link to="/employer/contracts" className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+              <Link to="/employer/contracts" className="flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700">
                 View All <ChevronRight className="h-3.5 w-3.5" />
               </Link>
             }
@@ -787,29 +787,29 @@ export default function EmployerDashboardPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50/50">
-                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Contract</th>
-                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Freelancer</th>
-                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Amount</th>
-                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Status</th>
-                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Action</th>
+                  <tr className="border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50">
+                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Contract</th>
+                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Freelancer</th>
+                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Amount</th>
+                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Status</th>
+                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                   {activeContracts.slice(0, 5).map((contract) => (
-                    <tr key={contract.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={contract.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
                       <td className="px-5 py-3">
-                        <p className="text-sm font-semibold text-ink-900 line-clamp-1">{contract.title || `Contract #${contract.id}`}</p>
+                        <p className="text-sm font-semibold text-ink-900 dark:text-slate-100 line-clamp-1">{contract.title || `Contract #${contract.id}`}</p>
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="h-6 w-6 rounded-full bg-indigo-100 flex items-center justify-center text-[10px] font-bold text-indigo-600">
+                          <div className="h-6 w-6 rounded-full bg-indigo-100 dark:bg-indigo-950/50 flex items-center justify-center text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
                             {(contract.freelancer?.name || 'F').charAt(0).toUpperCase()}
                           </div>
-                          <span className="text-xs text-gray-600">{contract.freelancer?.name || 'Freelancer'}</span>
+                          <span className="text-xs text-gray-600 dark:text-slate-300">{contract.freelancer?.name || 'Freelancer'}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-3 text-sm font-medium text-ink-900">
+                      <td className="px-5 py-3 text-sm font-medium text-ink-900 dark:text-slate-100">
                         {formatETB(contract.amount)}
                       </td>
                       <td className="px-5 py-3">
@@ -818,7 +818,7 @@ export default function EmployerDashboardPage() {
                       <td className="px-5 py-3">
                         <Link
                           to={`/employer/contracts/${contract.id}`}
-                          className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                          className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700"
                         >
                           View Details
                         </Link>
@@ -835,20 +835,20 @@ export default function EmployerDashboardPage() {
       {/* ═══════════════════════════════════════════════════════════════════
          COMPANY PROFILE STRIP
          ═══════════════════════════════════════════════════════════════════ */}
-      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-xl font-extrabold text-indigo-600">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-xl font-extrabold text-indigo-600 dark:text-indigo-400">
               {(profile?.companyName || user?.name || 'E').charAt(0).toUpperCase()}
             </div>
             <div>
-              <p className="font-bold text-ink-900">
+              <p className="font-bold text-ink-900 dark:text-slate-100">
                 {profile?.companyName || user?.name || 'Company'}
               </p>
-              <p className="text-sm text-gray-500 line-clamp-1">
+              <p className="text-sm text-gray-500 dark:text-slate-400 line-clamp-1">
                 {profile?.companyDescription || 'No company description set'}
               </p>
-              <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-gray-400">
+              <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-gray-400 dark:text-slate-400">
                 {profile?.location && (
                   <span className="inline-flex items-center gap-1">
                     <MapPin className="h-3.5 w-3.5" />{profile.location}
@@ -882,7 +882,7 @@ export default function EmployerDashboardPage() {
       {/* ═══════════════════════════════════════════════════════════════════
          FOOTER INFO
          ═══════════════════════════════════════════════════════════════════ */}
-      <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-5 py-3 text-xs text-gray-500 shadow-card">
+      <div className="flex items-center justify-between rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-3 text-xs text-gray-500 dark:text-slate-400 shadow-card">
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5">
             <Globe className="h-3.5 w-3.5" />
@@ -909,15 +909,15 @@ function Skeleton() {
   return (
     <div className="animate-pulse space-y-6">
       <div className="h-40 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900" />
-      <div className="h-28 rounded-2xl bg-gray-200" />
+      <div className="h-28 rounded-2xl bg-gray-200 dark:bg-slate-800" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => <div key={i} className="h-28 rounded-xl bg-gray-200" />)}
+        {[...Array(4)].map((_, i) => <div key={i} className="h-28 rounded-xl bg-gray-200 dark:bg-slate-800" />)}
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 h-64 rounded-2xl bg-gray-200" />
-        <div className="h-64 rounded-2xl bg-gray-200" />
+        <div className="lg:col-span-2 h-64 rounded-2xl bg-gray-200 dark:bg-slate-800" />
+        <div className="h-64 rounded-2xl bg-gray-200 dark:bg-slate-800" />
       </div>
-      <div className="h-48 rounded-2xl bg-gray-200" />
+      <div className="h-48 rounded-2xl bg-gray-200 dark:bg-slate-800" />
     </div>
   );
 }
@@ -934,14 +934,14 @@ function QuickAction({ icon: Icon, label, description, to, color = 'brand' }) {
   return (
     <Link
       to={to}
-      className="group flex flex-col items-center gap-2 rounded-2xl border border-gray-100 bg-white p-5 text-center transition-all hover:-translate-y-1 hover:shadow-lg"
+      className="group flex flex-col items-center gap-2 rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 text-center transition-all hover:-translate-y-1 hover:shadow-lg"
     >
       <div className={cn('flex h-11 w-11 items-center justify-center rounded-2xl text-white transition-transform group-hover:scale-110', colors[color] ?? colors.brand)}>
         <Icon className="h-5 w-5" aria-hidden="true" />
       </div>
       <div>
-        <p className="text-sm font-bold text-ink-900">{label}</p>
-        <p className="mt-0.5 text-xs text-gray-400">{description}</p>
+        <p className="text-sm font-bold text-ink-900 dark:text-slate-100">{label}</p>
+        <p className="mt-0.5 text-xs text-gray-400 dark:text-slate-400">{description}</p>
       </div>
     </Link>
   );

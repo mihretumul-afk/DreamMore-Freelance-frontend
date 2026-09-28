@@ -98,9 +98,9 @@ function AnimatedCounter({ value, prefix = '', suffix = '', duration = 1000 }) {
    ═══════════════════════════════════════════════════════════════════════════ */
 function SystemHealthCard({ icon: Icon, label, status, latency, color = 'success' }) {
   const colors = {
-    success: 'bg-emerald-50 text-emerald-600 border-emerald-200',
-    warning: 'bg-amber-50 text-amber-600 border-amber-200',
-    danger: 'bg-red-50 text-red-600 border-red-200',
+    success: 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50',
+    warning: 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900/50',
+    danger: 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/50',
   };
 
   const dotColors = {
@@ -114,11 +114,11 @@ function SystemHealthCard({ icon: Icon, label, status, latency, color = 'success
       <div className={cn('h-2 w-2 rounded-full animate-pulse', dotColors[color])} />
       <Icon className="h-4 w-4" />
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold text-ink-900">{label}</p>
-        <p className="text-[11px] text-gray-500">{status}</p>
+        <p className="text-xs font-semibold text-ink-900 dark:text-slate-100">{label}</p>
+        <p className="text-[11px] text-gray-500 dark:text-slate-400">{status}</p>
       </div>
       {latency && (
-        <span className="text-[10px] font-mono text-gray-400">{latency}</span>
+        <span className="text-[10px] font-mono text-gray-400 dark:text-slate-500">{latency}</span>
       )}
     </div>
   );
@@ -146,7 +146,7 @@ function MiniBarChart({ data, height = 60, color = 'brand' }) {
             className={cn('w-full rounded-t transition-all duration-500', colorMap[color] || colorMap.brand)}
             style={{ height: `${(d.value / max) * 100}%`, minHeight: 2 }}
           />
-          <span className="text-[9px] text-gray-400">{d.label}</span>
+          <span className="text-[9px] text-gray-400 dark:text-slate-500">{d.label}</span>
         </div>
       ))}
     </div>
@@ -158,26 +158,26 @@ function MiniBarChart({ data, height = 60, color = 'brand' }) {
    ═══════════════════════════════════════════════════════════════════════════ */
 function ActivityFeedItem({ icon: Icon, color, title, description, time, link }) {
   const colorMap = {
-    brand: 'bg-indigo-50 text-indigo-600',
-    success: 'bg-emerald-50 text-emerald-600',
-    warning: 'bg-amber-50 text-amber-600',
-    danger: 'bg-red-50 text-red-600',
-    info: 'bg-blue-50 text-blue-600',
+    brand: 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400',
+    success: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400',
+    warning: 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400',
+    danger: 'bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400',
+    info: 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400',
   };
 
   return (
-    <div className="flex items-start gap-3 py-3 border-b border-gray-50 last:border-0">
+    <div className="flex items-start gap-3 py-3 border-b border-gray-50 dark:border-slate-800/60 last:border-0">
       <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', colorMap[color] || colorMap.brand)}>
         <Icon className="h-4 w-4" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-ink-900">{title}</p>
-        <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+        <p className="text-sm font-medium text-ink-900 dark:text-slate-100">{title}</p>
+        <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{description}</p>
       </div>
       <div className="flex flex-col items-end gap-1">
-        <span className="text-[10px] text-gray-400">{time}</span>
+        <span className="text-[10px] text-gray-400 dark:text-slate-500">{time}</span>
         {link && (
-          <Link to={link} className="text-[10px] font-medium text-indigo-600 hover:text-indigo-700">
+          <Link to={link} className="text-[10px] font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">
             View
           </Link>
         )}
@@ -401,44 +401,44 @@ export default function AdminDashboardPage() {
       {/* ═══════════════════════════════════════════════════════════════════
          HERO HEADER — White Cloud Design
          ═══════════════════════════════════════════════════════════════════ */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white via-gray-50 to-gray-100 p-6 lg:p-8 text-gray-900 shadow-xl border border-gray-200">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 p-6 lg:p-8 text-gray-900 dark:text-slate-100 shadow-xl border border-gray-200 dark:border-slate-800">
         {/* Background decorations */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-indigo-100/50 blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-emerald-100/50 blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-violet-100/30 blur-3xl" />
+          <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-indigo-100/50 dark:bg-indigo-900/20 blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-emerald-100/50 dark:bg-emerald-900/20 blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-violet-100/30 dark:bg-violet-900/10 blur-3xl" />
         </div>
 
         <div className="relative z-10">
           {/* Header row */}
           <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
             <div>
-              <p className="text-indigo-600 text-sm font-medium tracking-wider uppercase mb-1">Super Admin</p>
-              <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900">
+              <p className="text-indigo-600 dark:text-indigo-400 text-sm font-medium tracking-wider uppercase mb-1">Super Admin</p>
+              <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 dark:text-slate-100">
                 Platform Dashboard
               </h1>
-              <p className="text-gray-500 text-sm mt-1">
+              <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">
                 Welcome back, {firstName}. Here&apos;s your platform overview.
               </p>
             </div>
             <div className="flex items-center gap-3">
               {lastUpdated && (
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-400 dark:text-slate-500">
                   Updated {timeAgo(lastUpdated)}
                 </span>
               )}
               <div className={cn(
                 'flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold',
                 isRefreshing
-                  ? 'bg-indigo-100 text-indigo-600'
-                  : 'bg-emerald-100 text-emerald-600'
+                  ? 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400'
+                  : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400'
               )}>
                 <RefreshCw className={cn('h-3 w-3', isRefreshing && 'animate-spin')} />
                 {isRefreshing ? 'Refreshing...' : 'Live'}
               </div>
               <button
                 onClick={() => loadDashboard(true)}
-                className="flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
+                className="flex items-center gap-2 rounded-full border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all shadow-sm cursor-pointer"
               >
                 <RefreshCw className={cn('h-4 w-4', isRefreshing && 'animate-spin')} />
                 Refresh
@@ -450,24 +450,24 @@ export default function AdminDashboardPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Total Users */}
             <div className={cn(
-              'rounded-xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-indigo-100 p-4 transition-all duration-500',
+              'rounded-xl border border-indigo-200 dark:border-indigo-900/50 bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-950/40 dark:to-indigo-900/40 p-4 transition-all duration-500',
               isRefreshing && 'animate-pulse'
             )}>
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500">
                   <Users className="h-4 w-4 text-white" />
                 </div>
-                <span className="text-xs font-semibold text-indigo-700 uppercase tracking-wide">Total Users</span>
+                <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 uppercase tracking-wide">Total Users</span>
               </div>
-              <p className="text-2xl lg:text-3xl font-bold text-gray-900">
+              <p className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-slate-100">
                 {formatNumber(s.totalUsers)}
               </p>
               <div className="flex items-center gap-2 mt-2">
-                <span className="text-xs text-indigo-600">
+                <span className="text-xs text-indigo-600 dark:text-indigo-400">
                   {s.totalFreelancers} freelancers
                 </span>
-                <span className="text-indigo-300">·</span>
-                <span className="text-xs text-indigo-600">
+                <span className="text-indigo-300 dark:text-indigo-700">·</span>
+                <span className="text-xs text-indigo-600 dark:text-indigo-400">
                   {s.totalEmployers} employers
                 </span>
               </div>
@@ -475,24 +475,24 @@ export default function AdminDashboardPage() {
 
             {/* Active Jobs */}
             <div className={cn(
-              'rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 p-4 transition-all duration-500',
+              'rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/40 dark:to-emerald-900/40 p-4 transition-all duration-500',
               isRefreshing && 'animate-pulse'
             )}>
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500">
                   <Briefcase className="h-4 w-4 text-white" />
                 </div>
-                <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Active Jobs</span>
+                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wide">Active Jobs</span>
               </div>
-              <p className="text-2xl lg:text-3xl font-bold text-gray-900">
+              <p className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-slate-100">
                 {formatNumber(s.openJobs)}
               </p>
               <div className="flex items-center gap-2 mt-2">
-                <span className="text-xs text-emerald-600">
+                <span className="text-xs text-emerald-600 dark:text-emerald-400">
                   {s.inProgressJobs} in progress
                 </span>
-                <span className="text-emerald-300">·</span>
-                <span className="text-xs text-emerald-600">
+                <span className="text-emerald-300 dark:text-emerald-700">·</span>
+                <span className="text-xs text-emerald-600 dark:text-emerald-400">
                   {s.completedJobs} completed
                 </span>
               </div>
@@ -500,20 +500,20 @@ export default function AdminDashboardPage() {
 
             {/* Platform Revenue */}
             <div className={cn(
-              'rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100 p-4 transition-all duration-500',
+              'rounded-xl border border-amber-200 dark:border-amber-900/50 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/40 dark:to-amber-900/40 p-4 transition-all duration-500',
               isRefreshing && 'animate-pulse'
             )}>
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500">
                   <DollarSign className="h-4 w-4 text-white" />
                 </div>
-                <span className="text-xs font-semibold text-amber-700 uppercase tracking-wide">Revenue</span>
+                <span className="text-xs font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">Revenue</span>
               </div>
-              <p className="text-2xl lg:text-3xl font-bold text-gray-900">
+              <p className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-slate-100">
                 {formatCurrency(s.totalRevenue)}
               </p>
               <div className="flex items-center gap-2 mt-2">
-                <span className="text-xs text-amber-600">
+                <span className="text-xs text-amber-600 dark:text-amber-400">
                   This month: {formatCurrency(s.monthlyRevenue)}
                 </span>
               </div>
@@ -521,24 +521,24 @@ export default function AdminDashboardPage() {
 
             {/* Contracts */}
             <div className={cn(
-              'rounded-xl border border-violet-200 bg-gradient-to-br from-violet-50 to-violet-100 p-4 transition-all duration-500',
+              'rounded-xl border border-violet-200 dark:border-violet-900/50 bg-gradient-to-br from-violet-50 to-violet-100 dark:from-violet-950/40 dark:to-violet-900/40 p-4 transition-all duration-500',
               isRefreshing && 'animate-pulse'
             )}>
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500">
                   <Handshake className="h-4 w-4 text-white" />
                 </div>
-                <span className="text-xs font-semibold text-violet-700 uppercase tracking-wide">Contracts</span>
+                <span className="text-xs font-semibold text-violet-700 dark:text-violet-300 uppercase tracking-wide">Contracts</span>
               </div>
-              <p className="text-2xl lg:text-3xl font-bold text-gray-900">
+              <p className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-slate-100">
                 {formatNumber(s.totalContracts)}
               </p>
               <div className="flex items-center gap-2 mt-2">
-                <span className="text-xs text-violet-600">
+                <span className="text-xs text-violet-600 dark:text-violet-400">
                   {s.activeContracts} active
                 </span>
-                <span className="text-violet-300">·</span>
-                <span className="text-xs text-violet-600">
+                <span className="text-violet-300 dark:text-violet-700">·</span>
+                <span className="text-xs text-violet-600 dark:text-violet-400">
                   {s.completedContracts} completed
                 </span>
               </div>
@@ -551,14 +551,14 @@ export default function AdminDashboardPage() {
          ALERTS BANNER — Pending Actions
          ═══════════════════════════════════════════════════════════════════ */}
       {(s.pendingCredentials > 0 || s.pendingReports > 0 || s.pendingWithdrawals > 0) && (
-        <div className="rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4 shadow-sm">
+        <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 p-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
-              <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950/60">
+              <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-amber-900">Actions Required</p>
-              <p className="text-xs text-amber-700 mt-0.5">Items that need your immediate attention</p>
+              <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">Actions Required</p>
+              <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">Items that need your immediate attention</p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mt-3">
@@ -566,7 +566,7 @@ export default function AdminDashboardPage() {
             {s.pendingCredentials > 0 && can('users.verify') && (
               <Link
                 to="/admin/verifications?type=credential&status=pending"
-                className="inline-flex items-center gap-2 rounded-lg bg-white border border-indigo-200 px-3 py-2 text-xs font-semibold text-indigo-800 hover:bg-indigo-50 transition-all shadow-sm"
+                className="inline-flex items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-900 px-3 py-2 text-xs font-semibold text-indigo-800 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 transition-all shadow-sm"
               >
                 <Award className="h-3.5 w-3.5" />
                 {s.pendingCredentials} Credential{s.pendingCredentials !== 1 ? 's' : ''}
@@ -576,7 +576,7 @@ export default function AdminDashboardPage() {
             {s.pendingReports > 0 && can('disputes.view') && (
               <Link
                 to="/admin/reports"
-                className="inline-flex items-center gap-2 rounded-lg bg-white border border-red-200 px-3 py-2 text-xs font-semibold text-red-800 hover:bg-red-50 transition-all shadow-sm"
+                className="inline-flex items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900 px-3 py-2 text-xs font-semibold text-red-800 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/60 transition-all shadow-sm"
               >
                 <Flag className="h-3.5 w-3.5" />
                 {s.pendingReports} Report{s.pendingReports !== 1 ? 's' : ''}
@@ -586,7 +586,7 @@ export default function AdminDashboardPage() {
             {s.pendingWithdrawals > 0 && can('finance.view') && (
               <Link
                 to="/admin/finance"
-                className="inline-flex items-center gap-2 rounded-lg bg-white border border-blue-200 px-3 py-2 text-xs font-semibold text-blue-800 hover:bg-blue-50 transition-all shadow-sm"
+                className="inline-flex items-center gap-2 rounded-lg bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-900 px-3 py-2 text-xs font-semibold text-blue-800 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/60 transition-all shadow-sm"
               >
                 <Banknote className="h-3.5 w-3.5" />
                 {s.pendingWithdrawals} Withdrawal{s.pendingWithdrawals !== 1 ? 's' : ''}
@@ -608,7 +608,7 @@ export default function AdminDashboardPage() {
             description="New registrations this week"
             action={
               <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 text-xs text-emerald-600 font-semibold">
+                <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
                   <ArrowUpRight className="h-3 w-3" />
                   +{Math.round((userGrowthData.reduce((a, b) => a + b.value, 0) / 7) * 0.1)}%
                 </span>
@@ -617,18 +617,18 @@ export default function AdminDashboardPage() {
           />
           <CardBody>
             <MiniBarChart data={userGrowthData} height={100} color="brand" />
-            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
               <div className="text-center">
-                <p className="text-lg font-bold text-ink-900">{s.totalUsers.toLocaleString()}</p>
-                <p className="text-[10px] text-gray-500 uppercase">Total Users</p>
+                <p className="text-lg font-bold text-ink-900 dark:text-slate-100">{s.totalUsers.toLocaleString()}</p>
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 uppercase">Total Users</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold text-indigo-600">{userGrowthData.reduce((a, b) => a + b.value, 0)}</p>
-                <p className="text-[10px] text-gray-500 uppercase">This Week</p>
+                <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400">{userGrowthData.reduce((a, b) => a + b.value, 0)}</p>
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 uppercase">This Week</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold text-emerald-600">{s.totalFreelancers}</p>
-                <p className="text-[10px] text-gray-500 uppercase">Freelancers</p>
+                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{s.totalFreelancers}</p>
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 uppercase">Freelancers</p>
               </div>
             </div>
           </CardBody>
@@ -641,7 +641,7 @@ export default function AdminDashboardPage() {
             description="Platform earnings this week"
             action={
               <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1 text-xs text-emerald-600 font-semibold">
+                <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
                   <ArrowUpRight className="h-3 w-3" />
                   +12.5%
                 </span>
@@ -650,18 +650,18 @@ export default function AdminDashboardPage() {
           />
           <CardBody>
             <MiniBarChart data={revenueGrowthData} height={100} color="success" />
-            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-slate-800">
               <div className="text-center">
-                <p className="text-lg font-bold text-ink-900">{formatCurrency(s.totalRevenue)}</p>
-                <p className="text-[10px] text-gray-500 uppercase">Total Revenue</p>
+                <p className="text-lg font-bold text-ink-900 dark:text-slate-100">{formatCurrency(s.totalRevenue)}</p>
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 uppercase">Total Revenue</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold text-emerald-600">{formatCurrency(revenueGrowthData.reduce((a, b) => a + b.value, 0))}</p>
-                <p className="text-[10px] text-gray-500 uppercase">This Week</p>
+                <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(revenueGrowthData.reduce((a, b) => a + b.value, 0))}</p>
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 uppercase">This Week</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold text-amber-600">{formatCurrency(s.platformFees)}</p>
-                <p className="text-[10px] text-gray-500 uppercase">Platform Fees</p>
+                <p className="text-lg font-bold text-amber-600 dark:text-amber-400">{formatCurrency(s.platformFees)}</p>
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 uppercase">Platform Fees</p>
               </div>
             </div>
           </CardBody>
@@ -673,58 +673,58 @@ export default function AdminDashboardPage() {
          ═══════════════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Freelancers */}
-        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-card hover:shadow-lg transition-all duration-300">
+        <div className="rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-card hover:shadow-lg transition-all duration-300">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/25">
               <Users className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-500 font-medium">Freelancers</p>
-              <p className="text-xl font-bold text-ink-900">{s.totalFreelancers.toLocaleString()}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">Freelancers</p>
+              <p className="text-xl font-bold text-ink-900 dark:text-slate-100">{s.totalFreelancers.toLocaleString()}</p>
             </div>
           </div>
-          <div className="mt-3 pt-3 border-t border-gray-100">
+          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-800">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-500">Active contracts</span>
-              <span className="font-semibold text-ink-900">{s.activeContracts}</span>
+              <span className="text-gray-500 dark:text-slate-400">Active contracts</span>
+              <span className="font-semibold text-ink-900 dark:text-slate-100">{s.activeContracts}</span>
             </div>
           </div>
         </div>
 
         {/* Employers */}
-        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-card hover:shadow-lg transition-all duration-300">
+        <div className="rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-card hover:shadow-lg transition-all duration-300">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25">
               <Building2 className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-500 font-medium">Employers</p>
-              <p className="text-xl font-bold text-ink-900">{s.totalEmployers.toLocaleString()}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">Employers</p>
+              <p className="text-xl font-bold text-ink-900 dark:text-slate-100">{s.totalEmployers.toLocaleString()}</p>
             </div>
           </div>
-          <div className="mt-3 pt-3 border-t border-gray-100">
+          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-800">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-500">Open jobs</span>
-              <span className="font-semibold text-ink-900">{s.openJobs}</span>
+              <span className="text-gray-500 dark:text-slate-400">Open jobs</span>
+              <span className="font-semibold text-ink-900 dark:text-slate-100">{s.openJobs}</span>
             </div>
           </div>
         </div>
 
         {/* Proposals */}
-        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-card hover:shadow-lg transition-all duration-300">
+        <div className="rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-card hover:shadow-lg transition-all duration-300">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/25">
               <FileText className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-500 font-medium">Proposals</p>
-              <p className="text-xl font-bold text-ink-900">{s.totalProposals.toLocaleString()}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">Proposals</p>
+              <p className="text-xl font-bold text-ink-900 dark:text-slate-100">{s.totalProposals.toLocaleString()}</p>
             </div>
           </div>
-          <div className="mt-3 pt-3 border-t border-gray-100">
+          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-800">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-500">Avg per job</span>
-              <span className="font-semibold text-ink-900">
+              <span className="text-gray-500 dark:text-slate-400">Avg per job</span>
+              <span className="font-semibold text-ink-900 dark:text-slate-100">
                 {s.totalJobs > 0 ? (s.totalProposals / s.totalJobs).toFixed(1) : '0'}
               </span>
             </div>
@@ -732,20 +732,20 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Platform Categories */}
-        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-card hover:shadow-lg transition-all duration-300">
+        <div className="rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-card hover:shadow-lg transition-all duration-300">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 text-white shadow-lg shadow-violet-500/25">
               <FolderTree className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-500 font-medium">Categories</p>
-              <p className="text-xl font-bold text-ink-900">{s.totalCategories}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">Categories</p>
+              <p className="text-xl font-bold text-ink-900 dark:text-slate-100">{s.totalCategories}</p>
             </div>
           </div>
-          <div className="mt-3 pt-3 border-t border-gray-100">
+          <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-800">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-500">Skills available</span>
-              <span className="font-semibold text-ink-900">{s.totalSkills}</span>
+              <span className="text-gray-500 dark:text-slate-400">Skills available</span>
+              <span className="font-semibold text-ink-900 dark:text-slate-100">{s.totalSkills}</span>
             </div>
           </div>
         </div>
@@ -839,16 +839,16 @@ export default function AdminDashboardPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50/50">
-                        <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">User</th>
-                        <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Role</th>
-                        <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Status</th>
-                        <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Joined</th>
+                      <tr className="border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50">
+                        <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">User</th>
+                        <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Role</th>
+                        <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Status</th>
+                        <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Joined</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                       {recentUsers.map((u) => (
-                        <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
+                        <tr key={u.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
                           <td className="px-5 py-3">
                             <div className="flex items-center gap-3">
                               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-xs font-bold text-white">
@@ -857,11 +857,11 @@ export default function AdminDashboardPage() {
                               <div className="min-w-0">
                                 <Link
                                   to={`/admin/users/${u.id}`}
-                                  className="block truncate text-sm font-semibold text-ink-900 hover:text-indigo-600"
+                                  className="block truncate text-sm font-semibold text-ink-900 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400"
                                 >
                                   {u.name}
                                 </Link>
-                                <p className="truncate text-xs text-gray-400">{u.email}</p>
+                                <p className="truncate text-xs text-gray-400 dark:text-slate-500">{u.email}</p>
                               </div>
                             </div>
                           </td>
@@ -875,7 +875,7 @@ export default function AdminDashboardPage() {
                               {u.status}
                             </Badge>
                           </td>
-                          <td className="px-5 py-3 text-xs text-gray-500">
+                          <td className="px-5 py-3 text-xs text-gray-500 dark:text-slate-400">
                             {u.created_at ? timeAgo(u.created_at) : '—'}
                           </td>
                         </tr>
@@ -884,7 +884,7 @@ export default function AdminDashboardPage() {
                   </table>
                 </div>
               ) : (
-                <p className="px-5 py-8 text-center text-sm text-gray-400">No recent users.</p>
+                <p className="px-5 py-8 text-center text-sm text-gray-400 dark:text-slate-500">No recent users.</p>
               )}
             </CardBody>
           </Card>
@@ -898,13 +898,13 @@ export default function AdminDashboardPage() {
           />
           <CardBody className="p-0 px-5">
             {activityItems.length > 0 ? (
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-gray-50 dark:divide-slate-800">
                 {activityItems.slice(0, 6).map((item, i) => (
                   <ActivityFeedItem key={i} {...item} />
                 ))}
               </div>
             ) : (
-              <p className="py-8 text-center text-sm text-gray-400">No recent activity.</p>
+              <p className="py-8 text-center text-sm text-gray-400 dark:text-slate-500">No recent activity.</p>
             )}
           </CardBody>
         </Card>
@@ -919,7 +919,7 @@ export default function AdminDashboardPage() {
             title="Recent Jobs"
             description="Latest job postings on the platform"
             action={
-              <Link to="/admin/jobs" className="flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+              <Link to="/admin/jobs" className="flex items-center gap-1 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700">
                 View all <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             }
@@ -929,32 +929,32 @@ export default function AdminDashboardPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="border-b border-gray-100 bg-gray-50/50">
-                      <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Job Title</th>
-                      <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Budget</th>
-                      <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Status</th>
-                      <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Posted</th>
+                    <tr className="border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50">
+                      <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Job Title</th>
+                      <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Budget</th>
+                      <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Status</th>
+                      <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Posted</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                     {recentJobs.map((job) => (
-                      <tr key={job.id} className="hover:bg-gray-50/50 transition-colors">
+                      <tr key={job.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
                         <td className="px-5 py-3">
-                          <p className="truncate text-sm font-semibold text-ink-900 max-w-xs">{job.title}</p>
+                          <p className="truncate text-sm font-semibold text-ink-900 dark:text-slate-100 max-w-xs">{job.title}</p>
                           {job.category && (
-                            <p className="text-xs text-gray-400 mt-0.5">{job.category}</p>
+                            <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{job.category}</p>
                           )}
                         </td>
-                        <td className="px-5 py-3 text-sm font-medium text-ink-900">
+                        <td className="px-5 py-3 text-sm font-medium text-ink-900 dark:text-slate-100">
                           {formatETB(job.min_budget ?? job.budget)}
-                          <span className="text-xs text-gray-400 ml-1">{job.currency ?? 'ETB'}</span>
+                          <span className="text-xs text-gray-400 dark:text-slate-500 ml-1">{job.currency ?? 'ETB'}</span>
                         </td>
                         <td className="px-5 py-3">
                           <Badge tone={statusTone[job.status] ?? 'neutral'} size="xs" dot>
                             {job.status}
                           </Badge>
                         </td>
-                        <td className="px-5 py-3 text-xs text-gray-500">
+                        <td className="px-5 py-3 text-xs text-gray-500 dark:text-slate-400">
                           {job.created_at ? timeAgo(job.created_at) : '—'}
                         </td>
                       </tr>
@@ -963,7 +963,7 @@ export default function AdminDashboardPage() {
                 </table>
               </div>
             ) : (
-              <p className="px-5 py-8 text-center text-sm text-gray-400">No recent jobs.</p>
+              <p className="px-5 py-8 text-center text-sm text-gray-400 dark:text-slate-500">No recent jobs.</p>
             )}
           </CardBody>
         </Card>
@@ -972,7 +972,7 @@ export default function AdminDashboardPage() {
       {/* ═══════════════════════════════════════════════════════════════════
          FOOTER INFO
          ═══════════════════════════════════════════════════════════════════ */}
-      <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-5 py-3 text-xs text-gray-500 shadow-card">
+      <div className="flex items-center justify-between rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-5 py-3 text-xs text-gray-500 dark:text-slate-400 shadow-card">
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5">
             <Globe className="h-3.5 w-3.5" />

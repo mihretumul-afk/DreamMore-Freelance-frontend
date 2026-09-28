@@ -75,40 +75,40 @@ function MethodCard({ method, onSetDefault, onRemove }) {
   return (
     <div className={`rounded-2xl border-2 p-5 transition-all duration-200 hover:shadow-lg ${
       method.is_default
-        ? 'border-brand-400 bg-gradient-to-br from-brand-50/60 to-white shadow-sm'
-        : 'border-gray-200 bg-white hover:border-gray-300'
+        ? 'border-brand-400 bg-gradient-to-br from-brand-50/60 to-white dark:from-brand-950/40 dark:to-slate-900 dark:border-brand-500/50 shadow-sm'
+        : 'border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 hover:border-gray-300 dark:hover:border-slate-700'
     }`}>
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
           <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
-            method.is_default ? 'bg-brand-100' : 'bg-gray-100'
+            method.is_default ? 'bg-brand-100 dark:bg-brand-950/50' : 'bg-gray-100 dark:bg-slate-800'
           }`}>
-            <Icon className={`h-6 w-6 ${method.is_default ? 'text-brand-600' : 'text-gray-500'}`} />
+            <Icon className={`h-6 w-6 ${method.is_default ? 'text-brand-600 dark:text-brand-400' : 'text-gray-500 dark:text-slate-400'}`} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-ink-900">{method.display_label || method.nickname || 'Payment Method'}</h3>
+              <h3 className="font-bold text-ink-900 dark:text-slate-100">{method.display_label || method.nickname || 'Payment Method'}</h3>
               {method.is_default && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-brand-100 px-2.5 py-0.5 text-[11px] font-bold text-brand-700">
+                <span className="inline-flex items-center gap-1 rounded-full bg-brand-100 dark:bg-brand-950/60 px-2.5 py-0.5 text-[11px] font-bold text-brand-700 dark:text-brand-300">
                   <Star className="h-3 w-3 fill-current" /> Default
                 </span>
               )}
             </div>
-            <p className="mt-0.5 text-sm text-gray-500">{typeLabels[method.type]} · {method.provider}</p>
+            <p className="mt-0.5 text-sm text-gray-500 dark:text-slate-400">{typeLabels[method.type]} · {method.provider}</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
           {!method.is_default && (
             <button
               onClick={() => onSetDefault(method.id)}
-              className="rounded-xl px-3 py-1.5 text-xs font-semibold text-brand-600 hover:bg-brand-50 transition-colors cursor-pointer"
+              className="rounded-xl px-3 py-1.5 text-xs font-semibold text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/40 transition-colors cursor-pointer"
             >
               Set Default
             </button>
           )}
           <button
             onClick={() => onRemove(method.id)}
-            className="rounded-xl p-2 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
+            className="rounded-xl p-2 text-gray-400 dark:text-slate-500 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -487,9 +487,9 @@ export default function EmployerFinancePage() {
   if (loading) {
     return (
       <div className="space-y-6 animate-pulse">
-        <div className="h-48 rounded-3xl bg-gray-200" />
-        <div className="h-16 rounded-2xl bg-gray-200" />
-        <div className="h-80 rounded-2xl bg-gray-200" />
+        <div className="h-48 rounded-3xl bg-gray-200 dark:bg-slate-800" />
+        <div className="h-16 rounded-2xl bg-gray-200 dark:bg-slate-800" />
+        <div className="h-80 rounded-2xl bg-gray-200 dark:bg-slate-800" />
       </div>
     );
   }
@@ -508,57 +508,58 @@ export default function EmployerFinancePage() {
     <div className="space-y-6 animate-fade-in">
 
       {/* ─── Hero Header ─────────────────────────────────────────────── */}
-      <div className="rounded-3xl bg-gradient-to-br from-white via-gray-50 to-gray-100 p-6 sm:p-8 relative overflow-hidden border border-gray-200 shadow-sm">
-        <div className="absolute -top-12 -right-12 h-48 w-48 rounded-full bg-brand-100/40 blur-3xl" />
-        <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-blue-100/40 blur-2xl" />
+      <div className="rounded-3xl bg-gradient-to-br from-white via-gray-50 to-gray-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6 sm:p-8 relative overflow-hidden border border-gray-200 dark:border-slate-800 shadow-sm">
+        <div className="absolute -top-12 -right-12 h-48 w-48 rounded-full bg-brand-100/40 dark:bg-brand-900/20 blur-3xl" />
+        <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-blue-100/40 dark:bg-blue-900/20 blur-2xl" />
         <div className="relative">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">Employer Finance</p>            <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900">Finance</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage your wallet, payment methods, track spending, and view billing history.</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-400">Employer Finance</p>
+          <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-slate-100">Finance</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Manage your wallet, payment methods, track spending, and view billing history.</p>
 
           {/* Quick Stats Row */}
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="rounded-2xl bg-brand-50 border border-brand-200 p-4">
+            <div className="rounded-2xl bg-brand-50 dark:bg-brand-950/30 border border-brand-200 dark:border-brand-800/50 p-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-semibold text-brand-600">
+                <div className="flex items-center gap-2 text-xs font-semibold text-brand-600 dark:text-brand-400">
                   <Wallet className="h-3.5 w-3.5" /> Available Balance
                 </div>
 
               </div>
-              <p className="mt-1.5 text-xl font-extrabold text-brand-900">{formatETB(e.available_balance || 0)}</p>
-              <p className="text-[10px] text-brand-500 mt-0.5">Use for milestones, featured jobs, and more</p>
+              <p className="mt-1.5 text-xl font-extrabold text-brand-900 dark:text-brand-100">{formatETB(e.available_balance || 0)}</p>
+              <p className="text-[10px] text-brand-500 dark:text-brand-400 mt-0.5">Use for milestones, featured jobs, and more</p>
             </div>
-            <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
-              <div className="flex items-center gap-2 text-xs font-semibold text-amber-600">
+            <div className="rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 p-4">
+              <div className="flex items-center gap-2 text-xs font-semibold text-amber-600 dark:text-amber-400">
                 <Clock className="h-3.5 w-3.5" /> In Escrow
               </div>
-              <p className="mt-1.5 text-xl font-extrabold text-amber-900">{formatETB(e.pending_payments || 0)}</p>
+              <p className="mt-1.5 text-xl font-extrabold text-amber-900 dark:text-amber-100">{formatETB(e.pending_payments || 0)}</p>
             </div>
-            <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4">
-              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600">
+            <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 p-4">
+              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                 <TrendingUp className="h-3.5 w-3.5" /> Total Spent
               </div>
-              <p className="mt-1.5 text-xl font-extrabold text-emerald-900">{formatETB(totalSpent)}</p>
+              <p className="mt-1.5 text-xl font-extrabold text-emerald-900 dark:text-emerald-100">{formatETB(totalSpent)}</p>
             </div>
-            <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4">
-              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+            <div className="rounded-2xl bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-800 p-4">
+              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-slate-400">
                 <Receipt className="h-3.5 w-3.5" /> Platform Fees
               </div>
-              <p className="mt-1.5 text-xl font-extrabold text-gray-900">{formatETB(totalFees)}</p>
+              <p className="mt-1.5 text-xl font-extrabold text-gray-900 dark:text-slate-100">{formatETB(totalFees)}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* ─── Earnings Chart ─────────────────────────────────────────── */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-6">
+      <div className="rounded-2xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
-              <TrendingUp className="h-5 w-5 text-blue-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40">
+              <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h2 className="font-bold text-ink-900">Monthly Spending</h2>
-              <p className="text-xs text-gray-400">Last 6 months overview</p>
+              <h2 className="font-bold text-ink-900 dark:text-slate-100">Monthly Spending</h2>
+              <p className="text-xs text-gray-400 dark:text-slate-400">Last 6 months overview</p>
             </div>
           </div>
         </div>
@@ -566,32 +567,32 @@ export default function EmployerFinancePage() {
           <EarningsChart transactions={transactions} months={6} direction="debit" barColor="#6366f1" barColorHighlight="#4f46e5" />
         ) : (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
-              <TrendingUp className="h-8 w-8 text-gray-300" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 dark:bg-slate-800">
+              <TrendingUp className="h-8 w-8 text-gray-300 dark:text-slate-600" />
             </div>
-            <p className="mt-3 text-sm font-semibold text-gray-500">No spending data yet</p>
-            <p className="text-xs text-gray-400">Fund milestones to see your spending chart</p>
+            <p className="mt-3 text-sm font-semibold text-gray-500 dark:text-slate-400">No spending data yet</p>
+            <p className="text-xs text-gray-400 dark:text-slate-400">Fund milestones to see your spending chart</p>
           </div>
         )}
       </div>
 
       {/* ─── Spending by Freelancer ──────────────────────────────────── */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-6">
+      <div className="rounded-2xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 dark:bg-violet-950/40">
               <span className="text-lg">👥</span>
             </div>
             <div>
-              <h2 className="font-bold text-ink-900">Spending by Freelancer</h2>
-              <p className="text-xs text-gray-400">Breakdown of payments to freelancers</p>
+              <h2 className="font-bold text-ink-900 dark:text-slate-100">Spending by Freelancer</h2>
+              <p className="text-xs text-gray-400 dark:text-slate-400">Breakdown of payments to freelancers</p>
             </div>
           </div>
-          <div className="flex gap-1 rounded-xl bg-gray-100 p-0.5">
+          <div className="flex gap-1 rounded-xl bg-gray-100 dark:bg-slate-800 p-0.5">
             <button
               onClick={() => setSpendingChartVariant('pie')}
               className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                spendingChartVariant === 'pie' ? 'bg-white text-ink-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                spendingChartVariant === 'pie' ? 'bg-white text-ink-900 dark:bg-slate-700 dark:text-slate-100 shadow-sm' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200'
               }`}
             >
               Pie
@@ -599,7 +600,7 @@ export default function EmployerFinancePage() {
             <button
               onClick={() => setSpendingChartVariant('bar')}
               className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                spendingChartVariant === 'bar' ? 'bg-white text-ink-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                spendingChartVariant === 'bar' ? 'bg-white text-ink-900 dark:bg-slate-700 dark:text-slate-100 shadow-sm' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200'
               }`}
             >
               Bar
@@ -610,15 +611,15 @@ export default function EmployerFinancePage() {
       </div>
 
       {/* ─── Monthly Budget ───────────────────────────────────────────── */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-6">
+      <div className="rounded-2xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/40">
               <span className="text-lg">🎯</span>
             </div>
             <div>
-              <h2 className="font-bold text-ink-900">Monthly Budget</h2>
-              <p className="text-xs text-gray-400">{budgetSpending?.month || 'This month'}</p>
+              <h2 className="font-bold text-ink-900 dark:text-slate-100">Monthly Budget</h2>
+              <p className="text-xs text-gray-400 dark:text-slate-400">{budgetSpending?.month || 'This month'}</p>
             </div>
           </div>
           <Button variant="outline" size="xs" onClick={() => setShowBudgetModal(true)}>
@@ -631,12 +632,12 @@ export default function EmployerFinancePage() {
             {/* Progress Bar */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-gray-700">Spent</span>
-                <span className="text-sm font-bold text-ink-900">
+                <span className="text-sm font-semibold text-gray-700 dark:text-slate-300">Spent</span>
+                <span className="text-sm font-bold text-ink-900 dark:text-slate-100">
                   {formatETB(budgetSpending?.current_month || 0)} / {formatETB(budget.monthly_limit)}
                 </span>
               </div>
-              <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-3 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
                     (budgetSpending?.usage_percentage || 0) >= 100
@@ -649,8 +650,8 @@ export default function EmployerFinancePage() {
                 />
               </div>
               <div className="flex items-center justify-between mt-1">
-                <span className="text-xs text-gray-400">{budgetSpending?.usage_percentage || 0}% used</span>
-                <span className="text-xs font-semibold text-gray-600">
+                <span className="text-xs text-gray-400 dark:text-slate-400">{budgetSpending?.usage_percentage || 0}% used</span>
+                <span className="text-xs font-semibold text-gray-600 dark:text-slate-300">
                   {formatETB(budgetSpending?.remaining || 0)} remaining
                 </span>
               </div>
@@ -658,42 +659,42 @@ export default function EmployerFinancePage() {
 
             {/* Alert Status */}
             {budgetSpending?.is_exceeded && (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-3 flex items-center gap-2">
+              <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 p-3 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-red-500 shrink-0" />
-                <p className="text-sm font-semibold text-red-700">Budget exceeded! You have overspent by {formatETB((budgetSpending?.current_month || 0) - budget.monthly_limit)}</p>
+                <p className="text-sm font-semibold text-red-700 dark:text-red-400">Budget exceeded! You have overspent by {formatETB((budgetSpending?.current_month || 0) - budget.monthly_limit)}</p>
               </div>
             )}
 
             {budgetSpending?.should_alert && !budgetSpending?.is_exceeded && (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 flex items-center gap-2">
+              <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/40 p-3 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
-                <p className="text-sm font-semibold text-amber-700">Approaching budget limit — {budgetSpending?.usage_percentage || 0}% used</p>
+                <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">Approaching budget limit — {budgetSpending?.usage_percentage || 0}% used</p>
               </div>
             )}
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-xl bg-gray-50 p-3 text-center">
-                <p className="text-[10px] font-bold uppercase text-gray-400">Budget</p>
-                <p className="mt-1 text-sm font-bold text-ink-900">{formatETB(budget.monthly_limit)}</p>
+              <div className="rounded-xl bg-gray-50 dark:bg-slate-800/50 p-3 text-center">
+                <p className="text-[10px] font-bold uppercase text-gray-400 dark:text-slate-400">Budget</p>
+                <p className="mt-1 text-sm font-bold text-ink-900 dark:text-slate-100">{formatETB(budget.monthly_limit)}</p>
               </div>
-              <div className="rounded-xl bg-gray-50 p-3 text-center">
-                <p className="text-[10px] font-bold uppercase text-gray-400">Spent</p>
-                <p className="mt-1 text-sm font-bold text-ink-900">{formatETB(budgetSpending?.current_month || 0)}</p>
+              <div className="rounded-xl bg-gray-50 dark:bg-slate-800/50 p-3 text-center">
+                <p className="text-[10px] font-bold uppercase text-gray-400 dark:text-slate-400">Spent</p>
+                <p className="mt-1 text-sm font-bold text-ink-900 dark:text-slate-100">{formatETB(budgetSpending?.current_month || 0)}</p>
               </div>
-              <div className="rounded-xl bg-gray-50 p-3 text-center">
-                <p className="text-[10px] font-bold uppercase text-gray-400">Alert at</p>
-                <p className="mt-1 text-sm font-bold text-ink-900">{budget.alert_threshold}%</p>
+              <div className="rounded-xl bg-gray-50 dark:bg-slate-800/50 p-3 text-center">
+                <p className="text-[10px] font-bold uppercase text-gray-400 dark:text-slate-400">Alert at</p>
+                <p className="mt-1 text-sm font-bold text-ink-900 dark:text-slate-100">{budget.alert_threshold}%</p>
               </div>
             </div>
           </div>
         ) : (
-          <div className="rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50/50 p-8 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100">
+          <div className="rounded-2xl border-2 border-dashed border-gray-300 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/30 p-8 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 dark:bg-slate-800">
               <span className="text-2xl">🎯</span>
             </div>
-            <h3 className="mt-3 font-bold text-ink-900">No budget set</h3>
-            <p className="mt-1 text-sm text-gray-500 max-w-sm mx-auto">
+            <h3 className="mt-3 font-bold text-ink-900 dark:text-slate-100">No budget set</h3>
+            <p className="mt-1 text-sm text-gray-500 dark:text-slate-400 max-w-sm mx-auto">
               Set a monthly spending limit to track your expenses and avoid overspending.
             </p>
             <Button variant="primary" size="sm" className="mt-3" onClick={() => setShowBudgetModal(true)}>
@@ -731,7 +732,7 @@ export default function EmployerFinancePage() {
       </div>
 
       {/* ─── Tab Navigation ──────────────────────────────────────────── */}
-      <div className="flex gap-1 rounded-2xl bg-gray-100 p-1">
+      <div className="flex gap-1 rounded-2xl bg-gray-100 dark:bg-slate-800 p-1">
         {[
           { key: 'transactions', label: 'Billing History', icon: BadgeDollarSign },
           { key: 'withdrawals', label: 'Withdrawal History', icon: ArrowDownRight },
@@ -742,8 +743,8 @@ export default function EmployerFinancePage() {
             onClick={() => setActiveTab(tab.key)}
             className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 text-sm font-semibold transition-all cursor-pointer ${
               activeTab === tab.key
-                ? 'bg-white text-ink-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-white text-ink-900 dark:bg-slate-700 dark:text-slate-100 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <tab.icon className="h-4 w-4" />
@@ -754,12 +755,12 @@ export default function EmployerFinancePage() {
 
       {/* ─── Billing History Tab ─────────────────────────────────────── */}
       {activeTab === 'transactions' && (
-        <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
+        <div className="rounded-2xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-bold text-ink-900">Billing History</h2>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <h2 className="font-bold text-ink-900 dark:text-slate-100">Billing History</h2>
+                <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">
                   {hasTxDateFilter ? `${filteredTransactions.length} of ${txMeta.total || transactions.length} transactions` : `${txMeta.total || 0} transactions`}
                 </p>
               </div>
@@ -776,25 +777,25 @@ export default function EmployerFinancePage() {
                   {showExportMenu && (
                     <>
                       <div className="fixed inset-0 z-10" onClick={() => setShowExportMenu(false)} />
-                      <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-xl border border-gray-200 bg-white py-1 shadow-xl">
+                      <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 py-1 shadow-xl">
                         <button
                           onClick={() => { exportTransactionsCSV(hasTxDateFilter ? filteredTransactions : transactions, { total: hasTxDateFilter ? filteredTransactions.length : txMeta.total }); setShowExportMenu(false); showToast('CSV exported successfully!', 'success'); }}
-                          className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                          className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                         >
                           <FileSpreadsheet className="h-4 w-4 text-emerald-500" />
                           <div className="text-left">
                             <p className="font-semibold">Export as CSV</p>
-                            <p className="text-[10px] text-gray-400">Spreadsheet format</p>
+                            <p className="text-[10px] text-gray-400 dark:text-slate-400">Spreadsheet format</p>
                           </div>
                         </button>
                         <button
                           onClick={() => { exportTransactionsPDF(hasTxDateFilter ? filteredTransactions : transactions, { total: hasTxDateFilter ? filteredTransactions.length : txMeta.total }); setShowExportMenu(false); showToast('PDF exported successfully!', 'success'); }}
-                          className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                          className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                         >
                           <FileText className="h-4 w-4 text-red-500" />
                           <div className="text-left">
                             <p className="font-semibold">Export as PDF</p>
-                            <p className="text-[10px] text-gray-400">Printable document</p>
+                            <p className="text-[10px] text-gray-400 dark:text-slate-400">Printable document</p>
                           </div>
                         </button>
                       </div>
@@ -806,8 +807,8 @@ export default function EmployerFinancePage() {
           </div>
 
           {/* Date Range Filter */}
-          <div className="px-6 py-3 bg-gray-50/50 border-b border-gray-100 flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+          <div className="px-6 py-3 bg-gray-50/50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800 flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-slate-400">
               <Calendar className="h-3.5 w-3.5" /> Filter by date:
             </div>
             <div className="flex items-center gap-2">
@@ -815,20 +816,20 @@ export default function EmployerFinancePage() {
                 type="date"
                 value={txDateFrom}
                 onChange={(e) => setTxDateFrom(e.target.value)}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="rounded-lg border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 text-gray-700 dark:text-slate-200 px-3 py-1.5 text-xs focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
               />
-              <span className="text-xs text-gray-400">to</span>
+              <span className="text-xs text-gray-400 dark:text-slate-400">to</span>
               <input
                 type="date"
                 value={txDateTo}
                 onChange={(e) => setTxDateTo(e.target.value)}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="rounded-lg border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 text-gray-700 dark:text-slate-200 px-3 py-1.5 text-xs focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
               />
             </div>
             {hasTxDateFilter && (
               <button
                 onClick={() => { setTxDateFrom(''); setTxDateTo(''); }}
-                className="flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors cursor-pointer"
+                className="flex items-center gap-1 rounded-lg bg-red-50 dark:bg-red-950/40 px-2.5 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors cursor-pointer"
               >
                 <X className="h-3 w-3" /> Clear
               </button>
@@ -847,37 +848,37 @@ export default function EmployerFinancePage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50/80 text-left">
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Type</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Description</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Amount</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Balance</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Date</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Invoice</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right"></th>
+                  <tr className="bg-gray-50/80 dark:bg-slate-800/50 text-left">
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Type</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Description</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right">Amount</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right">Balance</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Date</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right">Invoice</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                   {filteredTransactions.map((tx) => {
                     const meta = TX_TYPES[tx.type] || { label: tx.type, color: 'gray' };
                     const isCredit = tx.direction === 'credit';
                     return (
-                      <tr key={tx.id} className="hover:bg-gray-50/50 transition-colors">
+                      <tr key={tx.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
                         <td className="px-6 py-3.5">
                           <Badge tone={meta.tone} size="xs">{meta.label}</Badge>
                         </td>
-                        <td className="px-6 py-3.5 text-gray-600 max-w-xs truncate">{tx.description || '—'}</td>
-                        <td className={`px-6 py-3.5 text-right font-bold ${isCredit ? 'text-emerald-600' : 'text-red-500'}`}>
+                        <td className="px-6 py-3.5 text-gray-600 dark:text-slate-300 max-w-xs truncate">{tx.description || '—'}</td>
+                        <td className={`px-6 py-3.5 text-right font-bold ${isCredit ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
                           {isCredit ? '+' : '−'}{formatETB(Math.abs(tx.amount))}
                         </td>
-                        <td className="px-6 py-3.5 text-right text-gray-400 text-xs">
+                        <td className="px-6 py-3.5 text-right text-gray-400 dark:text-slate-400 text-xs">
                           {tx.balance_after != null ? formatETB(tx.balance_after) : '—'}
                         </td>
-                        <td className="px-6 py-3.5 text-gray-400 text-xs whitespace-nowrap">{formatDate(tx.created_at)}</td>
+                        <td className="px-6 py-3.5 text-gray-400 dark:text-slate-400 text-xs whitespace-nowrap">{formatDate(tx.created_at)}</td>
                         <td className="px-6 py-3.5 text-right">
                           <button
                             onClick={() => { generateTransactionInvoice(tx, { name: user?.name, email: user?.email, role: user?.role }); showToast('Invoice downloaded!', 'success'); }}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors cursor-pointer"
                           >
                             <FileDown className="h-3.5 w-3.5" /> PDF
                           </button>
@@ -886,7 +887,7 @@ export default function EmployerFinancePage() {
                           <button
                             onClick={() => handleDeleteTransaction(tx)}
                             title="Delete from history"
-                            className="rounded-lg p-2 text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
+                            className="rounded-lg p-2 text-gray-300 dark:text-slate-500 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -900,8 +901,8 @@ export default function EmployerFinancePage() {
           )}
 
           {txMeta.last_page > 1 && (
-            <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3">
-              <p className="text-xs text-gray-400">Page {txMeta.current_page} of {txMeta.last_page}</p>
+            <div className="flex items-center justify-between border-t border-gray-100 dark:border-slate-800 px-6 py-3">
+              <p className="text-xs text-gray-400 dark:text-slate-400">Page {txMeta.current_page} of {txMeta.last_page}</p>
               <div className="flex gap-2">
                 <Button variant="outline" size="xs" disabled={txMeta.current_page <= 1} onClick={() => setTxPage((p) => p - 1)}>
                   <ChevronLeft className="h-3 w-3" /> Prev
@@ -917,12 +918,12 @@ export default function EmployerFinancePage() {
 
       {/* ─── Withdrawal History Tab ──────────────────────────────────── */}
       {activeTab === 'withdrawals' && (
-        <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
+        <div className="rounded-2xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-bold text-ink-900">Withdrawal History</h2>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <h2 className="font-bold text-ink-900 dark:text-slate-100">Withdrawal History</h2>
+                <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">
                   {wdMeta.total || 0} withdrawals
                 </p>
               </div>
@@ -937,37 +938,37 @@ export default function EmployerFinancePage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50/80 text-left">
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Reference</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Amount</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Fee</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Net</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Status</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Date</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right"></th>
+                  <tr className="bg-gray-50/80 dark:bg-slate-800/50 text-left">
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Reference</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Amount</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Fee</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Net</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Status</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Date</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                   {withdrawals.map((w) => {
                     const isPending = w.status === 'requested' || w.status === 'processing';
                     const isCompleted = w.status === 'completed';
                     return (
-                      <tr key={w.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-3.5 font-mono text-xs text-gray-600">{w.reference}</td>
-                        <td className="px-6 py-3.5 font-bold text-ink-900">{formatETB(w.amount)}</td>
+                      <tr key={w.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                        <td className="px-6 py-3.5 font-mono text-xs text-gray-600 dark:text-slate-400">{w.reference}</td>
+                        <td className="px-6 py-3.5 font-bold text-ink-900 dark:text-slate-100">{formatETB(w.amount)}</td>
                         <td className="px-6 py-3.5 text-red-400 text-xs">−{formatETB(w.fee)}</td>
-                        <td className="px-6 py-3.5 font-bold text-emerald-600">{formatETB(w.net_amount)}</td>
+                        <td className="px-6 py-3.5 font-bold text-emerald-600 dark:text-emerald-400">{formatETB(w.net_amount)}</td>
                         <td className="px-6 py-3.5">
                           <Badge tone={isCompleted ? 'success' : isPending ? 'warning' : 'neutral'} size="xs">
                             {w.status}
                           </Badge>
                         </td>
-                        <td className="px-6 py-3.5 text-xs text-gray-400 whitespace-nowrap">{formatDate(w.created_at)}</td>
+                        <td className="px-6 py-3.5 text-xs text-gray-400 dark:text-slate-400 whitespace-nowrap">{formatDate(w.created_at)}</td>
                         <td className="px-6 py-3.5 text-right">
                           {isPending && (
                             <button
                               onClick={() => handleCancelWithdrawal(w.id)}
-                              className="rounded-lg px-2.5 py-1 text-xs font-semibold text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                              className="rounded-lg px-2.5 py-1 text-xs font-semibold text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer"
                             >
                               Cancel
                             </button>
@@ -976,7 +977,7 @@ export default function EmployerFinancePage() {
                             <button
                               onClick={() => handleDeleteWithdrawal(w)}
                               title="Delete from history"
-                              className="rounded-lg p-2 text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
+                              className="rounded-lg p-2 text-gray-300 dark:text-slate-500 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -991,8 +992,8 @@ export default function EmployerFinancePage() {
           )}
 
           {wdMeta.last_page > 1 && (
-            <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3">
-              <p className="text-xs text-gray-400">Page {wdMeta.current_page} of {wdMeta.last_page}</p>
+            <div className="flex items-center justify-between border-t border-gray-100 dark:border-slate-800 px-6 py-3">
+              <p className="text-xs text-gray-400 dark:text-slate-400">Page {wdMeta.current_page} of {wdMeta.last_page}</p>
               <div className="flex gap-2">
                 <Button variant="outline" size="xs" disabled={wdPage <= 1} onClick={() => setWdPage((p) => p - 1)}>
                   <ChevronLeft className="h-3 w-3" /> Prev
@@ -1011,8 +1012,8 @@ export default function EmployerFinancePage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-ink-900">Your Payment Methods</h2>
-              <p className="text-xs text-gray-400 mt-0.5">Manage how you pay for milestones and services</p>
+              <h2 className="text-lg font-bold text-ink-900 dark:text-slate-100">Your Payment Methods</h2>
+              <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">Manage how you pay for milestones and services</p>
             </div>
             <Button variant="primary" size="sm" onClick={() => setShowAddMethod(true)}>
               <Plus className="h-4 w-4" /> Add Method
@@ -1020,21 +1021,21 @@ export default function EmployerFinancePage() {
           </div>
 
           {/* Security Notice */}
-          <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 flex items-start gap-3">
-            <Shield className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
+          <div className="rounded-2xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-950/40 p-4 flex items-start gap-3">
+            <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-blue-900">Secure Payments</p>
-              <p className="text-xs text-blue-700 mt-0.5">Your payment information is encrypted and never stored on our servers. All transactions are processed securely.</p>
+              <p className="text-sm font-semibold text-blue-900 dark:text-blue-200">Secure Payments</p>
+              <p className="text-xs text-blue-700 dark:text-blue-300 mt-0.5">Your payment information is encrypted and never stored on our servers. All transactions are processed securely.</p>
             </div>
           </div>
 
           {methods.length === 0 ? (
-            <div className="rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50/50 p-12 text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
-                <CreditCard className="h-8 w-8 text-gray-400" />
+            <div className="rounded-2xl border-2 border-dashed border-gray-300 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/30 p-12 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 dark:bg-slate-800">
+                <CreditCard className="h-8 w-8 text-gray-400 dark:text-slate-400" />
               </div>
-              <h3 className="mt-4 font-bold text-ink-900">No payment methods yet</h3>
-              <p className="mt-1 text-sm text-gray-500 max-w-sm mx-auto">
+              <h3 className="mt-4 font-bold text-ink-900 dark:text-slate-100">No payment methods yet</h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400 max-w-sm mx-auto">
                 Add a card or bank account to fund milestones and pay freelancers.
               </p>
               <Button variant="primary" size="sm" className="mt-4" onClick={() => setShowAddMethod(true)}>

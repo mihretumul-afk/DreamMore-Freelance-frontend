@@ -74,21 +74,21 @@ function resolveAssetUrl(src) {
    ═══════════════════════════════════════════════════════════════════════════ */
 function ProfileStat({ icon: Icon, label, value, tone = 'ink' }) {
   const tones = {
-    brand: 'bg-brand-100 text-brand-600',
-    success: 'bg-emerald-100 text-emerald-600',
-    warning: 'bg-amber-100 text-amber-600',
-    ink: 'bg-ink-100 text-ink-600',
-    violet: 'bg-violet-100 text-violet-600',
+    brand: 'bg-brand-100 text-brand-600 dark:bg-indigo-950/60 dark:text-indigo-400',
+    success: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400',
+    warning: 'bg-amber-100 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400',
+    ink: 'bg-ink-100 text-ink-600 dark:bg-slate-800 dark:text-slate-300',
+    violet: 'bg-violet-100 text-violet-600 dark:bg-violet-950/60 dark:text-violet-400',
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-gray-200/80 bg-white px-3.5 py-3 shadow-sm transition-colors hover:border-gray-300">
+    <div className="flex items-center gap-3 rounded-xl border border-gray-200/80 bg-white px-3.5 py-3 shadow-sm transition-colors hover:border-gray-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700">
       <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', tones[tone])}>
         <Icon className="h-5 w-5" aria-hidden="true" />
       </div>
       <div className="min-w-0">
-        <p className="truncate text-[10px] font-bold uppercase tracking-wider text-gray-400">{label}</p>
-        <p className="mt-0.5 truncate text-base font-extrabold text-ink-900 sm:text-lg">{value}</p>
+        <p className="truncate text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">{label}</p>
+        <p className="mt-0.5 truncate text-base font-extrabold text-ink-900 dark:text-slate-100 sm:text-lg">{value}</p>
       </div>
     </div>
   );
@@ -101,8 +101,8 @@ function PortfolioTile({ item }) {
   const imageUrl = resolveAssetUrl(item.image_url);
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover">
-      <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-ink-50 to-gray-100">
+    <div className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-500/30">
+      <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-ink-50 to-gray-100 dark:from-slate-800 dark:to-slate-900">
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -111,23 +111,23 @@ function PortfolioTile({ item }) {
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-1.5 text-gray-300">
+          <div className="flex h-full flex-col items-center justify-center gap-1.5 text-gray-300 dark:text-slate-600">
             <ImageIcon className="h-8 w-8 stroke-1" aria-hidden="true" />
-            <span className="text-[10px] font-medium text-gray-400">No preview image</span>
+            <span className="text-[10px] font-medium text-gray-400 dark:text-slate-400">No preview image</span>
           </div>
         )}
       </div>
 
       <div className="flex flex-1 flex-col p-3.5">
-        <h4 className="truncate text-sm font-bold text-ink-900 transition-colors group-hover:text-brand-600">
+        <h4 className="truncate text-sm font-bold text-ink-900 transition-colors group-hover:text-brand-600 dark:text-slate-100 dark:group-hover:text-indigo-400">
           {item.title}
         </h4>
         {item.description && (
-          <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-gray-500">{item.description}</p>
+          <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-gray-500 dark:text-slate-400">{item.description}</p>
         )}
-        <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-gray-100 pt-2.5">
+        <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-gray-100 dark:border-slate-800 pt-2.5">
           {item.category?.name ? (
-            <span className="truncate text-[10px] font-bold uppercase tracking-wider text-gray-400">
+            <span className="truncate text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">
               {item.category.name}
             </span>
           ) : (
@@ -139,7 +139,7 @@ function PortfolioTile({ item }) {
               target="_blank"
               rel="noreferrer"
               title="Open live project in a new tab"
-              className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-brand-50 px-2 py-1 text-[11px] font-bold text-brand-600 transition-colors hover:bg-brand-100 hover:text-brand-700"
+              className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-brand-50 px-2 py-1 text-[11px] font-bold text-brand-600 transition-colors hover:bg-brand-100 hover:text-brand-700 dark:bg-indigo-950 dark:text-indigo-400 dark:hover:bg-indigo-900"
             >
               Live Demo <ExternalLink className="h-3 w-3" aria-hidden="true" />
             </a>
@@ -247,7 +247,7 @@ export default function FreelancerProfilePage() {
   };
 
   const chipClass =
-    'inline-flex items-center gap-1.5 rounded-full border border-gray-200/70 bg-white/70 px-3 py-1 text-xs font-medium text-gray-600 shadow-sm backdrop-blur-sm';
+    'inline-flex items-center gap-1.5 rounded-full border border-gray-200/70 bg-white/70 px-3 py-1 text-xs font-medium text-gray-600 shadow-sm backdrop-blur-sm dark:border-slate-700/70 dark:bg-slate-800/70 dark:text-slate-300';
 
   return (
     <div className="space-y-6">
@@ -268,7 +268,7 @@ export default function FreelancerProfilePage() {
               </Button>
             )}
             {featuredStatus?.is_featured && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-700">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/50 dark:text-amber-400">
                 ⭐ Featured until {featuredStatus.expires_at ? new Date(featuredStatus.expires_at).toLocaleDateString() : '—'}
               </span>
             )}
@@ -282,9 +282,9 @@ export default function FreelancerProfilePage() {
       {/* ═══ Identity hero ═══ */}
       <Card className="overflow-hidden p-0">
         {/* Gradient band behind the identity */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-brand-50 via-white to-indigo-50/70 px-6 py-8 sm:px-10 sm:py-10">
-          <div className="pointer-events-none absolute -top-20 -right-12 h-52 w-52 rounded-full bg-brand-200/40 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-24 -left-10 h-48 w-48 rounded-full bg-indigo-200/40 blur-3xl" />
+        <div className="relative overflow-hidden bg-gradient-to-br from-brand-50 via-white to-indigo-50/70 px-6 py-8 sm:px-10 sm:py-10 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
+          <div className="pointer-events-none absolute -top-20 -right-12 h-52 w-52 rounded-full bg-brand-200/40 dark:bg-brand-900/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 -left-10 h-48 w-48 rounded-full bg-indigo-200/40 dark:bg-indigo-900/20 blur-3xl" />
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand-500 via-brand-400 to-indigo-400" />
 
           <div className="relative z-10 flex flex-col items-center gap-6 text-center sm:flex-row sm:items-center sm:gap-8 sm:text-left">
@@ -299,17 +299,17 @@ export default function FreelancerProfilePage() {
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-2 sm:justify-start">
-                <h2 className="text-3xl font-extrabold tracking-tight text-ink-900 sm:text-4xl">
+                <h2 className="text-3xl font-extrabold tracking-tight text-ink-900 dark:text-slate-100 sm:text-4xl">
                   {profile.name ?? 'Freelancer'}
                 </h2>
                 {rawData?.is_verified && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100/90 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100/90 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:bg-emerald-950/90 dark:text-emerald-400">
                     <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" /> DreamMore Verified
                   </span>
                 )}
               </div>
 
-              <p className="mt-2 text-base font-medium text-gray-600 sm:text-lg">
+              <p className="mt-2 text-base font-medium text-gray-600 dark:text-slate-300 sm:text-lg">
                 {profile.headline ?? 'Professional headline not set yet.'}
               </p>
 
@@ -319,7 +319,7 @@ export default function FreelancerProfilePage() {
 
                 {profile.location && (
                   <span className={chipClass}>
-                    <MapPin className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" /> {profile.location}
+                    <MapPin className="h-3.5 w-3.5 text-gray-400 dark:text-slate-400" aria-hidden="true" /> {profile.location}
                   </span>
                 )}
 
@@ -329,20 +329,20 @@ export default function FreelancerProfilePage() {
                   </span>
                 ) : (
                   <span className={chipClass}>
-                    <Star className="h-3.5 w-3.5 text-gray-300" aria-hidden="true" /> No ratings yet
+                    <Star className="h-3.5 w-3.5 text-gray-300 dark:text-slate-500" aria-hidden="true" /> No ratings yet
                   </span>
                 )}
 
                 {profile.experienceLevelLabel && (
                   <span className={chipClass}>
-                    <Briefcase className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
+                    <Briefcase className="h-3.5 w-3.5 text-gray-400 dark:text-slate-400" aria-hidden="true" />
                     {profile.experienceLevelLabel}
                   </span>
                 )}
 
                 {profile.memberSinceLabel && (
                   <span className={chipClass}>
-                    <Clock className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" /> Member since{' '}
+                    <Clock className="h-3.5 w-3.5 text-gray-400 dark:text-slate-400" aria-hidden="true" /> Member since{' '}
                     {profile.memberSinceLabel}
                   </span>
                 )}
@@ -352,7 +352,7 @@ export default function FreelancerProfilePage() {
         </div>
 
         {/* Stats — real API data */}
-        <div className="border-t border-white/60 bg-white/70 px-5 py-4 sm:px-8 sm:py-5">
+        <div className="border-t border-white/60 bg-white/70 px-5 py-4 sm:px-8 sm:py-5 dark:border-slate-800 dark:bg-slate-900/70">
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <ProfileStat
               icon={Banknote}
@@ -390,7 +390,7 @@ export default function FreelancerProfilePage() {
       <Card>
         <CardHeader title="Professional summary" />
         <CardBody>
-          <p className="whitespace-pre-line text-[15px] leading-7 text-gray-600">
+          <p className="whitespace-pre-line text-[15px] leading-7 text-gray-600 dark:text-slate-300">
             {profile.overview || 'You have not added a professional summary yet.'}
           </p>
         </CardBody>
@@ -409,7 +409,7 @@ export default function FreelancerProfilePage() {
                 <SkillBadge key={skill.id} className="gap-1.5">
                   {skill.name}
                   {skill.yearsOfExperience != null && (
-                    <span className="text-[10px] font-semibold text-brand-600">
+                    <span className="text-[10px] font-semibold text-brand-600 dark:text-indigo-400">
                       {skill.yearsOfExperience}y
                     </span>
                   )}
@@ -418,14 +418,14 @@ export default function FreelancerProfilePage() {
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100">
-                <FolderOpen className="h-4 w-4 text-gray-400" aria-hidden="true" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 dark:bg-slate-800">
+                <FolderOpen className="h-4 w-4 text-gray-400 dark:text-slate-400" aria-hidden="true" />
               </div>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-slate-400">
                 No skills listed yet.{' '}
                 <Link
                   to="/freelancer/profile/edit"
-                  className="font-semibold text-brand-600 hover:text-brand-700"
+                  className="font-semibold text-brand-600 hover:text-brand-700 dark:text-indigo-400 dark:hover:text-indigo-300"
                 >
                   Add skills
                 </Link>{' '}
@@ -443,7 +443,7 @@ export default function FreelancerProfilePage() {
             title="Verified Credentials"
             description="Your approved certificates and professional qualifications."
             action={
-              <span className="inline-flex shrink-0 items-center rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
+              <span className="inline-flex shrink-0 items-center rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">
                 <CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />
                 {verifiedCredentials.length} approved
               </span>
@@ -454,7 +454,7 @@ export default function FreelancerProfilePage() {
               {verifiedCredentials.map((cred) => (
                 <li
                   key={cred.id}
-                  className="flex items-center gap-3.5 rounded-xl border border-emerald-100 bg-gradient-to-r from-emerald-50/70 via-white to-white p-3.5"
+                  className="flex items-center gap-3.5 rounded-xl border border-emerald-100 bg-gradient-to-r from-emerald-50/70 via-white to-white p-3.5 dark:border-emerald-900/50 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/30"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-sm shadow-emerald-500/30">
                     {cred.type === 'dream_more_certificate' ? (
@@ -464,17 +464,17 @@ export default function FreelancerProfilePage() {
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-ink-900">{cred.title}</p>
-                    <p className="mt-0.5 text-xs text-gray-500">
+                    <p className="text-sm font-bold text-ink-900 dark:text-slate-100">{cred.title}</p>
+                    <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">
                       {cred.type === 'dream_more_certificate' ? 'Dream More Certified' : 'Verified Certificate'}
                       {cred.issuing_organization && ` — ${cred.issuing_organization}`}
                     </p>
                   </div>
-                  <CheckCircle className="h-5 w-5 shrink-0 text-emerald-500" aria-hidden="true" />
+                  <CheckCircle className="h-5 w-5 shrink-0 text-emerald-500 dark:text-emerald-400" aria-hidden="true" />
                 </li>
               ))}
             </ul>
-            <p className="mt-4 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-[11px] leading-relaxed text-gray-500">
+            <p className="mt-4 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-[11px] leading-relaxed text-gray-500 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-400">
               This is what clients see on your public profile. Add, download, or remove credentials —
               including pending and rejected ones — under Credentials &amp; Certificates below.
             </p>
@@ -504,13 +504,13 @@ export default function FreelancerProfilePage() {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-start gap-4 rounded-xl border border-dashed border-gray-200 bg-gray-50/60 p-5 sm:flex-row sm:items-center">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+            <div className="flex flex-col items-start gap-4 rounded-xl border border-dashed border-gray-200 bg-gray-50/60 p-5 sm:flex-row sm:items-center dark:border-slate-800 dark:bg-slate-800/40">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-indigo-950 dark:text-indigo-400">
                 <FolderOpen className="h-5 w-5" aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-ink-900">No portfolio projects yet</p>
-                <p className="mt-0.5 text-xs leading-relaxed text-gray-500">
+                <p className="text-sm font-bold text-ink-900 dark:text-slate-100">No portfolio projects yet</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-gray-500 dark:text-slate-400">
                   Add screenshots, links, or documents from your best work so clients can see what
                   you deliver.
                 </p>
@@ -522,8 +522,8 @@ export default function FreelancerProfilePage() {
           )}
 
           {/* External links, separate from the visual portfolio pieces */}
-          <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-gray-100 pt-4">
-            <span className="mr-1 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+          <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-gray-100 dark:border-slate-800 pt-4">
+            <span className="mr-1 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">
               Find me on
             </span>
             {links.length > 0 ? (
@@ -535,14 +535,14 @@ export default function FreelancerProfilePage() {
                     href={link.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-sm font-medium text-ink-700 transition-colors hover:border-brand-200 hover:text-brand-600"
+                    className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3.5 py-2 text-sm font-medium text-ink-700 transition-colors hover:border-brand-200 hover:text-brand-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-indigo-500/50 dark:hover:text-indigo-400"
                   >
                     <Icon className="h-4 w-4" aria-hidden="true" /> {link.label}
                   </a>
                 );
               })
             ) : (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-slate-400">
                 No external links added yet — add GitHub, LinkedIn, or your website from the edit
                 form.
               </p>

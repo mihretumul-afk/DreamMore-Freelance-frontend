@@ -82,40 +82,40 @@ function MethodCard({ method, onSetDefault, onRemove }) {
   return (
     <div className={`rounded-2xl border-2 p-5 transition-all duration-200 hover:shadow-lg ${
       method.is_default
-        ? 'border-brand-400 bg-gradient-to-br from-brand-50/60 to-white shadow-sm'
-        : 'border-gray-200 bg-white hover:border-gray-300'
+        ? 'border-brand-400 bg-gradient-to-br from-brand-50/60 to-white shadow-sm dark:border-indigo-500 dark:from-slate-800 dark:to-indigo-950/40'
+        : 'border-gray-200 bg-white hover:border-gray-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700'
     }`}>
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
           <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
-            method.is_default ? 'bg-brand-100' : 'bg-gray-100'
+            method.is_default ? 'bg-brand-100 dark:bg-indigo-950' : 'bg-gray-100 dark:bg-slate-800'
           }`}>
-            <Icon className={`h-6 w-6 ${method.is_default ? 'text-brand-600' : 'text-gray-500'}`} />
+            <Icon className={`h-6 w-6 ${method.is_default ? 'text-brand-600 dark:text-indigo-400' : 'text-gray-500 dark:text-slate-400'}`} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-ink-900">{method.display_label || method.nickname || 'Payment Method'}</h3>
+              <h3 className="font-bold text-ink-900 dark:text-slate-100">{method.display_label || method.nickname || 'Payment Method'}</h3>
               {method.is_default && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-brand-100 px-2.5 py-0.5 text-[11px] font-bold text-brand-700">
+                <span className="inline-flex items-center gap-1 rounded-full bg-brand-100 px-2.5 py-0.5 text-[11px] font-bold text-brand-700 dark:bg-indigo-950 dark:text-indigo-400">
                   <Star className="h-3 w-3 fill-current" /> Default
                 </span>
               )}
             </div>
-            <p className="mt-0.5 text-sm text-gray-500">{typeLabels[method.type]} · {method.provider}</p>
+            <p className="mt-0.5 text-sm text-gray-500 dark:text-slate-400">{typeLabels[method.type]} · {method.provider}</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
           {!method.is_default && (
             <button
               onClick={() => onSetDefault(method.id)}
-              className="rounded-xl px-3 py-1.5 text-xs font-semibold text-brand-600 hover:bg-brand-50 transition-colors cursor-pointer"
+              className="rounded-xl px-3 py-1.5 text-xs font-semibold text-brand-600 hover:bg-brand-50 transition-colors cursor-pointer dark:text-indigo-400 dark:hover:bg-indigo-950"
             >
               Set Default
             </button>
           )}
           <button
             onClick={() => onRemove(method.id)}
-            className="rounded-xl p-2 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
+            className="rounded-xl p-2 text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer dark:text-slate-400 dark:hover:bg-red-950/50 dark:hover:text-red-400"
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -129,17 +129,17 @@ function MethodCard({ method, onSetDefault, onRemove }) {
 
 function StatCard({ icon: Icon, label, value, sub, color, gradient }) {
   return (
-    <div className={`rounded-2xl border ${gradient || 'border-gray-200 bg-white'} p-5 transition-all duration-200 hover:shadow-md`}>
+    <div className={`rounded-2xl border ${gradient || 'border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900'} p-5 transition-all duration-200 hover:shadow-md`}>
       <div className="flex items-center gap-3">
-        <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${color || 'bg-gray-100'}`}>
-          <Icon className={`h-5 w-5 ${color ? color.replace('bg-', 'text-').replace('-100', '-600') : 'text-gray-500'}`} />
+        <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${color || 'bg-gray-100 dark:bg-slate-800'}`}>
+          <Icon className={`h-5 w-5 ${color ? color.replace('bg-', 'text-').replace('-100', '-600') : 'text-gray-500 dark:text-slate-400'}`} />
         </div>
         <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-gray-400">{label}</p>
-          <p className="text-2xl font-extrabold text-ink-900 mt-0.5">{value}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">{label}</p>
+          <p className="text-2xl font-extrabold text-ink-900 dark:text-slate-100 mt-0.5">{value}</p>
         </div>
       </div>
-      {sub && <p className="mt-2 text-[11px] text-gray-500">{sub}</p>}
+      {sub && <p className="mt-2 text-[11px] text-gray-500 dark:text-slate-400">{sub}</p>}
     </div>
   );
 }
@@ -490,60 +490,60 @@ export default function WithdrawalsPage() {
     <div className="space-y-6 animate-fade-in">
 
       {/* ─── Hero Header ─────────────────────────────────────────────── */}
-      <div className="rounded-3xl bg-gradient-to-br from-white via-gray-50 to-gray-100 p-6 sm:p-8 relative overflow-hidden border border-gray-200 shadow-sm">
-        <div className="absolute -top-12 -right-12 h-48 w-48 rounded-full bg-brand-100/40 blur-3xl" />
-        <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-emerald-100/40 blur-2xl" />
+      <div className="rounded-3xl bg-gradient-to-br from-white via-gray-50 to-gray-100 p-6 sm:p-8 relative overflow-hidden border border-gray-200 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
+        <div className="absolute -top-12 -right-12 h-48 w-48 rounded-full bg-brand-100/40 dark:bg-brand-900/20 blur-3xl" />
+        <div className="absolute -bottom-8 -left-8 h-32 w-32 rounded-full bg-emerald-100/40 dark:bg-emerald-900/20 blur-2xl" />
         <div className="relative">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">My Finances</p>
-          <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900">Withdrawals</h1>
-          <p className="mt-1 text-sm text-gray-500">Track your earnings, manage withdrawal methods, and request payouts.</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-slate-400">My Finances</p>
+          <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-ink-900 dark:text-slate-100">Withdrawals</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Track your earnings, manage withdrawal methods, and request payouts.</p>
 
           {/* Quick Stats Row */}
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4">
-              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600">
+            <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 dark:bg-emerald-950/40 dark:border-emerald-900/50">
+              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                 <Wallet className="h-3.5 w-3.5" /> Available
               </div>
-              <p className="mt-1.5 text-xl font-extrabold text-emerald-900">{formatETB(e.available_balance || 0)}</p>
+              <p className="mt-1.5 text-xl font-extrabold text-emerald-900 dark:text-emerald-100">{formatETB(e.available_balance || 0)}</p>
             </div>
-            <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
-              <div className="flex items-center gap-2 text-xs font-semibold text-amber-600">
+            <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 dark:bg-amber-950/40 dark:border-amber-900/50">
+              <div className="flex items-center gap-2 text-xs font-semibold text-amber-600 dark:text-amber-400">
                 <Clock className="h-3.5 w-3.5" /> Pending
               </div>
-              <p className="mt-1.5 text-xl font-extrabold text-amber-900">{formatETB(e.pending_balance || 0)}</p>
+              <p className="mt-1.5 text-xl font-extrabold text-amber-900 dark:text-amber-100">{formatETB(e.pending_balance || 0)}</p>
             </div>
-            <div className="rounded-2xl bg-blue-50 border border-blue-200 p-4">
-              <div className="flex items-center gap-2 text-xs font-semibold text-blue-600">
+            <div className="rounded-2xl bg-blue-50 border border-blue-200 p-4 dark:bg-blue-950/40 dark:border-blue-900/50">
+              <div className="flex items-center gap-2 text-xs font-semibold text-blue-600 dark:text-blue-400">
                 <TrendingUp className="h-3.5 w-3.5" /> Total Earned
               </div>
-              <p className="mt-1.5 text-xl font-extrabold text-blue-900">{formatETB(e.total_earned || 0)}</p>
+              <p className="mt-1.5 text-xl font-extrabold text-blue-900 dark:text-blue-100">{formatETB(e.total_earned || 0)}</p>
             </div>
-            <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4">
-              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+            <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4 dark:bg-slate-800/50 dark:border-slate-700">
+              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-slate-400">
                 <ArrowDownRight className="h-3.5 w-3.5" /> Withdrawn
               </div>
-              <p className="mt-1.5 text-xl font-extrabold text-gray-900">{formatETB(e.total_withdrawn || 0)}</p>
+              <p className="mt-1.5 text-xl font-extrabold text-gray-900 dark:text-slate-100">{formatETB(e.total_withdrawn || 0)}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* ─── Earnings Chart ─────────────────────────────────────────── */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-6">
+      <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50">
-              <BarChart3 className="h-5 w-5 text-emerald-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950">
+              <BarChart3 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <h2 className="font-bold text-ink-900">Monthly Earnings</h2>
-              <p className="text-xs text-gray-400">Last 6 months overview</p>
+              <h2 className="font-bold text-ink-900 dark:text-slate-100">Monthly Earnings</h2>
+              <p className="text-xs text-gray-400 dark:text-slate-400">Last 6 months overview</p>
             </div>
           </div>
           <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-1.5">
               <div className="h-3 w-3 rounded-full bg-emerald-500" />
-              <span className="text-gray-500">Earnings</span>
+              <span className="text-gray-500 dark:text-slate-400">Earnings</span>
             </div>
           </div>
         </div>
@@ -551,11 +551,11 @@ export default function WithdrawalsPage() {
           <EarningsChart transactions={transactions} months={6} />
         ) : (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
-              <BarChart3 className="h-8 w-8 text-gray-300" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 dark:bg-slate-800">
+              <BarChart3 className="h-8 w-8 text-gray-300 dark:text-slate-600" />
             </div>
-            <p className="mt-3 text-sm font-semibold text-gray-500">No earnings data yet</p>
-            <p className="text-xs text-gray-400">Complete jobs to see your earnings chart</p>
+            <p className="mt-3 text-sm font-semibold text-gray-500 dark:text-slate-400">No earnings data yet</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500">Complete jobs to see your earnings chart</p>
           </div>
         )}
       </div>
@@ -588,7 +588,7 @@ export default function WithdrawalsPage() {
       </div>
 
       {/* ─── Tab Navigation ──────────────────────────────────────────── */}
-      <div className="flex gap-1 rounded-2xl bg-gray-100 p-1">
+      <div className="flex gap-1 rounded-2xl bg-gray-100 p-1 dark:bg-slate-800">
         {[
           { key: 'transactions', label: 'Transaction History', icon: BadgeDollarSign },
           { key: 'withdrawals', label: 'Withdrawal History', icon: ArrowDownRight },
@@ -599,8 +599,8 @@ export default function WithdrawalsPage() {
             onClick={() => setActiveTab(tab.key)}
             className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 text-sm font-semibold transition-all cursor-pointer ${
               activeTab === tab.key
-                ? 'bg-white text-ink-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-white text-ink-900 shadow-sm dark:bg-slate-900 dark:text-slate-100'
+                : 'text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <tab.icon className="h-4 w-4" />
@@ -611,12 +611,12 @@ export default function WithdrawalsPage() {
 
       {/* ─── Transaction History Tab ─────────────────────────────────── */}
       {activeTab === 'transactions' && (
-        <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
+        <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden dark:border-slate-800 dark:bg-slate-900">
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-bold text-ink-900">Transaction History</h2>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <h2 className="font-bold text-ink-900 dark:text-slate-100">Transaction History</h2>
+                <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">
                   {hasTxDateFilter ? `${filteredTransactions.length} of ${txMeta.total || transactions.length} transactions` : `${txMeta.total || 0} transactions`}
                 </p>
               </div>
@@ -633,25 +633,25 @@ export default function WithdrawalsPage() {
                 {showExportMenu && (
                   <>
                     <div className="fixed inset-0 z-10" onClick={() => setShowExportMenu(false)} />
-                    <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-xl border border-gray-200 bg-white py-1 shadow-xl">
+                    <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-slate-800 dark:bg-slate-900">
                       <button
                         onClick={() => { exportTransactionsCSV(hasTxDateFilter ? filteredTransactions : transactions, { total: hasTxDateFilter ? filteredTransactions.length : txMeta.total }); setShowExportMenu(false); showToast('CSV exported successfully!', 'success'); }}
-                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer dark:text-slate-200 dark:hover:bg-slate-800"
                       >
                         <FileSpreadsheet className="h-4 w-4 text-emerald-500" />
                         <div className="text-left">
                           <p className="font-semibold">Export as CSV</p>
-                          <p className="text-[10px] text-gray-400">Spreadsheet format</p>
+                          <p className="text-[10px] text-gray-400 dark:text-slate-400">Spreadsheet format</p>
                         </div>
                       </button>
                       <button
                         onClick={() => { exportTransactionsPDF(hasTxDateFilter ? filteredTransactions : transactions, { total: hasTxDateFilter ? filteredTransactions.length : txMeta.total }); setShowExportMenu(false); showToast('PDF exported successfully!', 'success'); }}
-                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer dark:text-slate-200 dark:hover:bg-slate-800"
                       >
                         <FileText className="h-4 w-4 text-red-500" />
                         <div className="text-left">
                           <p className="font-semibold">Export as PDF</p>
-                          <p className="text-[10px] text-gray-400">Printable document</p>
+                          <p className="text-[10px] text-gray-400 dark:text-slate-400">Printable document</p>
                         </div>
                       </button>
                     </div>
@@ -663,8 +663,8 @@ export default function WithdrawalsPage() {
           </div>
 
           {/* Date Range Filter */}
-          <div className="px-6 py-3 bg-gray-50/50 border-b border-gray-100 flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+          <div className="px-6 py-3 bg-gray-50/50 border-b border-gray-100 flex flex-wrap items-center gap-3 dark:bg-slate-800/50 dark:border-slate-800">
+            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-slate-400">
               <Calendar className="h-3.5 w-3.5" /> Filter by date:
             </div>
             <div className="flex items-center gap-2">
@@ -672,22 +672,22 @@ export default function WithdrawalsPage() {
                 type="date"
                 value={txDateFrom}
                 onChange={(e) => setTxDateFrom(e.target.value)}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                 placeholder="From"
               />
-              <span className="text-xs text-gray-400">to</span>
+              <span className="text-xs text-gray-400 dark:text-slate-400">to</span>
               <input
                 type="date"
                 value={txDateTo}
                 onChange={(e) => setTxDateTo(e.target.value)}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                 placeholder="To"
               />
             </div>
             {hasTxDateFilter && (
               <button
                 onClick={() => { setTxDateFrom(''); setTxDateTo(''); }}
-                className="flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors cursor-pointer"
+                className="flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors cursor-pointer dark:bg-red-950/50 dark:text-red-400"
               >
                 <X className="h-3 w-3" /> Clear
               </button>
@@ -706,37 +706,37 @@ export default function WithdrawalsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50/80 text-left">
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Type</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Description</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Amount</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Balance</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Date</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Invoice</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right"></th>
+                  <tr className="bg-gray-50/80 text-left dark:bg-slate-800/80">
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Type</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Description</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right">Amount</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right">Balance</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Date</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right">Invoice</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                   {filteredTransactions.map((tx) => {
                     const meta = TX_TYPES[tx.type] || { label: tx.type, color: 'gray' };
                     const isCredit = tx.direction === 'credit';
                     return (
-                      <tr key={tx.id} className="hover:bg-gray-50/50 transition-colors">
+                      <tr key={tx.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
                         <td className="px-6 py-3.5">
                           <Badge tone={meta.tone} size="xs">{meta.label}</Badge>
                         </td>
-                        <td className="px-6 py-3.5 text-gray-600 max-w-xs truncate">{tx.description || '—'}</td>
-                        <td className={`px-6 py-3.5 text-right font-bold ${isCredit ? 'text-emerald-600' : 'text-red-500'}`}>
+                        <td className="px-6 py-3.5 text-gray-600 dark:text-slate-300 max-w-xs truncate">{tx.description || '—'}</td>
+                        <td className={`px-6 py-3.5 text-right font-bold ${isCredit ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
                           {isCredit ? '+' : '−'}{formatETB(Math.abs(tx.amount))}
                         </td>
-                        <td className="px-6 py-3.5 text-right text-gray-400 text-xs">
+                        <td className="px-6 py-3.5 text-right text-gray-400 dark:text-slate-400 text-xs">
                           {tx.balance_after != null ? formatETB(tx.balance_after) : '—'}
                         </td>
-                        <td className="px-6 py-3.5 text-gray-400 text-xs whitespace-nowrap">{formatDate(tx.created_at)}</td>
+                        <td className="px-6 py-3.5 text-gray-400 dark:text-slate-400 text-xs whitespace-nowrap">{formatDate(tx.created_at)}</td>
                         <td className="px-6 py-3.5 text-right">
                           <button
                             onClick={() => { generateTransactionInvoice(tx, { name: user?.name, email: user?.email, role: user?.role }); showToast('Invoice downloaded!', 'success'); }}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors cursor-pointer dark:bg-emerald-950 dark:text-emerald-400 dark:hover:bg-emerald-900"
                           >
                             <FileDown className="h-3.5 w-3.5" /> PDF
                           </button>
@@ -745,7 +745,7 @@ export default function WithdrawalsPage() {
                           <button
                             onClick={() => handleDeleteTransaction(tx)}
                             title="Delete from history"
-                            className="rounded-lg p-2 text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
+                            className="rounded-lg p-2 text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer dark:text-slate-600 dark:hover:bg-red-950/50 dark:hover:text-red-400"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -759,8 +759,8 @@ export default function WithdrawalsPage() {
           )}
 
           {txMeta.last_page > 1 && (
-            <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3">
-              <p className="text-xs text-gray-400">Page {txMeta.current_page} of {txMeta.last_page}</p>
+            <div className="flex items-center justify-between border-t border-gray-100 dark:border-slate-800 px-6 py-3">
+              <p className="text-xs text-gray-400 dark:text-slate-400">Page {txMeta.current_page} of {txMeta.last_page}</p>
               <div className="flex gap-2">
                 <Button variant="outline" size="xs" disabled={txMeta.current_page <= 1} onClick={() => setTxPage((p) => p - 1)}>
                   <ChevronLeft className="h-3 w-3" /> Prev
@@ -776,12 +776,12 @@ export default function WithdrawalsPage() {
 
       {/* ─── Withdrawal History Tab ──────────────────────────────────── */}
       {activeTab === 'withdrawals' && (
-        <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
+        <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden dark:border-slate-800 dark:bg-slate-900">
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-bold text-ink-900">Withdrawal History</h2>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <h2 className="font-bold text-ink-900 dark:text-slate-100">Withdrawal History</h2>
+                <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">
                   {hasWdDateFilter ? `${filteredWithdrawals.length} of ${wdMeta.total || withdrawals.length} withdrawals` : `${wdMeta.total || 0} withdrawals`}
                 </p>
               </div>
@@ -799,8 +799,8 @@ export default function WithdrawalsPage() {
           </div>
 
           {/* Date Range Filter */}
-          <div className="px-6 py-3 bg-gray-50/50 border-b border-gray-100 flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+          <div className="px-6 py-3 bg-gray-50/50 border-b border-gray-100 flex flex-wrap items-center gap-3 dark:bg-slate-800/50 dark:border-slate-800">
+            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-slate-400">
               <Calendar className="h-3.5 w-3.5" /> Filter by date:
             </div>
             <div className="flex items-center gap-2">
@@ -808,20 +808,20 @@ export default function WithdrawalsPage() {
                 type="date"
                 value={wdDateFrom}
                 onChange={(e) => setWdDateFrom(e.target.value)}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
               />
-              <span className="text-xs text-gray-400">to</span>
+              <span className="text-xs text-gray-400 dark:text-slate-400">to</span>
               <input
                 type="date"
                 value={wdDateTo}
                 onChange={(e) => setWdDateTo(e.target.value)}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
               />
             </div>
             {hasWdDateFilter && (
               <button
                 onClick={() => { setWdDateFrom(''); setWdDateTo(''); }}
-                className="flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors cursor-pointer"
+                className="flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors cursor-pointer dark:bg-red-950/50 dark:text-red-400"
               >
                 <X className="h-3 w-3" /> Clear
               </button>
@@ -840,37 +840,37 @@ export default function WithdrawalsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50/80 text-left">
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Reference</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Amount</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Fee</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Net</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Status</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Date</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400"></th>
+                  <tr className="bg-gray-50/80 text-left dark:bg-slate-800/80">
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Reference</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Amount</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Fee</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Net</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Status</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Date</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                   {filteredWithdrawals.map((w) => {
                     const s = WD_STATUS[w.status] || { tone: 'neutral', label: w.status, bg: 'bg-gray-50', text: 'text-gray-600' };
                     const SIcon = s.icon;
                     return (
-                      <tr key={w.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-3.5 font-mono text-xs text-gray-600">{w.reference}</td>
-                        <td className="px-6 py-3.5 font-bold text-ink-900">{formatETB(w.amount)}</td>
-                        <td className="px-6 py-3.5 text-red-400 text-xs">−{formatETB(w.fee)}</td>
-                        <td className="px-6 py-3.5 font-bold text-emerald-600">{formatETB(w.net_amount)}</td>
+                      <tr key={w.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                        <td className="px-6 py-3.5 font-mono text-xs text-gray-600 dark:text-slate-400">{w.reference}</td>
+                        <td className="px-6 py-3.5 font-bold text-ink-900 dark:text-slate-100">{formatETB(w.amount)}</td>
+                        <td className="px-6 py-3.5 text-red-400 dark:text-red-400 text-xs">−{formatETB(w.fee)}</td>
+                        <td className="px-6 py-3.5 font-bold text-emerald-600 dark:text-emerald-400">{formatETB(w.net_amount)}</td>
                         <td className="px-6 py-3.5">
                           <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${s.bg} ${s.text}`}>
                             <SIcon className="h-3 w-3" /> {s.label}
                           </span>
                         </td>
-                        <td className="px-6 py-3.5 text-xs text-gray-400 whitespace-nowrap">{formatDate(w.created_at)}</td>
+                        <td className="px-6 py-3.5 text-xs text-gray-400 dark:text-slate-400 whitespace-nowrap">{formatDate(w.created_at)}</td>
                         <td className="px-6 py-3.5 text-right">
                           {w.status === 'requested' && (
                             <button
                               onClick={() => handleCancelWithdrawal(w.id)}
-                              className="rounded-lg px-2.5 py-1 text-xs font-semibold text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                              className="rounded-lg px-2.5 py-1 text-xs font-semibold text-red-500 hover:bg-red-50 transition-colors cursor-pointer dark:hover:bg-red-950/50"
                             >
                               Cancel
                             </button>
@@ -879,7 +879,7 @@ export default function WithdrawalsPage() {
                             <button
                               onClick={() => handleDeleteWithdrawal(w)}
                               title="Delete from history"
-                              className="rounded-lg p-2 text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
+                              className="rounded-lg p-2 text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer dark:text-slate-600 dark:hover:bg-red-950/50 dark:hover:text-red-400"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -894,8 +894,8 @@ export default function WithdrawalsPage() {
           )}
 
           {wdMeta.last_page > 1 && (
-            <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3">
-              <p className="text-xs text-gray-400">Page {wdMeta.current_page} of {wdMeta.last_page}</p>
+            <div className="flex items-center justify-between border-t border-gray-100 dark:border-slate-800 px-6 py-3">
+              <p className="text-xs text-gray-400 dark:text-slate-400">Page {wdMeta.current_page} of {wdMeta.last_page}</p>
               <div className="flex gap-2">
                 <Button variant="outline" size="xs" disabled={wdPage <= 1} onClick={() => setWdPage((p) => p - 1)}>
                   <ChevronLeft className="h-3 w-3" /> Prev
@@ -914,8 +914,8 @@ export default function WithdrawalsPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-ink-900">Your Withdrawal Methods</h2>
-              <p className="text-xs text-gray-400 mt-0.5">Manage how you receive your earnings</p>
+              <h2 className="text-lg font-bold text-ink-900 dark:text-slate-100">Your Withdrawal Methods</h2>
+              <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">Manage how you receive your earnings</p>
             </div>
             <Button variant="primary" size="sm" onClick={() => setShowAddMethod(true)}>
               <Plus className="h-4 w-4" /> Add Method
@@ -923,12 +923,12 @@ export default function WithdrawalsPage() {
           </div>
 
           {methods.length === 0 ? (
-            <div className="rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50/50 p-12 text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
-                <CreditCard className="h-8 w-8 text-gray-400" />
+            <div className="rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50/50 p-12 text-center dark:border-slate-800 dark:bg-slate-900/50">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 dark:bg-slate-800">
+                <CreditCard className="h-8 w-8 text-gray-400 dark:text-slate-500" />
               </div>
-              <h3 className="mt-4 font-bold text-ink-900">No withdrawal methods yet</h3>
-              <p className="mt-1 text-sm text-gray-500 max-w-sm mx-auto">
+              <h3 className="mt-4 font-bold text-ink-900 dark:text-slate-100">No withdrawal methods yet</h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400 max-w-sm mx-auto">
                 Add a bank account, card, or mobile money to receive your earnings.
               </p>
               <Button variant="primary" size="sm" className="mt-4" onClick={() => setShowAddMethod(true)}>
@@ -983,10 +983,10 @@ export default function WithdrawalsPage() {
                   ))}
                 </Select>
               ) : (
-                <div className="rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50 p-6 text-center">
+                <div className="rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50 p-6 text-center dark:border-amber-900/50 dark:bg-amber-950/40">
                   <CreditCard className="mx-auto h-10 w-10 text-amber-400" />
-                  <p className="mt-3 font-bold text-amber-800">No Payment Methods</p>
-                  <p className="mt-1 text-xs text-amber-600">Add a payment method first to add funds.</p>
+                  <p className="mt-3 font-bold text-amber-800 dark:text-amber-200">No Payment Methods</p>
+                  <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">Add a payment method first to add funds.</p>
                   <Button variant="outline" size="sm" className="mt-3" onClick={() => { resetAddFundsModal(); setShowAddMethod(true); }}>
                     <Plus className="h-3 w-3" /> Add Method
                   </Button>
@@ -995,14 +995,14 @@ export default function WithdrawalsPage() {
 
               {/* Summary */}
               {depositAmount && parseFloat(depositAmount) > 0 && (
-                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm space-y-2">
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm space-y-2 dark:border-slate-800 dark:bg-slate-800/50">
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Amount to add</span>
-                    <span className="font-bold text-ink-900">{formatETB(parseFloat(depositAmount) || 0)}</span>
+                    <span className="text-gray-500 dark:text-slate-400">Amount to add</span>
+                    <span className="font-bold text-ink-900 dark:text-slate-100">{formatETB(parseFloat(depositAmount) || 0)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">New balance</span>
-                    <span className="font-bold text-emerald-600">{formatETB((e.available_balance || 0) + (parseFloat(depositAmount) || 0))}</span>
+                    <span className="text-gray-500 dark:text-slate-400">New balance</span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">{formatETB((e.available_balance || 0) + (parseFloat(depositAmount) || 0))}</span>
                   </div>
                 </div>
               )}
@@ -1023,36 +1023,36 @@ export default function WithdrawalsPage() {
 
           {depositStep === 'processing' && (
             <div className="flex flex-col items-center justify-center py-12">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-50">
-                <RefreshCw className="h-8 w-8 text-brand-500 animate-spin" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-50 dark:bg-indigo-950">
+                <RefreshCw className="h-8 w-8 text-brand-500 dark:text-indigo-400 animate-spin" />
               </div>
-              <p className="mt-4 text-lg font-bold text-ink-900">Processing Payment</p>
-              <p className="mt-1 text-sm text-gray-500">Please wait while we confirm your payment...</p>
+              <p className="mt-4 text-lg font-bold text-ink-900 dark:text-slate-100">Processing Payment</p>
+              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Please wait while we confirm your payment...</p>
             </div>
           )}
 
           {depositStep === 'success' && depositResult && (
             <div className="space-y-4">
               <div className="flex flex-col items-center py-6">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50">
-                  <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950">
+                  <CheckCircle2 className="h-8 w-8 text-emerald-500 dark:text-emerald-400" />
                 </div>
-                <h3 className="mt-4 text-xl font-bold text-emerald-700">Funds Added Successfully</h3>
-                <p className="mt-1 text-sm text-gray-500">{formatETB(depositResult.payment.amount)} has been added to your Available Balance.</p>
+                <h3 className="mt-4 text-xl font-bold text-emerald-700 dark:text-emerald-400">Funds Added Successfully</h3>
+                <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">{formatETB(depositResult.payment.amount)} has been added to your Available Balance.</p>
               </div>
 
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 space-y-3">
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 space-y-3 dark:border-emerald-900/50 dark:bg-emerald-950/40">
                 <div className="flex justify-between">
-                  <span className="text-sm text-emerald-700">Previous Balance</span>
-                  <span className="text-sm font-bold text-emerald-900">{formatETB(depositResult.previous_balance)}</span>
+                  <span className="text-sm text-emerald-700 dark:text-emerald-400">Previous Balance</span>
+                  <span className="text-sm font-bold text-emerald-900 dark:text-emerald-100">{formatETB(depositResult.previous_balance)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-emerald-700">Added</span>
-                  <span className="text-sm font-bold text-emerald-900">+ {formatETB(depositResult.payment.amount)}</span>
+                  <span className="text-sm text-emerald-700 dark:text-emerald-400">Added</span>
+                  <span className="text-sm font-bold text-emerald-900 dark:text-emerald-100">+ {formatETB(depositResult.payment.amount)}</span>
                 </div>
-                <div className="border-t border-emerald-200 pt-2 flex justify-between">
-                  <span className="text-sm font-bold text-emerald-700">New Available Balance</span>
-                  <span className="text-lg font-extrabold text-emerald-900">{formatETB(depositResult.wallet.available_balance)}</span>
+                <div className="border-t border-emerald-200 dark:border-emerald-900/50 pt-2 flex justify-between">
+                  <span className="text-sm font-bold text-emerald-700 dark:text-emerald-400">New Available Balance</span>
+                  <span className="text-lg font-extrabold text-emerald-900 dark:text-emerald-100">{formatETB(depositResult.wallet.available_balance)}</span>
                 </div>
               </div>
 
@@ -1065,11 +1065,11 @@ export default function WithdrawalsPage() {
           {depositStep === 'error' && (
             <div className="space-y-4">
               <div className="flex flex-col items-center py-6">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
-                  <AlertTriangle className="h-8 w-8 text-red-500" />
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-50 dark:bg-red-950">
+                  <AlertTriangle className="h-8 w-8 text-red-500 dark:text-red-400" />
                 </div>
-                <h3 className="mt-4 text-xl font-bold text-red-700">Payment Failed</h3>
-                <p className="mt-1 text-sm text-gray-500 text-center max-w-sm">{depositError}</p>
+                <h3 className="mt-4 text-xl font-bold text-red-700 dark:text-red-400">Payment Failed</h3>
+                <p className="mt-1 text-sm text-gray-500 dark:text-slate-400 text-center max-w-sm">{depositError}</p>
               </div>
 
               <div className="flex justify-end gap-3 pt-2">
@@ -1091,10 +1091,10 @@ export default function WithdrawalsPage() {
           </div>
 
           {methods.length === 0 && (
-            <div className="rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50 p-6 text-center">
+            <div className="rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50 p-6 text-center dark:border-amber-900/50 dark:bg-amber-950/40">
               <CreditCard className="mx-auto h-10 w-10 text-amber-400" />
-              <p className="mt-3 font-bold text-amber-800">No Withdrawal Methods</p>
-              <p className="mt-1 text-xs text-amber-600">Add a method to receive your earnings.</p>
+              <p className="mt-3 font-bold text-amber-800 dark:text-amber-200">No Withdrawal Methods</p>
+              <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">Add a method to receive your earnings.</p>
               <Button variant="outline" size="sm" className="mt-3" onClick={() => { setShowWithdraw(false); setShowAddMethod(true); }}>
                 <Plus className="h-3 w-3" /> Add Method
               </Button>
@@ -1125,18 +1125,18 @@ export default function WithdrawalsPage() {
 
           {/* Fee Breakdown */}
           {amount && parseFloat(amount) > 0 && (
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm space-y-2">
+            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm space-y-2 dark:border-slate-800 dark:bg-slate-800/50">
               <div className="flex justify-between">
-                <span className="text-gray-500">Amount</span>
-                <span className="font-semibold">{formatETB(parseFloat(amount) || 0)}</span>
+                <span className="text-gray-500 dark:text-slate-400">Amount</span>
+                <span className="font-semibold text-ink-900 dark:text-slate-100">{formatETB(parseFloat(amount) || 0)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Fee (1.5%)</span>
-                <span className="text-red-500 font-semibold">−{formatETB((parseFloat(amount) || 0) * 0.015)}</span>
+                <span className="text-gray-500 dark:text-slate-400">Fee (1.5%)</span>
+                <span className="text-red-500 dark:text-red-400 font-semibold">−{formatETB((parseFloat(amount) || 0) * 0.015)}</span>
               </div>
-              <div className="border-t border-gray-200 pt-2 flex justify-between font-bold">
-                <span>You'll receive</span>
-                <span className="text-emerald-600 text-lg">{formatETB((parseFloat(amount) || 0) * 0.985)}</span>
+              <div className="border-t border-gray-200 dark:border-slate-800 pt-2 flex justify-between font-bold">
+                <span className="text-ink-900 dark:text-slate-100">You'll receive</span>
+                <span className="text-emerald-600 dark:text-emerald-400 text-lg">{formatETB((parseFloat(amount) || 0) * 0.985)}</span>
               </div>
             </div>
           )}
@@ -1161,7 +1161,7 @@ export default function WithdrawalsPage() {
         <div className="space-y-4">
           {/* Type Selection as Cards */}
           <div>
-            <label className="text-sm font-semibold text-ink-900 mb-2 block">Method Type</label>
+            <label className="text-sm font-semibold text-ink-900 dark:text-slate-100 mb-2 block">Method Type</label>
             <div className="grid grid-cols-3 gap-3">
               {METHOD_TYPES.map((t) => {
                 const MIcon = t.icon;
@@ -1171,8 +1171,8 @@ export default function WithdrawalsPage() {
                     onClick={() => setMethodForm({ ...methodForm, type: t.value, provider: PROVIDERS[t.value]?.[0]?.value || '' })}
                     className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-4 transition-all cursor-pointer ${
                       methodForm.type === t.value
-                        ? 'border-brand-400 bg-brand-50 text-brand-700 shadow-sm'
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                        ? 'border-brand-400 bg-brand-50 text-brand-700 shadow-sm dark:border-indigo-500 dark:bg-indigo-950 dark:text-indigo-400'
+                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-slate-700'
                     }`}
                   >
                     <MIcon className="h-6 w-6" />
@@ -1210,24 +1210,24 @@ export default function WithdrawalsPage() {
             <>
               <Input label="Bank Name" placeholder="e.g., CBE, Bank of Abyssinia" value={methodForm.bank_name} onChange={(e) => setMethodForm({ ...methodForm, bank_name: e.target.value })} />
               <Input label="Account Number" placeholder="Full account number" value={methodForm.account_number} onChange={(e) => setMethodForm({ ...methodForm, account_number: e.target.value })} />
-              <p className="text-xs text-gray-500 -mt-1">This is stored securely and only used for processing withdrawals.</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400 -mt-1">This is stored securely and only used for processing withdrawals.</p>
             </>
           )}
           {methodForm.type === 'mobile_money' && (
             <>
               <Input label="Mobile Provider" placeholder="e.g., TeleBirr, CBE Birr" value={methodForm.mobile_provider} onChange={(e) => setMethodForm({ ...methodForm, mobile_provider: e.target.value })} />
               <Input label="Account Number" placeholder="Full phone/account number" value={methodForm.account_number} onChange={(e) => setMethodForm({ ...methodForm, account_number: e.target.value })} />
-              <p className="text-xs text-gray-500 -mt-1">This is stored securely and only used for processing withdrawals.</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400 -mt-1">This is stored securely and only used for processing withdrawals.</p>
             </>
           )}
 
           {/* Optional Deposit Amount */}
-          <div className="rounded-2xl border border-brand-200 bg-brand-50 p-4">
+          <div className="rounded-2xl border border-brand-200 bg-brand-50 p-4 dark:border-indigo-900/50 dark:bg-indigo-950/40">
             <div className="flex items-center gap-2 mb-2">
-              <ArrowUpCircle className="h-4 w-4 text-brand-600" />
-              <span className="text-sm font-bold text-brand-700">Optional: Add Funds Now</span>
+              <ArrowUpCircle className="h-4 w-4 text-brand-600 dark:text-indigo-400" />
+              <span className="text-sm font-bold text-brand-700 dark:text-indigo-300">Optional: Add Funds Now</span>
             </div>
-            <p className="text-xs text-brand-600 mb-3">Enter an amount to deposit into your Available Balance using this new method.</p>
+            <p className="text-xs text-brand-600 dark:text-indigo-400 mb-3">Enter an amount to deposit into your Available Balance using this new method.</p>
             <Input
               label={`Deposit Amount (${getPlatformCurrency()})`}
               type="number"

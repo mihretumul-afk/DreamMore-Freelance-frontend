@@ -122,8 +122,8 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-ink-900">Manage Users</h1>
-        <p className="text-sm text-gray-500">
+        <h1 className="text-2xl font-bold tracking-tight text-ink-900 dark:text-slate-100">Manage Users</h1>
+        <p className="text-sm text-gray-500 dark:text-slate-400">
           View, search, and manage all platform users. {meta.total} total users.
         </p>
       </div>
@@ -173,7 +173,7 @@ export default function AdminUsersPage() {
       ) : loading ? (
         <div className="space-y-3">
           {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-16 animate-pulse rounded-card border border-gray-200 bg-white" />
+            <div key={i} className="h-16 animate-pulse rounded-card border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900" />
           ))}
         </div>
       ) : users.length === 0 ? (
@@ -184,40 +184,40 @@ export default function AdminUsersPage() {
         />
       ) : (
         <>
-          <div className="overflow-x-auto rounded-card border border-gray-200 bg-white shadow-card">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="overflow-x-auto rounded-card border border-gray-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
+              <thead className="bg-gray-50 dark:bg-slate-800/50">
                 <tr>
-                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500">
+                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                     User
                   </th>
-                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500">
+                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                     Role
                   </th>
-                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500">
+                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                     Status
                   </th>
-                  <th className="hidden px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 md:table-cell">
+                  <th className="hidden px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400 md:table-cell">
                     Joined
                   </th>
-                  <th className="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-gray-500">
+                  <th className="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                 {users.map((u) => {
                   const isSelf = currentUser?.id === u.id;
                   return (
-                    <tr key={u.id} className="hover:bg-gray-50/50">
+                    <tr key={u.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50">
                       <td className="px-5 py-3">
                         <Link
                           to={`/admin/users/${u.id}`}
-                          className="text-sm font-bold text-ink-900 hover:text-brand-600"
+                          className="text-sm font-bold text-ink-900 hover:text-brand-600 dark:text-slate-100 dark:hover:text-brand-400"
                         >
                           {u.name}
                         </Link>
-                        <p className="text-xs text-gray-500">{u.email}</p>
+                        <p className="text-xs text-gray-500 dark:text-slate-400">{u.email}</p>
                       </td>
                       <td className="px-5 py-3">
                         <Badge tone={ROLE_BADGE_TONE[u.role] || 'neutral'} size="xs">
@@ -233,7 +233,7 @@ export default function AdminUsersPage() {
                           {u.is_active !== false ? 'Active' : 'Inactive'}
                         </Badge>
                       </td>
-                      <td className="hidden px-5 py-3 text-xs text-gray-500 md:table-cell">
+                      <td className="hidden px-5 py-3 text-xs text-gray-500 dark:text-slate-400 md:table-cell">
                         {formatDate(u.created_at ?? u.createdAt)}
                       </td>
                       <td className="px-5 py-3 text-right">
@@ -277,7 +277,7 @@ export default function AdminUsersPage() {
           {/* Pagination */}
           {meta.last_page > 1 && (
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-slate-400">
                 Page {meta.current_page} of {meta.last_page}
               </p>
               <div className="flex gap-2">

@@ -104,8 +104,8 @@ export default function AdminCategoriesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-ink-900">Categories</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-bold tracking-tight text-ink-900 dark:text-slate-100">Categories</h1>
+          <p className="text-sm text-gray-500 dark:text-slate-400">
             Manage job categories on the platform. {categories.length} total.
           </p>
         </div>
@@ -119,7 +119,7 @@ export default function AdminCategoriesPage() {
       ) : loading ? (
         <div className="space-y-3">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-16 animate-pulse rounded-card border border-gray-200 bg-white" />
+            <div key={i} className="h-16 animate-pulse rounded-card border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900" />
           ))}
         </div>
       ) : categories.length === 0 ? (
@@ -130,40 +130,40 @@ export default function AdminCategoriesPage() {
           action={<Button onClick={openCreate} size="sm"><Plus className="h-4 w-4" /> Add Category</Button>}
         />
       ) : (
-        <div className="overflow-x-auto rounded-card border border-gray-200 bg-white shadow-card">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="overflow-x-auto rounded-card border border-gray-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
+            <thead className="bg-gray-50 dark:bg-slate-800/50">
               <tr>
-                <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500">
+                <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                   Name
                 </th>
-                <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500">
+                <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                   Slug
                 </th>
-                <th className="hidden px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 md:table-cell">
+                <th className="hidden px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400 md:table-cell">
                   Description
                 </th>
-                <th className="hidden px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 md:table-cell">
+                <th className="hidden px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400 md:table-cell">
                   Jobs
                 </th>
-                <th className="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-gray-500">
+                <th className="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
               {categories.map((cat) => (
-                <tr key={cat.id} className="hover:bg-gray-50/50">
+                <tr key={cat.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50">
                   <td className="px-5 py-3">
-                    <p className="text-sm font-bold text-ink-900">{cat.name}</p>
+                    <p className="text-sm font-bold text-ink-900 dark:text-slate-100">{cat.name}</p>
                   </td>
                   <td className="px-5 py-3">
                     <Badge tone="neutral" size="xs">{cat.slug}</Badge>
                   </td>
-                  <td className="hidden px-5 py-3 text-xs text-gray-500 md:table-cell max-w-xs truncate">
+                  <td className="hidden px-5 py-3 text-xs text-gray-500 dark:text-slate-400 md:table-cell max-w-xs truncate">
                     {cat.description || '—'}
                   </td>
-                  <td className="hidden px-5 py-3 text-sm text-gray-600 md:table-cell">
+                  <td className="hidden px-5 py-3 text-sm text-gray-600 dark:text-slate-300 md:table-cell">
                     {cat.jobs_count ?? cat.jobsCount ?? 0}
                   </td>
                   <td className="px-5 py-3 text-right">

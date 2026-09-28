@@ -11,7 +11,7 @@ export default function Select({ label, error, hint, required, id, className, ch
   return (
     <div className="space-y-1.5">
       {label && (
-        <label htmlFor={selectId} className="block text-sm font-medium text-ink-800">
+        <label htmlFor={selectId} className="block text-sm font-medium text-ink-800 dark:text-slate-200">
           {label}
           {required && (
             <span className="text-danger-500" aria-hidden="true">
@@ -28,10 +28,10 @@ export default function Select({ label, error, hint, required, id, className, ch
           aria-required={required || undefined}
           aria-invalid={error ? 'true' : undefined}
           className={cn(
-            'w-full appearance-none rounded-input border bg-white px-3.5 py-2.5 pr-9 text-sm text-ink-900 transition-colors focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400',
+            'w-full appearance-none rounded-input border bg-white dark:bg-slate-900 px-3.5 py-2.5 pr-9 text-sm text-ink-900 dark:text-slate-100 dark:border-slate-700 transition-colors focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-gray-50 dark:disabled:bg-slate-800 disabled:text-gray-400 dark:disabled:text-slate-500',
             error
               ? 'border-danger-400 focus:border-danger-500 focus:ring-danger-500/20'
-              : 'border-gray-300 focus:border-brand-500 focus:ring-brand-500/20',
+              : 'border-gray-300 dark:border-slate-700 focus:border-brand-500 focus:ring-brand-500/20',
             className,
           )}
           {...props}

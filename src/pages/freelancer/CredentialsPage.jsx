@@ -93,19 +93,19 @@ function StepIndicator({ steps, currentStep }) {
                 'flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-all duration-300',
                 isCompleted ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-200' :
                 isActive ? 'bg-brand-600 text-white shadow-lg shadow-brand-200 scale-110' :
-                'bg-gray-100 text-gray-400'
+                'bg-gray-100 text-gray-400 dark:bg-slate-800 dark:text-slate-400'
               )}>
                 {isCompleted ? <Check className="h-5 w-5" /> : stepNum}
               </div>
               <span className={cn(
                 'mt-2 text-[10px] font-semibold transition-colors',
-                isActive ? 'text-brand-600' : isCompleted ? 'text-emerald-600' : 'text-gray-400'
+                isActive ? 'text-brand-600 dark:text-indigo-400' : isCompleted ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400 dark:text-slate-400'
               )}>{step.label}</span>
             </div>
             {i < steps.length - 1 && (
               <div className={cn(
                 'mx-2 h-0.5 w-8 sm:w-12 transition-colors duration-300',
-                isCompleted ? 'bg-emerald-400' : 'bg-gray-200'
+                isCompleted ? 'bg-emerald-400' : 'bg-gray-200 dark:bg-slate-700'
               )} />
             )}
           </div>
@@ -332,14 +332,14 @@ export default function CredentialsPage() {
   return (
     <div className="space-y-6">
       {/* ── Header ────────────────────────────────────────────── */}
-      <div className="rounded-2xl bg-gradient-to-r from-ink-900 to-ink-800 p-6 lg:p-8 text-white">
+      <div className="rounded-2xl bg-gradient-to-r from-ink-900 to-ink-800 p-6 lg:p-8 text-white dark:from-slate-900 dark:to-slate-800">
         <div className="flex items-start gap-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/10 backdrop-blur">
-            <Shield className="h-6 w-6 text-brand-300" />
+            <Shield className="h-6 w-6 text-brand-300 dark:text-indigo-400" />
           </div>
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight">Certificates & Credentials</h1>
-            <p className="mt-1 text-sm text-gray-300 max-w-xl">
+            <p className="mt-1 text-sm text-gray-300 dark:text-slate-300 max-w-xl">
               Verify your professional qualifications to increase employer confidence and unlock job application permissions.
             </p>
           </div>
@@ -348,35 +348,35 @@ export default function CredentialsPage() {
 
       {/* ── Stats ───────────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600"><CheckCircle className="h-6 w-6" /></div>
-          <div><p className="text-2xl font-extrabold text-emerald-900">{approvedCount}</p><p className="text-xs font-medium text-emerald-700">Verified</p></div>
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 flex items-center gap-4 dark:border-emerald-900/50 dark:bg-emerald-950/40">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400"><CheckCircle className="h-6 w-6" /></div>
+          <div><p className="text-2xl font-extrabold text-emerald-900 dark:text-emerald-100">{approvedCount}</p><p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">Verified</p></div>
         </div>
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600"><Clock className="h-6 w-6" /></div>
-          <div><p className="text-2xl font-extrabold text-amber-900">{pendingCount}</p><p className="text-xs font-medium text-amber-700">Pending Review</p></div>
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 flex items-center gap-4 dark:border-amber-900/50 dark:bg-amber-950/40">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400"><Clock className="h-6 w-6" /></div>
+          <div><p className="text-2xl font-extrabold text-amber-900 dark:text-amber-100">{pendingCount}</p><p className="text-xs font-medium text-amber-700 dark:text-amber-400">Pending Review</p></div>
         </div>
-        <div className="rounded-2xl border border-purple-200 bg-purple-50 p-5 flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 text-purple-600"><RefreshCw className="h-6 w-6" /></div>
-          <div><p className="text-2xl font-extrabold text-purple-900">{resubmitCount}</p><p className="text-xs font-medium text-purple-700">Action Required</p></div>
+        <div className="rounded-2xl border border-purple-200 bg-purple-50 p-5 flex items-center gap-4 dark:border-purple-900/50 dark:bg-purple-950/40">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-950 dark:text-purple-400"><RefreshCw className="h-6 w-6" /></div>
+          <div><p className="text-2xl font-extrabold text-purple-900 dark:text-purple-100">{resubmitCount}</p><p className="text-xs font-medium text-purple-700 dark:text-purple-400">Action Required</p></div>
         </div>
       </div>
 
       {/* ── Section Header ──────────────────────────────────── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div><h2 className="text-lg font-bold text-ink-900">Your Qualifications</h2><p className="text-xs text-gray-500">Submit and track your professional certificates.</p></div>
+        <div><h2 className="text-lg font-bold text-ink-900 dark:text-slate-100">Your Qualifications</h2><p className="text-xs text-gray-500 dark:text-slate-400">Submit and track your professional certificates.</p></div>
         <Button onClick={openNewSubmission}><Plus className="h-4 w-4" /> Add Certificate</Button>
       </div>
 
       {/* ── Loading / Error / Empty ──────────────────────────── */}
-      {loading && <div className="space-y-4">{[1, 2].map((i) => <div key={i} className="h-32 animate-pulse rounded-2xl border border-gray-200 bg-white" />)}</div>}
+      {loading && <div className="space-y-4">{[1, 2].map((i) => <div key={i} className="h-32 animate-pulse rounded-2xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900" />)}</div>}
       {error && <ErrorState title="Unable to load credentials" description={error} onRetry={loadCredentials} />}
 
       {!loading && !error && credentials.length === 0 && (
-        <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center">
-          <Award className="mx-auto h-12 w-12 text-gray-300" />
-          <h3 className="mt-4 text-base font-bold text-ink-900">No credentials yet</h3>
-          <p className="mt-1 text-sm text-gray-500 max-w-sm mx-auto">Add your professional certificates to boost your profile and gain job application access.</p>
+        <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
+          <Award className="mx-auto h-12 w-12 text-gray-300 dark:text-slate-600" />
+          <h3 className="mt-4 text-base font-bold text-ink-900 dark:text-slate-100">No credentials yet</h3>
+          <p className="mt-1 text-sm text-gray-500 dark:text-slate-400 max-w-sm mx-auto">Add your professional certificates to boost your profile and gain job application access.</p>
           <Button onClick={openNewSubmission} size="sm" className="mt-4"><Plus className="h-4 w-4" /> Add Your First Certificate</Button>
         </div>
       )}
@@ -390,32 +390,32 @@ export default function CredentialsPage() {
             const isDreamMore = cred.type === 'dream_more_certificate' || cred.verification_source === 'dream_more_lms';
             const canEditResubmit = cred.status === 'pending' || cred.status === 'rejected' || cred.status === 'resubmission_required';
             return (
-              <div key={cred.id} className="rounded-2xl border border-gray-200 bg-white p-5 hover:shadow-md transition-all duration-200">
+              <div key={cred.id} className="rounded-2xl border border-gray-200 bg-white p-5 hover:shadow-md transition-all duration-200 dark:border-slate-800 dark:bg-slate-900">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0 flex-1 space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={cn('flex h-8 w-8 items-center justify-center rounded-xl', isDreamMore ? 'bg-brand-100 text-brand-700' : 'bg-gray-100 text-gray-600')}>
+                      <span className={cn('flex h-8 w-8 items-center justify-center rounded-xl', isDreamMore ? 'bg-brand-100 text-brand-700 dark:bg-indigo-950 dark:text-indigo-400' : 'bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-slate-300')}>
                         {isDreamMore ? <Sparkles className="h-4 w-4" /> : <Building2 className="h-4 w-4" />}
                       </span>
-                      <h3 className="text-sm font-bold text-ink-900">{cred.title}</h3>
+                      <h3 className="text-sm font-bold text-ink-900 dark:text-slate-100">{cred.title}</h3>
                       <Badge tone={statusInfo.tone} size="xs" className="flex items-center gap-1"><StatusIcon className="h-3 w-3" /> {statusInfo.label}</Badge>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-gray-600 pl-10">
-                      <div><span className="text-gray-400">Issuer: </span><span className="font-medium text-ink-700">{cred.issuing_organization || (isDreamMore ? 'DreamMore' : '—')}</span></div>
-                      {cred.certificate_identifier && <div><span className="text-gray-400">ID: </span><code className="font-mono text-ink-700 bg-gray-100 px-1.5 py-0.5 rounded text-[11px]">{cred.certificate_identifier}</code></div>}
-                      {cred.issue_date && <div><span className="text-gray-400">Issued: </span>{formatDate(cred.issue_date)}</div>}
-                      {cred.expiry_date && <div><span className="text-gray-400">Expires: </span>{formatDate(cred.expiry_date)}</div>}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-gray-600 dark:text-slate-300 pl-10">
+                      <div><span className="text-gray-400 dark:text-slate-400">Issuer: </span><span className="font-medium text-ink-700 dark:text-slate-200">{cred.issuing_organization || (isDreamMore ? 'DreamMore' : '—')}</span></div>
+                      {cred.certificate_identifier && <div><span className="text-gray-400 dark:text-slate-400">ID: </span><code className="font-mono text-ink-700 bg-gray-100 px-1.5 py-0.5 rounded text-[11px] dark:text-slate-200 dark:bg-slate-800">{cred.certificate_identifier}</code></div>}
+                      {cred.issue_date && <div><span className="text-gray-400 dark:text-slate-400">Issued: </span>{formatDate(cred.issue_date)}</div>}
+                      {cred.expiry_date && <div><span className="text-gray-400 dark:text-slate-400">Expires: </span>{formatDate(cred.expiry_date)}</div>}
                     </div>
                     {cred.status === 'resubmission_required' && cred.rejection_reason && (
-                      <div className="ml-10 mt-2 rounded-xl border border-purple-200 bg-purple-50 p-3 text-xs text-purple-900 flex items-start gap-2">
+                      <div className="ml-10 mt-2 rounded-xl border border-purple-200 bg-purple-50 p-3 text-xs text-purple-900 flex items-start gap-2 dark:border-purple-900/50 dark:bg-purple-950/40 dark:text-purple-200">
                         <AlertCircle className="h-4 w-4 shrink-0 text-purple-500 mt-0.5" />
-                        <div><p className="font-bold">Resubmit Instructions:</p><p className="mt-0.5 text-purple-700">{cred.rejection_reason}</p></div>
+                        <div><p className="font-bold">Resubmit Instructions:</p><p className="mt-0.5 text-purple-700 dark:text-purple-300">{cred.rejection_reason}</p></div>
                       </div>
                     )}
                     {cred.status === 'rejected' && cred.rejection_reason && (
-                      <div className="ml-10 mt-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-900 flex items-start gap-2">
+                      <div className="ml-10 mt-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-900 flex items-start gap-2 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
                         <XCircle className="h-4 w-4 shrink-0 text-red-500 mt-0.5" />
-                        <div><p className="font-bold">Rejection Reason:</p><p className="mt-0.5 text-red-700">{cred.rejection_reason}</p></div>
+                        <div><p className="font-bold">Rejection Reason:</p><p className="mt-0.5 text-red-700 dark:text-red-300">{cred.rejection_reason}</p></div>
                       </div>
                     )}
                   </div>
@@ -450,8 +450,8 @@ export default function CredentialsPage() {
           {wizardStep === 1 && (
             <div className="space-y-4 animate-fade-in">
               <div className="text-center mb-6">
-                <h3 className="text-lg font-bold text-ink-900">Choose Certificate Type</h3>
-                <p className="text-sm text-gray-500 mt-1">Select the type of certificate you want to add</p>
+                <h3 className="text-lg font-bold text-ink-900 dark:text-slate-100">Choose Certificate Type</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Select the type of certificate you want to add</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {CREDENTIAL_TYPES.map((ct) => (
@@ -459,8 +459,8 @@ export default function CredentialsPage() {
                     className={cn(
                       'group relative rounded-2xl border-2 p-6 text-left transition-all duration-300 cursor-pointer',
                       form.type === ct.value
-                        ? 'border-brand-500 bg-brand-50/50 shadow-lg shadow-brand-100 ring-2 ring-brand-200'
-                        : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md'
+                        ? 'border-brand-500 bg-brand-50/50 shadow-lg shadow-brand-100 ring-2 ring-brand-200 dark:border-indigo-500 dark:bg-indigo-950/50 dark:ring-indigo-900'
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700'
                     )}>
                     {form.type === ct.value && (
                       <div className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-brand-500 text-white shadow-lg">
@@ -470,23 +470,23 @@ export default function CredentialsPage() {
                     <div className="flex items-center gap-4">
                       <div className={cn(
                         'flex h-14 w-14 items-center justify-center rounded-2xl transition-colors',
-                        form.type === ct.value ? 'bg-brand-100 text-brand-700' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
+                        form.type === ct.value ? 'bg-brand-100 text-brand-700 dark:bg-indigo-950 dark:text-indigo-400' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200 dark:bg-slate-800 dark:text-slate-400'
                       )}>
                         <ct.icon className="h-7 w-7" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-ink-900">{ct.label}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{ct.tagline}</p>
+                        <p className="text-sm font-bold text-ink-900 dark:text-slate-100">{ct.label}</p>
+                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{ct.tagline}</p>
                         <span className={cn(
                           'mt-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold',
-                          ct.color === 'brand' ? 'bg-brand-100 text-brand-700' : 'bg-blue-100 text-blue-700'
+                          ct.color === 'brand' ? 'bg-brand-100 text-brand-700 dark:bg-indigo-950 dark:text-indigo-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400'
                         )}>{ct.badge}</span>
                       </div>
                     </div>
                   </button>
                 ))}
               </div>
-              {formErrors.type && <p className="text-xs font-medium text-red-600">{formErrors.type}</p>}
+              {formErrors.type && <p className="text-xs font-medium text-red-600 dark:text-red-400">{formErrors.type}</p>}
             </div>
           )}
 
@@ -494,14 +494,14 @@ export default function CredentialsPage() {
           {wizardStep === 2 && (
             <div className="space-y-5 animate-fade-in">
               <div className="text-center mb-6">
-                <h3 className="text-lg font-bold text-ink-900">{form.type === 'dream_more_certificate' ? 'DreamMore Certificate Details' : 'Certificate Details'}</h3>
-                <p className="text-sm text-gray-500 mt-1">{form.type === 'dream_more_certificate' ? 'Enter your DreamMore certificate ID to verify' : 'Provide details about your certificate'}</p>
+                <h3 className="text-lg font-bold text-ink-900 dark:text-slate-100">{form.type === 'dream_more_certificate' ? 'DreamMore Certificate Details' : 'Certificate Details'}</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">{form.type === 'dream_more_certificate' ? 'Enter your DreamMore certificate ID to verify' : 'Provide details about your certificate'}</p>
               </div>
               {form.type === 'dream_more_certificate' ? (
-                <div className="space-y-5 rounded-2xl border-2 border-brand-200 bg-gradient-to-br from-brand-50 to-brand-100/50 p-6">
+                <div className="space-y-5 rounded-2xl border-2 border-brand-200 bg-gradient-to-br from-brand-50 to-brand-100/50 p-6 dark:border-indigo-900/50 dark:from-slate-900 dark:to-indigo-950/40">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-white"><Key className="h-5 w-5" /></div>
-                    <div><p className="text-sm font-bold text-ink-900">Certificate Verification</p><p className="text-xs text-brand-600">Enter your unique certificate ID</p></div>
+                    <div><p className="text-sm font-bold text-ink-900 dark:text-slate-100">Certificate Verification</p><p className="text-xs text-brand-600 dark:text-indigo-400">Enter your unique certificate ID</p></div>
                   </div>
                   <Input label="Certificate ID *" placeholder="e.g. DM-WD-2024-001" value={form.certificate_identifier} onChange={(e) => setForm({ ...form, certificate_identifier: e.target.value })} error={formErrors.certificate_identifier} required />
                   <Input label="Certificate Title (Optional)" placeholder="e.g. Full Stack Web Development" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} error={formErrors.title} />
@@ -509,12 +509,12 @@ export default function CredentialsPage() {
                 </div>
               ) : (
                 <div className="space-y-5">
-                  <div className="rounded-2xl border border-gray-200 bg-white p-6">
+                  <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
                     <Input label="Certificate Title *" placeholder="e.g. AWS Certified Solutions Architect" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} error={formErrors.title} required />
                     <div className="mt-4"><Input label="Issuing Organization *" placeholder="e.g. Amazon Web Services, Google" value={form.issuing_organization} onChange={(e) => setForm({ ...form, issuing_organization: e.target.value })} error={formErrors.issuing_organization} required /></div>
                     <div className="mt-4"><Input label="Certificate ID (Optional)" placeholder="e.g. AWS-ASA-2024-98765" value={form.certificate_identifier} onChange={(e) => setForm({ ...form, certificate_identifier: e.target.value })} error={formErrors.certificate_identifier} /></div>
                   </div>
-                  <div className="rounded-2xl border border-gray-200 bg-white p-6">
+                  <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <Input type="date" label="Issue Date" value={form.issue_date} onChange={(e) => setForm({ ...form, issue_date: e.target.value })} error={formErrors.issue_date} />
                       <Input type="date" label="Expiry Date (Optional)" value={form.expiry_date} onChange={(e) => setForm({ ...form, expiry_date: e.target.value })} error={formErrors.expiry_date} />
@@ -530,32 +530,32 @@ export default function CredentialsPage() {
           {wizardStep === 3 && form.type === 'external_certificate' && (
             <div className="space-y-4 animate-fade-in">
               <div className="text-center mb-6">
-                <h3 className="text-lg font-bold text-ink-900">Upload Certificate</h3>
-                <p className="text-sm text-gray-500 mt-1">Upload a clear photo or PDF of your certificate</p>
+                <h3 className="text-lg font-bold text-ink-900 dark:text-slate-100">Upload Certificate</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Upload a clear photo or PDF of your certificate</p>
               </div>
               <div onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
                 className={cn(
                   'relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-10 text-center cursor-pointer transition-all',
-                  isDragging ? 'border-brand-500 bg-brand-50 scale-[1.02]' : form.document ? 'border-green-300 bg-green-50/30' : 'border-gray-300 bg-gray-50/50 hover:border-brand-400 hover:bg-brand-50/20'
+                  isDragging ? 'border-brand-500 bg-brand-50 scale-[1.02] dark:border-indigo-500 dark:bg-indigo-950' : form.document ? 'border-green-300 bg-green-50/30 dark:border-emerald-900/50 dark:bg-emerald-950/30' : 'border-gray-300 bg-gray-50/50 hover:border-brand-400 hover:bg-brand-50/20 dark:border-slate-800 dark:bg-slate-800/50 dark:hover:border-indigo-500/50'
                 )}>
                 <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={handleFileInput} className="absolute inset-0 z-10 opacity-0 cursor-pointer" />
                 {form.document ? (
                   <div className="flex flex-col items-center">
-                    <FileCheck className="h-12 w-12 text-green-500 mb-3" />
-                    <p className="text-sm font-bold text-ink-900">{form.document.name}</p>
-                    <p className="text-xs text-gray-500 mt-1">{formatBytes(form.document.size)}</p>
+                    <FileCheck className="h-12 w-12 text-green-500 dark:text-emerald-400 mb-3" />
+                    <p className="text-sm font-bold text-ink-900 dark:text-slate-100">{form.document.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">{formatBytes(form.document.size)}</p>
                     <Button variant="outline" size="xs" className="mt-3" onClick={(e) => { e.stopPropagation(); removeSelectedFile(); }}>Remove</Button>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center">
-                    <Upload className="h-12 w-12 text-gray-400 mb-3" />
-                    <p className="text-sm font-bold text-ink-900">Drag & drop or <span className="text-brand-600 underline">browse</span></p>
-                    <p className="text-xs text-gray-500 mt-1">PDF, JPG, PNG — Max 10 MB</p>
+                    <Upload className="h-12 w-12 text-gray-400 dark:text-slate-500 mb-3" />
+                    <p className="text-sm font-bold text-ink-900 dark:text-slate-100">Drag & drop or <span className="text-brand-600 dark:text-indigo-400 underline">browse</span></p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">PDF, JPG, PNG — Max 10 MB</p>
                   </div>
                 )}
               </div>
-              {isUploadingFile && <div className="rounded-xl bg-gray-50 p-3"><div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden"><div className="h-full bg-brand-500 transition-all" style={{ width: `${uploadProgress}%` }} /></div></div>}
-              {formErrors.document && <p className="text-xs font-medium text-red-600">{formErrors.document}</p>}
+              {isUploadingFile && <div className="rounded-xl bg-gray-50 dark:bg-slate-800 p-3"><div className="h-2 w-full rounded-full bg-gray-200 dark:bg-slate-700 overflow-hidden"><div className="h-full bg-brand-500 transition-all" style={{ width: `${uploadProgress}%` }} /></div></div>}
+              {formErrors.document && <p className="text-xs font-medium text-red-600 dark:text-red-400">{formErrors.document}</p>}
             </div>
           )}
 
@@ -563,33 +563,33 @@ export default function CredentialsPage() {
           {wizardStep === 4 && form.type === 'external_certificate' && (
             <div className="space-y-5 animate-fade-in">
               <div className="text-center mb-6">
-                <h3 className="text-lg font-bold text-ink-900">Identity Verification</h3>
-                <p className="text-sm text-gray-500 mt-1">Upload your identity document to build trust with employers</p>
+                <h3 className="text-lg font-bold text-ink-900 dark:text-slate-100">Identity Verification</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Upload your identity document to build trust with employers</p>
               </div>
-              <div className="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50 p-5">
+              <div className="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50 p-5 dark:border-blue-900/50 dark:from-slate-900 dark:to-blue-950/40">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 text-white"><Shield className="h-5 w-5" /></div>
-                  <div><p className="text-sm font-bold text-blue-900">Why is this required?</p><p className="text-xs text-blue-700">Identity verification helps employers trust your profile and increases your chances of winning projects.</p></div>
+                  <div><p className="text-sm font-bold text-blue-900 dark:text-blue-100">Why is this required?</p><p className="text-xs text-blue-700 dark:text-blue-400">Identity verification helps employers trust your profile and increases your chances of winning projects.</p></div>
                 </div>
               </div>
-              <div className="rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50/50 p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/20 transition-all relative">
+              <div className="rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50/50 p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/20 transition-all relative dark:border-slate-800 dark:bg-slate-800/50 dark:hover:border-blue-500/50">
                 <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={handleVerificationFileInput} className="absolute inset-0 z-10 opacity-0 cursor-pointer" />
                 {form.verification_document ? (
                   <div className="flex flex-col items-center">
-                    <FileCheck className="h-12 w-12 text-green-500 mb-3" />
-                    <p className="text-sm font-bold text-ink-900">{form.verification_document.name}</p>
-                    <p className="text-xs text-gray-500 mt-1">{formatBytes(form.verification_document.size)}</p>
+                    <FileCheck className="h-12 w-12 text-green-500 dark:text-emerald-400 mb-3" />
+                    <p className="text-sm font-bold text-ink-900 dark:text-slate-100">{form.verification_document.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">{formatBytes(form.verification_document.size)}</p>
                     <Button variant="outline" size="xs" className="mt-3" onClick={(e) => { e.stopPropagation(); removeVerificationFile(); }}>Remove</Button>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center">
-                    <Upload className="h-12 w-12 text-gray-400 mb-3" />
-                    <p className="text-sm font-bold text-ink-900">Upload Identity Document</p>
-                    <p className="text-xs text-gray-500 mt-1">Passport, National ID, or Driver's License — PDF, JPG, PNG, Max 10 MB</p>
+                    <Upload className="h-12 w-12 text-gray-400 dark:text-slate-500 mb-3" />
+                    <p className="text-sm font-bold text-ink-900 dark:text-slate-100">Upload Identity Document</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Passport, National ID, or Driver's License — PDF, JPG, PNG, Max 10 MB</p>
                   </div>
                 )}
               </div>
-              {formErrors.verification_document && <p className="text-xs font-medium text-red-600">{formErrors.verification_document}</p>}
+              {formErrors.verification_document && <p className="text-xs font-medium text-red-600 dark:text-red-400">{formErrors.verification_document}</p>}
               <Textarea label="Notes (Optional)" placeholder="Any additional notes about your identity verification..." value={form.verification_notes} onChange={(e) => setForm({ ...form, verification_notes: e.target.value })} rows={2} />
             </div>
           )}
@@ -598,10 +598,10 @@ export default function CredentialsPage() {
           {wizardStep === (form.type === 'external_certificate' ? 5 : 3) && (
             <div className="space-y-5 animate-fade-in">
               <div className="text-center mb-6">
-                <h3 className="text-lg font-bold text-ink-900">Review & Submit</h3>
-                <p className="text-sm text-gray-500 mt-1">Please review your information before submitting</p>
+                <h3 className="text-lg font-bold text-ink-900 dark:text-slate-100">Review & Submit</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Please review your information before submitting</p>
               </div>
-              <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
+              <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden dark:border-slate-800 dark:bg-slate-900">
                 <div className="bg-gradient-to-r from-brand-500 to-brand-600 px-6 py-4">
                   <div className="flex items-center gap-3">
                     {form.type === 'dream_more_certificate' ? <Sparkles className="h-5 w-5 text-white" /> : <Building2 className="h-5 w-5 text-white" />}
@@ -609,20 +609,20 @@ export default function CredentialsPage() {
                   </div>
                 </div>
                 <div className="p-6 space-y-4 text-sm">
-                  <div className="flex justify-between py-2 border-b border-gray-100"><span className="text-gray-500">Title</span><span className="font-bold text-ink-900">{form.title || 'DreamMore Certificate'}</span></div>
-                  <div className="flex justify-between py-2 border-b border-gray-100"><span className="text-gray-500">Issuer</span><span className="font-medium text-ink-700">{form.type === 'dream_more_certificate' ? 'DreamMore' : form.issuing_organization}</span></div>
-                  {form.certificate_identifier && <div className="flex justify-between py-2 border-b border-gray-100"><span className="text-gray-500">Certificate ID</span><code className="font-mono text-ink-700 bg-gray-100 px-2 py-0.5 rounded">{form.certificate_identifier}</code></div>}
-                  {form.issue_date && <div className="flex justify-between py-2 border-b border-gray-100"><span className="text-gray-500">Issue Date</span><span className="text-ink-700">{form.issue_date}</span></div>}
-                  {form.expiry_date && <div className="flex justify-between py-2 border-b border-gray-100"><span className="text-gray-500">Expiry Date</span><span className="text-ink-700">{form.expiry_date}</span></div>}
-                  {form.document && <div className="flex justify-between py-2 border-b border-gray-100"><span className="text-gray-500">Certificate File</span><span className="font-bold text-emerald-600">✓ {form.document.name}</span></div>}
-                  {form.verification_document && <div className="flex justify-between py-2"><span className="text-gray-500">Identity Document</span><span className="font-bold text-emerald-600">✓ {form.verification_document.name}</span></div>}
+                  <div className="flex justify-between py-2 border-b border-gray-100 dark:border-slate-800"><span className="text-gray-500 dark:text-slate-400">Title</span><span className="font-bold text-ink-900 dark:text-slate-100">{form.title || 'DreamMore Certificate'}</span></div>
+                  <div className="flex justify-between py-2 border-b border-gray-100 dark:border-slate-800"><span className="text-gray-500 dark:text-slate-400">Issuer</span><span className="font-medium text-ink-700 dark:text-slate-200">{form.type === 'dream_more_certificate' ? 'DreamMore' : form.issuing_organization}</span></div>
+                  {form.certificate_identifier && <div className="flex justify-between py-2 border-b border-gray-100 dark:border-slate-800"><span className="text-gray-500 dark:text-slate-400">Certificate ID</span><code className="font-mono text-ink-700 bg-gray-100 px-2 py-0.5 rounded dark:text-slate-200 dark:bg-slate-800">{form.certificate_identifier}</code></div>}
+                  {form.issue_date && <div className="flex justify-between py-2 border-b border-gray-100 dark:border-slate-800"><span className="text-gray-500 dark:text-slate-400">Issue Date</span><span className="text-ink-700 dark:text-slate-200">{form.issue_date}</span></div>}
+                  {form.expiry_date && <div className="flex justify-between py-2 border-b border-gray-100 dark:border-slate-800"><span className="text-gray-500 dark:text-slate-400">Expiry Date</span><span className="text-ink-700 dark:text-slate-200">{form.expiry_date}</span></div>}
+                  {form.document && <div className="flex justify-between py-2 border-b border-gray-100 dark:border-slate-800"><span className="text-gray-500 dark:text-slate-400">Certificate File</span><span className="font-bold text-emerald-600 dark:text-emerald-400">✓ {form.document.name}</span></div>}
+                  {form.verification_document && <div className="flex justify-between py-2"><span className="text-gray-500 dark:text-slate-400">Identity Document</span><span className="font-bold text-emerald-600 dark:text-emerald-400">✓ {form.verification_document.name}</span></div>}
                 </div>
               </div>
             </div>
           )}
 
           {/* Controls */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-slate-800">
             {wizardStep > 1 ? <Button type="button" variant="outline" onClick={handlePrevStep}><ArrowLeft className="h-4 w-4" /> Back</Button> : <div />}
             {wizardStep < getTotalSteps() ? <Button type="button" onClick={handleNextStep}>Next <ArrowRight className="h-4 w-4" /></Button>
               : <Button type="button" onClick={handleSubmit} loading={submitting} className="bg-emerald-600 hover:bg-emerald-700"><CheckCircle className="h-4 w-4" /> Submit for Verification</Button>}
@@ -632,7 +632,7 @@ export default function CredentialsPage() {
 
       {/* Delete Modal */}
       <Modal open={Boolean(deleteTarget)} onClose={() => setDeleteTarget(null)} title="Remove Credential" size="sm">
-        <p className="text-sm text-gray-600">Remove <strong>{deleteTarget?.title}</strong>?</p>
+        <p className="text-sm text-gray-600 dark:text-slate-300">Remove <strong>{deleteTarget?.title}</strong>?</p>
         <div className="flex justify-end gap-3 mt-4">
           <Button variant="outline" size="sm" onClick={() => setDeleteTarget(null)}>Cancel</Button>
           <Button variant="danger" size="sm" loading={deleting} onClick={handleDelete}>Remove</Button>

@@ -99,8 +99,8 @@ export default function AdminJobsPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-ink-900">Job Moderation</h1>
-        <p className="text-sm text-gray-500">
+        <h1 className="text-2xl font-bold tracking-tight text-ink-900 dark:text-slate-100">Job Moderation</h1>
+        <p className="text-sm text-gray-500 dark:text-slate-400">
           Review and moderate jobs posted on the platform. {meta.total} total jobs.
         </p>
       </div>
@@ -140,7 +140,7 @@ export default function AdminJobsPage() {
       ) : loading ? (
         <div className="space-y-3">
           {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-20 animate-pulse rounded-card border border-gray-200 bg-white" />
+            <div key={i} className="h-20 animate-pulse rounded-card border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900" />
           ))}
         </div>
       ) : jobs.length === 0 ? (
@@ -151,41 +151,41 @@ export default function AdminJobsPage() {
         />
       ) : (
         <>
-          <div className="overflow-x-auto rounded-card border border-gray-200 bg-white shadow-card">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="overflow-x-auto rounded-card border border-gray-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-800">
+              <thead className="bg-gray-50 dark:bg-slate-800/50">
                 <tr>
-                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500">
+                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                     Job
                   </th>
-                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500">
+                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                     Employer
                   </th>
-                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500">
+                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                     Budget
                   </th>
-                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500">
+                  <th className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                     Status
                   </th>
-                  <th className="hidden px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 lg:table-cell">
+                  <th className="hidden px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400 lg:table-cell">
                     Posted
                   </th>
-                  <th className="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-gray-500">
+                  <th className="px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-slate-400">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                 {jobs.map((job) => (
-                  <tr key={job.id} className="hover:bg-gray-50/50">
+                  <tr key={job.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50">
                     <td className="px-5 py-3">
-                      <p className="text-sm font-bold text-ink-900">{job.title}</p>
-                      <p className="text-xs text-gray-500">ID: {job.id}</p>
+                      <p className="text-sm font-bold text-ink-900 dark:text-slate-100">{job.title}</p>
+                      <p className="text-xs text-gray-500 dark:text-slate-400">ID: {job.id}</p>
                     </td>
-                    <td className="px-5 py-3 text-sm text-gray-600">
+                    <td className="px-5 py-3 text-sm text-gray-600 dark:text-slate-300">
                       {job.employer?.name ?? job.user?.name ?? '—'}
                     </td>
-                    <td className="px-5 py-3 text-sm font-medium text-ink-900">
+                    <td className="px-5 py-3 text-sm font-medium text-ink-900 dark:text-slate-100">
                       {formatETB(job.budget ?? job.max_budget ?? job.min_budget)}
                     </td>
                     <td className="px-5 py-3">
@@ -193,7 +193,7 @@ export default function AdminJobsPage() {
                         {job.status?.replace('_', ' ')}
                       </Badge>
                     </td>
-                    <td className="hidden px-5 py-3 text-xs text-gray-500 lg:table-cell">
+                    <td className="hidden px-5 py-3 text-xs text-gray-500 dark:text-slate-400 lg:table-cell">
                       {formatDate(job.created_at ?? job.createdAt)}
                     </td>
                     <td className="px-5 py-3 text-right">
@@ -243,7 +243,7 @@ export default function AdminJobsPage() {
           {/* Pagination */}
           {meta.last_page > 1 && (
             <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-slate-400">
                 Page {meta.current_page} of {meta.last_page}
               </p>
               <div className="flex gap-2">

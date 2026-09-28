@@ -35,28 +35,28 @@ function PerformanceMetric({ icon: Icon, label, value, maxValue = 100, color = '
   const percentage = Math.min((value / maxValue) * 100, 100);
   const colors = {
     brand: {
-      card: 'bg-gradient-to-br from-indigo-50 to-violet-50/70 border-indigo-100',
+      card: 'bg-gradient-to-br from-indigo-50 to-violet-50/70 border-indigo-100 dark:from-slate-800/80 dark:to-indigo-950/40 dark:border-slate-700/60',
       icon: 'bg-gradient-to-br from-indigo-500 to-violet-500 shadow-indigo-500/25',
       bar: 'bg-gradient-to-r from-indigo-500 to-violet-500',
-      sub: 'text-indigo-600 hover:text-indigo-700',
+      sub: 'text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300',
     },
     success: {
-      card: 'bg-gradient-to-br from-emerald-50 to-teal-50/70 border-emerald-100',
+      card: 'bg-gradient-to-br from-emerald-50 to-teal-50/70 border-emerald-100 dark:from-slate-800/80 dark:to-emerald-950/40 dark:border-slate-700/60',
       icon: 'bg-gradient-to-br from-emerald-500 to-teal-500 shadow-emerald-500/25',
       bar: 'bg-gradient-to-r from-emerald-500 to-teal-500',
-      sub: 'text-emerald-600 hover:text-emerald-700',
+      sub: 'text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300',
     },
     warning: {
-      card: 'bg-gradient-to-br from-amber-50 to-orange-50/70 border-amber-100',
+      card: 'bg-gradient-to-br from-amber-50 to-orange-50/70 border-amber-100 dark:from-slate-800/80 dark:to-amber-950/40 dark:border-slate-700/60',
       icon: 'bg-gradient-to-br from-amber-500 to-orange-500 shadow-amber-500/25',
       bar: 'bg-gradient-to-r from-amber-500 to-orange-500',
-      sub: 'text-amber-600 hover:text-amber-700',
+      sub: 'text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300',
     },
     info: {
-      card: 'bg-gradient-to-br from-blue-50 to-cyan-50/70 border-blue-100',
+      card: 'bg-gradient-to-br from-blue-50 to-cyan-50/70 border-blue-100 dark:from-slate-800/80 dark:to-blue-950/40 dark:border-slate-700/60',
       icon: 'bg-gradient-to-br from-blue-500 to-cyan-500 shadow-blue-500/25',
       bar: 'bg-gradient-to-r from-blue-500 to-cyan-500',
-      sub: 'text-blue-600 hover:text-blue-700',
+      sub: 'text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300',
     },
   };
   const c = colors[color] || colors.brand;
@@ -68,14 +68,14 @@ function PerformanceMetric({ icon: Icon, label, value, maxValue = 100, color = '
           <Icon className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[10px] font-bold uppercase tracking-wider text-gray-400">{label}</p>
+          <p className="truncate text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">{label}</p>
           <div className="flex items-baseline gap-1 mt-0.5">
-            <span className="text-2xl font-extrabold tracking-tight text-ink-900">{value}{suffix}</span>
-            {maxValue < 100 && <span className="text-xs font-medium text-gray-400">/ {maxValue}</span>}
+            <span className="text-2xl font-extrabold tracking-tight text-ink-900 dark:text-slate-100">{value}{suffix}</span>
+            {maxValue < 100 && <span className="text-xs font-medium text-gray-400 dark:text-slate-400">/ {maxValue}</span>}
           </div>
         </div>
       </div>
-      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/70">
+      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/70 dark:bg-slate-700/50">
         <div
           className={cn('h-full rounded-full transition-all duration-1000', c.bar)}
           style={{ width: `${percentage}%` }}
@@ -90,7 +90,7 @@ function PerformanceMetric({ icon: Icon, label, value, maxValue = 100, color = '
             {sub} <ChevronRight className="h-3 w-3" />
           </Link>
         ) : (
-          <p className="mt-2.5 text-[11px] font-medium text-gray-400">{sub}</p>
+          <p className="mt-2.5 text-[11px] font-medium text-gray-400 dark:text-slate-400">{sub}</p>
         )
       )}
     </div>
@@ -106,13 +106,13 @@ function WalletSummaryStrip({ s, isRefreshing }) {
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-r from-white via-gray-50 to-white p-5 shadow-card transition-opacity duration-500',
+        'relative overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-r from-white via-gray-50 to-white p-5 shadow-card transition-opacity duration-500 dark:border-slate-800 dark:from-slate-900 dark:via-slate-800/60 dark:to-slate-900',
         isRefreshing && 'opacity-60'
       )}
     >
       {/* Background decorations */}
-      <div className="pointer-events-none absolute -top-16 -right-10 h-44 w-44 rounded-full bg-emerald-100/60 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-16 left-1/3 h-36 w-36 rounded-full bg-indigo-100/50 blur-3xl" />
+      <div className="pointer-events-none absolute -top-16 -right-10 h-44 w-44 rounded-full bg-emerald-100/60 dark:bg-emerald-900/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-16 left-1/3 h-36 w-36 rounded-full bg-indigo-100/50 dark:bg-indigo-900/20 blur-3xl" />
 
       <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
         {/* Available balance — the number that matters for a quick glance */}
@@ -121,8 +121,8 @@ function WalletSummaryStrip({ s, isRefreshing }) {
             <Wallet className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Available Balance</p>
-            <p className="mt-0.5 text-2xl font-extrabold tracking-tight text-ink-900 lg:text-3xl">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Available Balance</p>
+            <p className="mt-0.5 text-2xl font-extrabold tracking-tight text-ink-900 dark:text-slate-100 lg:text-3xl">
               {formatETB(s.availableBalance)}
             </p>
           </div>
@@ -131,22 +131,22 @@ function WalletSummaryStrip({ s, isRefreshing }) {
         {/* Secondary figures */}
         <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
           <div>
-            <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-600">
+            <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
               <Clock className="h-3.5 w-3.5" /> Pending
             </p>
-            <p className="mt-0.5 text-lg font-bold text-ink-900">{formatETB(s.pendingBalance)}</p>
+            <p className="mt-0.5 text-lg font-bold text-ink-900 dark:text-slate-100">{formatETB(s.pendingBalance)}</p>
           </div>
-          <div className="hidden h-9 w-px bg-gray-200 sm:block" />
+          <div className="hidden h-9 w-px bg-gray-200 dark:bg-slate-700 sm:block" />
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Total Earned</p>
-            <p className="mt-0.5 text-lg font-semibold text-gray-500">{formatETB(s.totalEarned)}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Total Earned</p>
+            <p className="mt-0.5 text-lg font-semibold text-gray-500 dark:text-slate-400">{formatETB(s.totalEarned)}</p>
           </div>
         </div>
 
         {/* Link to the full Finance page */}
         <Link
           to="/freelancer/withdrawals"
-          className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-ink-900 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-ink-900/20 transition-all hover:-translate-y-0.5 hover:bg-ink-800 hover:shadow-xl hover:shadow-ink-900/25"
+          className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-ink-900 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-ink-900/20 transition-all hover:-translate-y-0.5 hover:bg-ink-800 hover:shadow-xl hover:shadow-ink-900/25 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
         >
           View Finance
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -161,26 +161,26 @@ function WalletSummaryStrip({ s, isRefreshing }) {
    ═══════════════════════════════════════════════════════════════════════════ */
 function ActivityFeedItem({ icon: Icon, color, title, description, time, link }) {
   const colorMap = {
-    brand: 'bg-indigo-50 text-indigo-600',
-    success: 'bg-emerald-50 text-emerald-600',
-    warning: 'bg-amber-50 text-amber-600',
-    danger: 'bg-red-50 text-red-600',
-    info: 'bg-blue-50 text-blue-600',
+    brand: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400',
+    success: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400',
+    warning: 'bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400',
+    danger: 'bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400',
+    info: 'bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400',
   };
 
   return (
-    <div className="flex items-start gap-3 py-3 border-b border-gray-50 last:border-0">
+    <div className="flex items-start gap-3 py-3 border-b border-gray-50 dark:border-slate-800/50 last:border-0">
       <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-lg', colorMap[color] || colorMap.brand)}>
         <Icon className="h-4 w-4" />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-ink-900">{title}</p>
-        <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+        <p className="text-sm font-medium text-ink-900 dark:text-slate-100">{title}</p>
+        <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{description}</p>
       </div>
       <div className="flex flex-col items-end gap-1">
-        <span className="text-[10px] text-gray-400">{time}</span>
+        <span className="text-[10px] text-gray-400 dark:text-slate-400">{time}</span>
         {link && (
-          <Link to={link} className="text-[10px] font-medium text-indigo-600 hover:text-indigo-700">
+          <Link to={link} className="text-[10px] font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
             View
           </Link>
         )}
@@ -398,56 +398,56 @@ export default function FreelancerDashboardPage() {
       {/* ═══════════════════════════════════════════════════════════════════
          GREETING HEADER — White Cloud Design
          ═══════════════════════════════════════════════════════════════════ */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white via-gray-50 to-gray-100 p-6 lg:p-8 text-gray-900 shadow-xl border border-gray-200">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white via-gray-50 to-gray-100 p-6 lg:p-8 text-gray-900 shadow-xl border border-gray-200 dark:border-slate-800 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 dark:text-slate-100">
         {/* Background decorations */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-indigo-100/50 blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-emerald-100/50 blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-violet-100/30 blur-3xl" />
+          <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-indigo-100/50 dark:bg-indigo-950/30 blur-3xl" />
+          <div className="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-emerald-100/50 dark:bg-emerald-950/30 blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 rounded-full bg-violet-100/30 dark:bg-violet-950/20 blur-3xl" />
         </div>
 
         <div className="relative z-10">
           {/* Header row */}
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 border-gray-200 bg-gray-100 shadow-lg">
+              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 border-gray-200 bg-gray-100 shadow-lg dark:border-slate-700 dark:bg-slate-800">
                 {profile?.avatar
                   ? <img src={profile.avatar} alt={profile.name} className="h-full w-full object-cover" />
                   : (
-                    <div className="flex h-full w-full items-center justify-center text-2xl font-extrabold text-gray-600">
+                    <div className="flex h-full w-full items-center justify-center text-2xl font-extrabold text-gray-600 dark:text-slate-300">
                       {(profile?.name || firstName).charAt(0).toUpperCase()}
                     </div>
                   )
                 }
               </div>
               <div>
-                <p className="text-indigo-600 text-sm font-medium tracking-wider uppercase mb-1">{greeting} 👋</p>
-                <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900">
+                <p className="text-indigo-600 dark:text-indigo-400 text-sm font-medium tracking-wider uppercase mb-1">{greeting} 👋</p>
+                <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 dark:text-slate-100">
                   {firstName}
                 </h1>
-                <p className="text-gray-500 text-sm mt-1">
+                <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">
                   {profile?.headline || 'Freelancer on DreamMore'}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               {lastUpdated && (
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-400 dark:text-slate-400">
                   Updated {timeAgo(lastUpdated)}
                 </span>
               )}
               <div className={cn(
                 'flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold',
                 isRefreshing
-                  ? 'bg-indigo-100 text-indigo-600'
-                  : 'bg-emerald-100 text-emerald-600'
+                  ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-400'
+                  : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400'
               )}>
                 <RefreshCw className={cn('h-3 w-3', isRefreshing && 'animate-spin')} />
                 {isRefreshing ? 'Refreshing...' : 'Live'}
               </div>
               <button
                 onClick={() => loadDashboard(true)}
-                className="flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all shadow-sm"
+                className="flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
               >
                 <RefreshCw className={cn('h-4 w-4', isRefreshing && 'animate-spin')} />
                 Refresh
@@ -461,14 +461,14 @@ export default function FreelancerDashboardPage() {
          PROFILE STRENGTH — Like Fiverr (most actionable item → right under greeting)
          ═══════════════════════════════════════════════════════════════════ */}
       {profileStrength < 100 && (
-        <div className="rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4 shadow-sm">
+        <div className="rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4 shadow-sm dark:border-amber-900/50 dark:from-slate-900 dark:to-amber-950/30">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
-              <Award className="h-5 w-5 text-amber-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950/50">
+              <Award className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-amber-900">Profile Strength: {profileStrength}%</p>
-              <p className="text-xs text-amber-700 mt-0.5">Complete your profile to attract more clients</p>
+              <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">Profile Strength: {profileStrength}%</p>
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">Complete your profile to attract more clients</p>
             </div>
             <Link
               to="/freelancer/profile/edit"
@@ -484,8 +484,8 @@ export default function FreelancerDashboardPage() {
                 className={cn(
                   'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold',
                   check.done
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-gray-100 text-gray-500'
+                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400'
+                    : 'bg-gray-100 text-gray-500 dark:bg-slate-800 dark:text-slate-400'
                 )}
               >
                 {check.done ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
@@ -510,7 +510,7 @@ export default function FreelancerDashboardPage() {
           title="Performance Metrics"
           description="Your freelancer scorecard"
           action={
-            <Link to="/freelancer/profile" className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+            <Link to="/freelancer/profile" className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
               View Profile <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           }
@@ -569,30 +569,30 @@ export default function FreelancerDashboardPage() {
          ═══════════════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Recommended jobs — 2 columns */}
-        <div className="lg:col-span-2 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <div className="lg:col-span-2 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h2 className="text-base font-bold text-ink-900">Recommended for you</h2>
-              <p className="text-xs text-gray-500 mt-0.5">AI-powered job matches based on your skills</p>
+              <h2 className="text-base font-bold text-ink-900 dark:text-slate-100">Recommended for you</h2>
+              <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">AI-powered job matches based on your skills</p>
             </div>
-            <Link to="/freelancer/jobs" className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+            <Link to="/freelancer/jobs" className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
               View all →
             </Link>
           </div>
           {recommendations.length > 0 ? (
-            <ul className="divide-y divide-gray-50">
+            <ul className="divide-y divide-gray-50 dark:divide-slate-800/50">
               {recommendations.slice(0, 5).map((rec) => (
                 <li key={rec.job?.id} className="py-3 first:pt-0 last:pb-0">
                   <Link
                     to={`/jobs/${rec.job?.id}`}
-                    className="block text-sm font-semibold text-ink-900 transition-colors hover:text-indigo-600 line-clamp-1"
+                    className="block text-sm font-semibold text-ink-900 transition-colors hover:text-indigo-600 dark:text-slate-100 dark:hover:text-indigo-400 line-clamp-1"
                   >
                     {rec.job?.title}
                   </Link>
                   <div className="flex items-center gap-3 mt-1">
-                    <span className="text-xs text-gray-400">{rec.reason}</span>
+                    <span className="text-xs text-gray-400 dark:text-slate-400">{rec.reason}</span>
                     {rec.job?.budget && (
-                      <span className="text-xs font-medium text-emerald-600">{formatETB(rec.job.budget)}</span>
+                      <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">{formatETB(rec.job.budget)}</span>
                     )}
                   </div>
                 </li>
@@ -609,16 +609,16 @@ export default function FreelancerDashboardPage() {
         </div>
 
         {/* Activity Feed */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-          <h2 className="text-base font-bold text-ink-900 mb-4">Activity Feed</h2>
+        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h2 className="text-base font-bold text-ink-900 dark:text-slate-100 mb-4">Activity Feed</h2>
           {activityItems.length > 0 ? (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-gray-50 dark:divide-slate-800/50">
               {activityItems.slice(0, 5).map((item, i) => (
                 <ActivityFeedItem key={i} {...item} />
               ))}
             </div>
           ) : (
-            <p className="py-8 text-center text-sm text-gray-400">No recent activity.</p>
+            <p className="py-8 text-center text-sm text-gray-400 dark:text-slate-400">No recent activity.</p>
           )}
         </div>
       </div>
@@ -632,21 +632,21 @@ export default function FreelancerDashboardPage() {
             title="Today's Agenda"
             description="Your active work items"
             action={
-              <Link to="/freelancer/contracts" className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+              <Link to="/freelancer/contracts" className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
                 View All <ChevronRight className="h-3.5 w-3.5" />
               </Link>
             }
           />
           <CardBody className="p-0">
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-gray-50 dark:divide-slate-800">
               {activeContracts.slice(0, 3).map((contract) => (
-                <div key={contract.id} className="flex items-center gap-4 px-5 py-3 hover:bg-gray-50/50 transition-colors">
+                <div key={contract.id} className="flex items-center gap-4 px-5 py-3 hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-500/25">
                     <Handshake className="h-5 w-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-ink-900 truncate">{contract.title || `Contract #${contract.id}`}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-sm font-semibold text-ink-900 dark:text-slate-100 truncate">{contract.title || `Contract #${contract.id}`}</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
                       {contract.employer?.name || 'Employer'} · {formatETB(contract.amount)}
                     </p>
                   </div>
@@ -654,7 +654,7 @@ export default function FreelancerDashboardPage() {
                     <Badge tone="primary" size="xs">{contract.status}</Badge>
                     <Link
                       to={`/freelancer/contracts/${contract.id}`}
-                      className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                      className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
                     >
                       View
                     </Link>
@@ -674,7 +674,7 @@ export default function FreelancerDashboardPage() {
           title="Recent Proposals"
           description="Your latest job applications"
           action={
-            <Link to="/freelancer/proposals" className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+            <Link to="/freelancer/proposals" className="flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
               View all <ChevronRight className="h-3.5 w-3.5" />
             </Link>
           }
@@ -684,31 +684,31 @@ export default function FreelancerDashboardPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50/50">
-                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Job</th>
-                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Amount</th>
-                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Status</th>
-                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Date</th>
+                  <tr className="border-b border-gray-100 bg-gray-50/50 dark:border-slate-800 dark:bg-slate-800/50">
+                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Job</th>
+                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Amount</th>
+                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Status</th>
+                    <th className="px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-slate-400">Date</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                   {recentProposals.map((proposal) => (
-                    <tr key={proposal.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={proposal.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
                       <td className="px-5 py-3">
                         <Link
                           to={`/freelancer/proposals/${proposal.id}`}
-                          className="text-sm font-semibold text-ink-900 hover:text-indigo-600 line-clamp-1"
+                          className="text-sm font-semibold text-ink-900 hover:text-indigo-600 dark:text-slate-100 dark:hover:text-indigo-400 line-clamp-1"
                         >
                           {proposal.jobTitle ?? `Proposal #${proposal.id}`}
                         </Link>
                       </td>
-                      <td className="px-5 py-3 text-sm font-medium text-ink-900">
+                      <td className="px-5 py-3 text-sm font-medium text-ink-900 dark:text-slate-100">
                         {formatETB(proposal.bidAmount)}
                       </td>
                       <td className="px-5 py-3">
                         <StatusBadge status={proposal.status} size="xs" />
                       </td>
-                      <td className="px-5 py-3 text-xs text-gray-500">
+                      <td className="px-5 py-3 text-xs text-gray-500 dark:text-slate-400">
                         {proposal.createdAtLabel || '—'}
                       </td>
                     </tr>
@@ -730,14 +730,14 @@ export default function FreelancerDashboardPage() {
       {/* ═══════════════════════════════════════════════════════════════════
          PROFILE SUMMARY STRIP
          ═══════════════════════════════════════════════════════════════════ */}
-      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-4">
             <Avatar name={profile?.name} src={profile?.avatar} size="lg" variant="brand" />
             <div>
-              <p className="font-bold text-ink-900">{profile?.name ?? 'Freelancer'}</p>
-              <p className="text-sm text-gray-500">{profile?.headline || 'No headline set'}</p>
-              <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-gray-400">
+              <p className="font-bold text-ink-900 dark:text-slate-100">{profile?.name ?? 'Freelancer'}</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400">{profile?.headline || 'No headline set'}</p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-gray-400 dark:text-slate-400">
                 {profile?.location && (
                   <span className="inline-flex items-center gap-1">
                     <MapPin className="h-3.5 w-3.5" />{profile.location}
@@ -769,7 +769,7 @@ export default function FreelancerDashboardPage() {
       {/* ═══════════════════════════════════════════════════════════════════
          FOOTER INFO
          ═══════════════════════════════════════════════════════════════════ */}
-      <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-5 py-3 text-xs text-gray-500 shadow-card">
+      <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-5 py-3 text-xs text-gray-500 shadow-card dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5">
             <Globe className="h-3.5 w-3.5" />
@@ -796,18 +796,18 @@ function Skeleton() {
   return (
     <div className="animate-pulse space-y-6">
       <div className="h-40 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900" />
-      <div className="h-16 rounded-2xl bg-gray-200" />
+      <div className="h-16 rounded-2xl bg-gray-200 dark:bg-slate-800" />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => <div key={i} className="h-32 rounded-xl bg-gray-200" />)}
+        {[...Array(4)].map((_, i) => <div key={i} className="h-32 rounded-xl bg-gray-200 dark:bg-slate-800" />)}
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {[...Array(6)].map((_, i) => <div key={i} className="h-24 rounded-2xl bg-gray-200" />)}
+        {[...Array(6)].map((_, i) => <div key={i} className="h-24 rounded-2xl bg-gray-200 dark:bg-slate-800" />)}
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 h-64 rounded-2xl bg-gray-200" />
-        <div className="h-64 rounded-2xl bg-gray-200" />
+        <div className="lg:col-span-2 h-64 rounded-2xl bg-gray-200 dark:bg-slate-800" />
+        <div className="h-64 rounded-2xl bg-gray-200 dark:bg-slate-800" />
       </div>
-      <div className="h-48 rounded-2xl bg-gray-200" />
+      <div className="h-48 rounded-2xl bg-gray-200 dark:bg-slate-800" />
     </div>
   );
 }
@@ -824,14 +824,14 @@ function QuickAction({ icon: Icon, label, description, to, color = 'brand' }) {
   return (
     <Link
       to={to}
-      className="group flex flex-col items-center gap-2 rounded-2xl border border-gray-100 bg-white p-5 text-center transition-all hover:-translate-y-1 hover:shadow-lg"
+      className="group flex flex-col items-center gap-2 rounded-2xl border border-gray-100 bg-white p-5 text-center transition-all hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
     >
       <div className={cn('flex h-11 w-11 items-center justify-center rounded-2xl text-white transition-transform group-hover:scale-110', colors[color] ?? colors.brand)}>
         <Icon className="h-5 w-5" aria-hidden="true" />
       </div>
       <div>
-        <p className="text-sm font-bold text-ink-900">{label}</p>
-        <p className="mt-0.5 text-xs text-gray-400">{description}</p>
+        <p className="text-sm font-bold text-ink-900 dark:text-slate-100">{label}</p>
+        <p className="mt-0.5 text-xs text-gray-400 dark:text-slate-400">{description}</p>
       </div>
     </Link>
   );

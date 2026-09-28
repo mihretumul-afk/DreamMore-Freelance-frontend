@@ -189,7 +189,7 @@ export default function FreelancerJobsPage() {
           />
         </div>
         <div className="flex items-center gap-3">
-          <p className="text-sm text-gray-500" aria-live="polite">
+          <p className="text-sm text-gray-500 dark:text-slate-400" aria-live="polite">
             {loading
               ? 'Loading jobs…'
               : total != null
@@ -211,14 +211,14 @@ export default function FreelancerJobsPage() {
           {activeFilters.map((filter) => (
             <span
               key={filter.key}
-              className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white py-1 pl-3 pr-1.5 text-xs font-medium text-ink-700 shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white py-1 pl-3 pr-1.5 text-xs font-medium text-ink-700 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
             >
               <span className="max-w-48 truncate">{filter.label}</span>
               <button
                 type="button"
                 onClick={() => updateParams({ [filter.key]: '' })}
                 aria-label={`Remove ${filter.label} filter`}
-                className="rounded-full p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-ink-900"
+                className="rounded-full p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-ink-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
               >
                 <X className="h-3 w-3" aria-hidden="true" />
               </button>
@@ -227,7 +227,7 @@ export default function FreelancerJobsPage() {
           <button
             type="button"
             onClick={clearAll}
-            className="text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
+            className="text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700 dark:text-indigo-400 dark:hover:text-indigo-300"
           >
             Clear all
           </button>
@@ -258,7 +258,7 @@ export default function FreelancerJobsPage() {
             <button
               type="button"
               onClick={clearAll}
-              className="text-sm font-semibold text-brand-600 hover:text-brand-700"
+              className="text-sm font-semibold text-brand-600 hover:text-brand-700 dark:text-indigo-400 dark:hover:text-indigo-300"
             >
               Clear filters
             </button>

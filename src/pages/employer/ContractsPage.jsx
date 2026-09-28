@@ -38,17 +38,17 @@ function ContractCard({ contract, onDelete, deletingId }) {
   const canDelete = DELETABLE_STATUSES.includes(contract.status);
 
   return (
-    <div className="group block rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:border-brand-300 hover:shadow-md">
+    <div className="group block rounded-2xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-5 shadow-sm transition-all hover:border-brand-300 hover:shadow-md">
       <Link
         to={`/employer/contracts/${contract.id}`}
         className="block cursor-pointer"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <h3 className="text-base font-bold text-ink-900 group-hover:text-brand-600 truncate">
+            <h3 className="text-base font-bold text-ink-900 dark:text-slate-100 group-hover:text-brand-600 dark:group-hover:text-brand-400 truncate">
               {contract.title}
             </h3>
-            <p className="mt-1 text-sm text-gray-500 truncate">
+            <p className="mt-1 text-sm text-gray-500 dark:text-slate-400 truncate">
               {contract.job?.title ?? 'Job'}
             </p>
           </div>
@@ -57,24 +57,24 @@ function ContractCard({ contract, onDelete, deletingId }) {
             {status.label}
           </Badge>
         </div>
-        <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-500">
+        <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-slate-400">
           <div className="flex items-center gap-1.5">
-            <span className="font-semibold text-ink-900">{formatETB(contract.total_amount)}</span>
+            <span className="font-semibold text-ink-900 dark:text-slate-100">{formatETB(contract.total_amount)}</span>
           </div>
           {contract.freelancer && (
             <div className="flex items-center gap-1.5">
-              <span className="text-gray-400">Freelancer:</span>
-              <span className="font-medium text-ink-800">{contract.freelancer.name}</span>
+              <span className="text-gray-400 dark:text-slate-400">Freelancer:</span>
+              <span className="font-medium text-ink-800 dark:text-slate-200">{contract.freelancer.name}</span>
             </div>
           )}
           <div className="flex items-center gap-1.5">
-            <span className="text-gray-400">Created:</span>
+            <span className="text-gray-400 dark:text-slate-400">Created:</span>
             <span>{formatDate(contract.created_at)}</span>
           </div>
           {contract.milestones && (
             <div className="flex items-center gap-1.5">
-              <span className="text-gray-400">Milestones:</span>
-              <span className="font-medium text-ink-800">{contract.milestones.length}</span>
+              <span className="text-gray-400 dark:text-slate-400">Milestones:</span>
+              <span className="font-medium text-ink-800 dark:text-slate-200">{contract.milestones.length}</span>
             </div>
           )}
         </div>
@@ -82,7 +82,7 @@ function ContractCard({ contract, onDelete, deletingId }) {
 
       {/* Delete button */}
       {canDelete && (
-        <div className="mt-3 flex justify-end border-t border-gray-100 pt-3">
+        <div className="mt-3 flex justify-end border-t border-gray-100 dark:border-slate-800 pt-3">
           <Button
             variant="ghost"
             size="xs"
@@ -157,14 +157,14 @@ export default function EmployerContractsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-ink-900">My Contracts</h1>
-        <p className="mt-0.5 text-sm text-gray-500">Manage your contracts with freelancers.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-ink-900 dark:text-slate-100">My Contracts</h1>
+        <p className="mt-0.5 text-sm text-gray-500 dark:text-slate-400">Manage your contracts with freelancers.</p>
       </div>
 
       <Card>
         <CardBody className="py-3">
           <div className="flex flex-wrap items-center gap-3">
-            <Filter className="h-4 w-4 text-gray-400" />
+            <Filter className="h-4 w-4 text-gray-400 dark:text-slate-400" />
             <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-44">
               {STATUS_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
@@ -179,7 +179,7 @@ export default function EmployerContractsPage() {
       ) : loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-32 animate-pulse rounded-2xl border border-gray-200 bg-white" />
+            <div key={i} className="h-32 animate-pulse rounded-2xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900" />
           ))}
         </div>
       ) : contracts.length === 0 ? (

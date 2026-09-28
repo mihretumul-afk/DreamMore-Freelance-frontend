@@ -27,27 +27,27 @@ import { useSearchParams } from 'react-router-dom';
 
 function StatCard({ icon: Icon, label, value, sub, color, gradient, trend }) {
   return (
-    <div className={`rounded-2xl border ${gradient || 'border-gray-200 bg-white'} p-5 transition-all duration-200 hover:shadow-md`}>
+    <div className={`rounded-2xl border ${gradient || 'border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900'} p-5 transition-all duration-200 hover:shadow-md`}>
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${color || 'bg-gray-100'}`}>
-            <Icon className={`h-5 w-5 ${color ? color.replace('bg-', 'text-').replace('-100', '-600') : 'text-gray-500'}`} />
+          <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${color || 'bg-gray-100 dark:bg-slate-800'}`}>
+            <Icon className={`h-5 w-5 ${color ? color.replace('bg-', 'text-').replace('-100', '-600') : 'text-gray-500 dark:text-slate-400'}`} />
           </div>
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-gray-400">{label}</p>
-            <p className="text-2xl font-extrabold text-ink-900 mt-0.5">{value}</p>
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">{label}</p>
+            <p className="text-2xl font-extrabold text-ink-900 dark:text-slate-100 mt-0.5">{value}</p>
           </div>
         </div>
         {trend && (
           <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${
-            trend > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+            trend > 0 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400' : 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400'
           }`}>
             {trend > 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
             {Math.abs(trend)}%
           </span>
         )}
       </div>
-      {sub && <p className="mt-2 text-[11px] text-gray-500">{sub}</p>}
+      {sub && <p className="mt-2 text-[11px] text-gray-500 dark:text-slate-400">{sub}</p>}
     </div>
   );
 }
@@ -65,14 +65,14 @@ function QuickAction({ icon: Icon, label, description, to, color = 'brand', badg
   return (
     <a
       href={to}
-      className="group relative flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+      className="group relative flex items-center gap-4 rounded-2xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-4 transition-all hover:-translate-y-0.5 hover:shadow-lg"
     >
       <div className={`flex h-12 w-12 items-center justify-center rounded-2xl text-white transition-transform group-hover:scale-110 ${colors[color]}`}>
         <Icon className="h-5 w-5" />
       </div>
       <div className="flex-1">
-        <p className="text-sm font-bold text-ink-900">{label}</p>
-        <p className="text-xs text-gray-500">{description}</p>
+        <p className="text-sm font-bold text-ink-900 dark:text-slate-100">{label}</p>
+        <p className="text-xs text-gray-500 dark:text-slate-400">{description}</p>
       </div>
       {badge && (
         <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
@@ -424,62 +424,62 @@ export default function FinanceDashboard() {
       </div>
 
       {/* ─── Wallet Summary ───────────────────────────────────────────── */}
-      <div className="rounded-2xl border border-gray-200 bg-white p-6">
+      <div className="rounded-2xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50">
-            <Wallet className="h-5 w-5 text-violet-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 dark:bg-violet-950/40">
+            <Wallet className="h-5 w-5 text-violet-600 dark:text-violet-400" />
           </div>
           <div>
-            <h2 className="font-bold text-ink-900">Freelancer Wallets</h2>
-            <p className="text-xs text-gray-400">Aggregate wallet balances across all freelancers</p>
+            <h2 className="font-bold text-ink-900 dark:text-slate-100">Freelancer Wallets</h2>
+            <p className="text-xs text-gray-400 dark:text-slate-400">Aggregate wallet balances across all freelancers</p>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 p-5">
-            <p className="text-xs font-bold uppercase tracking-wider text-emerald-600">Total Earned</p>
-            <p className="mt-1.5 text-2xl font-extrabold text-emerald-900">{formatETB(d.wallets?.total_earned || 0)}</p>
-            <p className="text-[10px] text-emerald-600 mt-0.5">All-time freelancer earnings</p>
+          <div className="rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 border border-emerald-200 dark:border-emerald-800/50 p-5">
+            <p className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Total Earned</p>
+            <p className="mt-1.5 text-2xl font-extrabold text-emerald-900 dark:text-emerald-100">{formatETB(d.wallets?.total_earned || 0)}</p>
+            <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">All-time freelancer earnings</p>
           </div>
-          <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 p-5">
-            <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Available Balance</p>
-            <p className="mt-1.5 text-2xl font-extrabold text-blue-900">{formatETB(d.wallets?.total_available || 0)}</p>
-            <p className="text-[10px] text-blue-600 mt-0.5">Ready for withdrawal</p>
+          <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border border-blue-200 dark:border-blue-800/50 p-5">
+            <p className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Available Balance</p>
+            <p className="mt-1.5 text-2xl font-extrabold text-blue-900 dark:text-blue-100">{formatETB(d.wallets?.total_available || 0)}</p>
+            <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-0.5">Ready for withdrawal</p>
           </div>
-          <div className="rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 p-5">
-            <p className="text-xs font-bold uppercase tracking-wider text-amber-600">Pending Balance</p>
-            <p className="mt-1.5 text-2xl font-extrabold text-amber-900">{formatETB(d.wallets?.total_pending || 0)}</p>
-            <p className="text-[10px] text-amber-600 mt-0.5">Awaiting clearance</p>
+          <div className="rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200 dark:border-amber-800/50 p-5">
+            <p className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Pending Balance</p>
+            <p className="mt-1.5 text-2xl font-extrabold text-amber-900 dark:text-amber-100">{formatETB(d.wallets?.total_pending || 0)}</p>
+            <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">Awaiting clearance</p>
           </div>
         </div>
       </div>
 
       {/* ─── Featured Revenue ────────────────────────────────────────── */}
       {d.featured_revenue && (
-        <div className="rounded-2xl border border-gray-200 bg-white p-6">
+        <div className="rounded-2xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50">
-              <Zap className="h-5 w-5 text-amber-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-950/40">
+              <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div>
-              <h2 className="font-bold text-ink-900">Featured Listings Revenue</h2>
-              <p className="text-xs text-gray-400">Revenue from paid job and profile boosts</p>
+              <h2 className="font-bold text-ink-900 dark:text-slate-100">Featured Listings Revenue</h2>
+              <p className="text-xs text-gray-400 dark:text-slate-400">Revenue from paid job and profile boosts</p>
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 p-5">
-              <p className="text-xs font-bold uppercase tracking-wider text-amber-600">Total Featured Revenue</p>
-              <p className="mt-1.5 text-2xl font-extrabold text-amber-900">{formatETB(d.featured_revenue?.total || 0)}</p>
-              <p className="text-[10px] text-amber-600 mt-0.5">This month: {formatETB(d.featured_revenue?.monthly || 0)}</p>
+            <div className="rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200 dark:border-amber-800/50 p-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Total Featured Revenue</p>
+              <p className="mt-1.5 text-2xl font-extrabold text-amber-900 dark:text-amber-100">{formatETB(d.featured_revenue?.total || 0)}</p>
+              <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">This month: {formatETB(d.featured_revenue?.monthly || 0)}</p>
             </div>
-            <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 p-5">
-              <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Featured Jobs</p>
-              <p className="mt-1.5 text-2xl font-extrabold text-blue-900">{formatETB(d.featured_revenue?.jobs_total || 0)}</p>
-              <p className="text-[10px] text-blue-600 mt-0.5">{d.featured_revenue?.jobs_active || 0} active • This month: {formatETB(d.featured_revenue?.jobs_monthly || 0)}</p>
+            <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border border-blue-200 dark:border-blue-800/50 p-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Featured Jobs</p>
+              <p className="mt-1.5 text-2xl font-extrabold text-blue-900 dark:text-blue-100">{formatETB(d.featured_revenue?.jobs_total || 0)}</p>
+              <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-0.5">{d.featured_revenue?.jobs_active || 0} active • This month: {formatETB(d.featured_revenue?.jobs_monthly || 0)}</p>
             </div>
-            <div className="rounded-2xl bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 p-5">
-              <p className="text-xs font-bold uppercase tracking-wider text-violet-600">Featured Profiles</p>
-              <p className="mt-1.5 text-2xl font-extrabold text-violet-900">{formatETB(d.featured_revenue?.profiles_total || 0)}</p>
-              <p className="text-[10px] text-violet-600 mt-0.5">{d.featured_revenue?.profiles_active || 0} active • This month: {formatETB(d.featured_revenue?.profiles_monthly || 0)}</p>
+            <div className="rounded-2xl bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 border border-violet-200 dark:border-violet-800/50 p-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400">Featured Profiles</p>
+              <p className="mt-1.5 text-2xl font-extrabold text-violet-900 dark:text-violet-100">{formatETB(d.featured_revenue?.profiles_total || 0)}</p>
+              <p className="text-[10px] text-violet-600 dark:text-violet-400 mt-0.5">{d.featured_revenue?.profiles_active || 0} active • This month: {formatETB(d.featured_revenue?.profiles_monthly || 0)}</p>
             </div>
           </div>
         </div>
@@ -489,7 +489,7 @@ export default function FinanceDashboard() {
       <PlatformBalanceCard onUpdated={() => load(true)} />
 
       {/* ─── Tab Navigation ──────────────────────────────────────────── */}
-      <div className="flex gap-1 rounded-2xl bg-gray-100 p-1">
+      <div className="flex gap-1 rounded-2xl bg-gray-100 dark:bg-slate-800 p-1">
         {[
           { key: 'overview', label: 'Overview', icon: BarChart3 },
           { key: 'payments', label: 'Payments', icon: CreditCard },
@@ -500,8 +500,8 @@ export default function FinanceDashboard() {
             onClick={() => setActiveTab(tab.key)}
             className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 text-sm font-semibold transition-all cursor-pointer ${
               activeTab === tab.key
-                ? 'bg-white text-ink-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-white text-ink-900 dark:bg-slate-700 dark:text-slate-100 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <tab.icon className="h-4 w-4" />
@@ -519,14 +519,14 @@ export default function FinanceDashboard() {
       {activeTab === 'overview' && (
         <div className="space-y-6">
           {/* Revenue Chart */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-6">
+          <div className="rounded-2xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50">
-                <TrendingUp className="h-5 w-5 text-emerald-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/40">
+                <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
-                <h2 className="font-bold text-ink-900">Revenue Over Time</h2>
-                <p className="text-xs text-gray-400">Monthly platform revenue from fees</p>
+                <h2 className="font-bold text-ink-900 dark:text-slate-100">Revenue Over Time</h2>
+                <p className="text-xs text-gray-400 dark:text-slate-400">Monthly platform revenue from fees</p>
               </div>
             </div>
             <EarningsChart transactions={payments.map(p => ({
@@ -537,24 +537,24 @@ export default function FinanceDashboard() {
           </div>
 
           {/* Monthly Revenue Comparison */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-6">
+          <div className="rounded-2xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
-                <BarChart3 className="h-5 w-5 text-blue-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/40">
+                <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <h2 className="font-bold text-ink-900">Monthly Revenue Comparison</h2>
-                <p className="text-xs text-gray-400">Payment volume, platform revenue, and released funds</p>
+                <h2 className="font-bold text-ink-900 dark:text-slate-100">Monthly Revenue Comparison</h2>
+                <p className="text-xs text-gray-400 dark:text-slate-400">Payment volume, platform revenue, and released funds</p>
               </div>
             </div>
             <RevenueComparisonChart data={d.monthly_breakdown || []} />
           </div>
 
           {/* Recent Activity */}
-          <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="font-bold text-ink-900">Recent Payments</h2>
-              <p className="text-xs text-gray-400 mt-0.5">Latest platform transactions</p>
+          <div className="rounded-2xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800">
+              <h2 className="font-bold text-ink-900 dark:text-slate-100">Recent Payments</h2>
+              <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">Latest platform transactions</p>
             </div>
             {payments.length === 0 ? (
               <div className="p-8">
@@ -564,30 +564,30 @@ export default function FinanceDashboard() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gray-50/80 text-left">
-                      <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Reference</th>
-                      <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">From</th>
-                      <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">To</th>
-                      <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Amount</th>
-                      <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Fee</th>
-                      <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Status</th>
-                      <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Date</th>
+                    <tr className="bg-gray-50/80 dark:bg-slate-800/50 text-left">
+                      <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Reference</th>
+                      <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">From</th>
+                      <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">To</th>
+                      <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right">Amount</th>
+                      <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right">Fee</th>
+                      <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Status</th>
+                      <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Date</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                     {payments.slice(0, 10).map((p) => (
-                      <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-6 py-3.5 font-mono text-xs text-gray-600">{p.reference}</td>
-                        <td className="px-6 py-3.5 text-sm text-gray-700">{p.payer?.name || '—'}</td>
-                        <td className="px-6 py-3.5 text-sm text-gray-700">{p.payee?.name || '—'}</td>
-                        <td className="px-6 py-3.5 text-right font-bold text-ink-900">{formatETB(p.amount)}</td>
-                        <td className="px-6 py-3.5 text-right text-amber-600 text-xs">{formatETB(p.platform_fee || p.fee || 0)}</td>
+                      <tr key={p.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                        <td className="px-6 py-3.5 font-mono text-xs text-gray-600 dark:text-slate-400">{p.reference}</td>
+                        <td className="px-6 py-3.5 text-sm text-gray-700 dark:text-slate-300">{p.payer?.name || '—'}</td>
+                        <td className="px-6 py-3.5 text-sm text-gray-700 dark:text-slate-300">{p.payee?.name || '—'}</td>
+                        <td className="px-6 py-3.5 text-right font-bold text-ink-900 dark:text-slate-100">{formatETB(p.amount)}</td>
+                        <td className="px-6 py-3.5 text-right text-amber-600 dark:text-amber-400 text-xs">{formatETB(p.platform_fee || p.fee || 0)}</td>
                         <td className="px-6 py-3.5">
                           <Badge tone={p.status === 'completed' ? 'success' : p.status === 'pending' ? 'warning' : 'danger'} size="xs">
                             {p.status}
                           </Badge>
                         </td>
-                        <td className="px-6 py-3.5 text-xs text-gray-400">{formatDate(p.created_at)}</td>
+                        <td className="px-6 py-3.5 text-xs text-gray-400 dark:text-slate-400">{formatDate(p.created_at)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -600,18 +600,18 @@ export default function FinanceDashboard() {
 
       {/* ─── Payments Tab ─────────────────────────────────────────────── */}
       {activeTab === 'payments' && (
-        <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
+        <div className="rounded-2xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-bold text-ink-900">All Payments</h2>
-                <p className="text-xs text-gray-400 mt-0.5">{paymentMeta.total || 0} total payments</p>
+                <h2 className="font-bold text-ink-900 dark:text-slate-100">All Payments</h2>
+                <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">{paymentMeta.total || 0} total payments</p>
               </div>
               <div className="flex items-center gap-2">
                 <select
                   value={paymentFilter}
                   onChange={(e) => { setPaymentFilter(e.target.value); setPaymentPage(1); }}
-                  className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:border-brand-400 focus:outline-none"
+                  className="rounded-lg border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 text-gray-700 dark:text-slate-200 px-3 py-1.5 text-xs focus:border-brand-400 focus:outline-none"
                 >
                   <option value="">All Status</option>
                   <option value="completed">Completed</option>
@@ -626,14 +626,14 @@ export default function FinanceDashboard() {
                     {showPayExportMenu && (
                       <>
                         <div className="fixed inset-0 z-10" onClick={() => setShowPayExportMenu(false)} />
-                        <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-xl border border-gray-200 bg-white py-1 shadow-xl">
-                          <button onClick={() => { exportAdminPaymentsCSV(payments); setShowPayExportMenu(false); showToast('CSV exported!', 'success'); }} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+                        <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 py-1 shadow-xl">
+                          <button onClick={() => { exportAdminPaymentsCSV(payments); setShowPayExportMenu(false); showToast('CSV exported!', 'success'); }} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer">
                             <FileSpreadsheet className="h-4 w-4 text-emerald-500" />
-                            <div className="text-left"><p className="font-semibold">Export CSV</p><p className="text-[10px] text-gray-400">Spreadsheet</p></div>
+                            <div className="text-left"><p className="font-semibold">Export CSV</p><p className="text-[10px] text-gray-400 dark:text-slate-400">Spreadsheet</p></div>
                           </button>
-                          <button onClick={() => { exportAdminPaymentsPDF(payments); setShowPayExportMenu(false); showToast('PDF exported!', 'success'); }} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+                          <button onClick={() => { exportAdminPaymentsPDF(payments); setShowPayExportMenu(false); showToast('PDF exported!', 'success'); }} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer">
                             <FileText className="h-4 w-4 text-red-500" />
-                            <div className="text-left"><p className="font-semibold">Export PDF</p><p className="text-[10px] text-gray-400">Printable</p></div>
+                            <div className="text-left"><p className="font-semibold">Export PDF</p><p className="text-[10px] text-gray-400 dark:text-slate-400">Printable</p></div>
                           </button>
                         </div>
                       </>
@@ -645,8 +645,8 @@ export default function FinanceDashboard() {
           </div>
 
           {/* Date Range Filter */}
-          <div className="px-6 py-3 bg-gray-50/50 border-b border-gray-100 flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+          <div className="px-6 py-3 bg-gray-50/50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800 flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-slate-400">
               <Calendar className="h-3.5 w-3.5" /> Filter by date:
             </div>
             <div className="flex items-center gap-2">
@@ -654,20 +654,20 @@ export default function FinanceDashboard() {
                 type="date"
                 value={payDateFrom}
                 onChange={(e) => { setPayDateFrom(e.target.value); setPaymentPage(1); }}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="rounded-lg border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 text-gray-700 dark:text-slate-200 px-3 py-1.5 text-xs focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
               />
-              <span className="text-xs text-gray-400">to</span>
+              <span className="text-xs text-gray-400 dark:text-slate-400">to</span>
               <input
                 type="date"
                 value={payDateTo}
                 onChange={(e) => { setPayDateTo(e.target.value); setPaymentPage(1); }}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="rounded-lg border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 text-gray-700 dark:text-slate-200 px-3 py-1.5 text-xs focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
               />
             </div>
             {(payDateFrom || payDateTo) && (
               <button
                 onClick={() => { setPayDateFrom(''); setPayDateTo(''); }}
-                className="flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors cursor-pointer"
+                className="flex items-center gap-1 rounded-lg bg-red-50 dark:bg-red-950/40 px-2.5 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors cursor-pointer"
               >
                 <X className="h-3 w-3" /> Clear
               </button>
@@ -681,42 +681,42 @@ export default function FinanceDashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50/80 text-left">
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Reference</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Type</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">From</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">To</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Amount</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Fee</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Status</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Date</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right"></th>
+                  <tr className="bg-gray-50/80 dark:bg-slate-800/50 text-left">
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Reference</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Type</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">From</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">To</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right">Amount</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right">Fee</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Status</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Date</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                   {payments.map((p) => (
-                    <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-3.5 font-mono text-xs text-gray-600">{p.reference}</td>
+                    <tr key={p.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                      <td className="px-6 py-3.5 font-mono text-xs text-gray-600 dark:text-slate-400">{p.reference}</td>
                       <td className="px-6 py-3.5">
                         <Badge tone={p.type === 'escrow_funded' ? 'info' : p.type === 'milestone_released' ? 'success' : 'warning'} size="xs">
                           {p.type?.replace('_', ' ')}
                         </Badge>
                       </td>
-                      <td className="px-6 py-3.5 text-sm text-gray-700">{p.payer?.name || '—'}</td>
-                      <td className="px-6 py-3.5 text-sm text-gray-700">{p.payee?.name || '—'}</td>
-                      <td className="px-6 py-3.5 text-right font-bold text-ink-900">{formatETB(p.amount)}</td>
-                      <td className="px-6 py-3.5 text-right text-amber-600 text-xs">{formatETB(p.platform_fee || p.fee || 0)}</td>
+                      <td className="px-6 py-3.5 text-sm text-gray-700 dark:text-slate-300">{p.payer?.name || '—'}</td>
+                      <td className="px-6 py-3.5 text-sm text-gray-700 dark:text-slate-300">{p.payee?.name || '—'}</td>
+                      <td className="px-6 py-3.5 text-right font-bold text-ink-900 dark:text-slate-100">{formatETB(p.amount)}</td>
+                      <td className="px-6 py-3.5 text-right text-amber-600 dark:text-amber-400 text-xs">{formatETB(p.platform_fee || p.fee || 0)}</td>
                       <td className="px-6 py-3.5">
                         <Badge tone={p.status === 'completed' ? 'success' : p.status === 'pending' ? 'warning' : 'danger'} size="xs">
                           {p.status}
                         </Badge>
                       </td>
-                      <td className="px-6 py-3.5 text-xs text-gray-400">{formatDate(p.created_at)}</td>
+                      <td className="px-6 py-3.5 text-xs text-gray-400 dark:text-slate-400">{formatDate(p.created_at)}</td>
                       <td className="px-6 py-3.5 text-right">
                         <button
                           onClick={() => handleDeletePayment(p)}
                           title="Delete from history"
-                          className="rounded-lg p-2 text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
+                          className="rounded-lg p-2 text-gray-300 dark:text-slate-500 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -728,8 +728,8 @@ export default function FinanceDashboard() {
             </div>
           )}
           {paymentMeta.last_page > 1 && (
-            <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3">
-              <p className="text-xs text-gray-400">Page {paymentMeta.current_page} of {paymentMeta.last_page}</p>
+            <div className="flex items-center justify-between border-t border-gray-100 dark:border-slate-800 px-6 py-3">
+              <p className="text-xs text-gray-400 dark:text-slate-400">Page {paymentMeta.current_page} of {paymentMeta.last_page}</p>
               <div className="flex gap-2">
                 <Button variant="outline" size="xs" disabled={paymentPage <= 1} onClick={() => setPaymentPage((p) => p - 1)}>
                   <ChevronLeft className="h-3 w-3" /> Prev
@@ -745,18 +745,18 @@ export default function FinanceDashboard() {
 
       {/* ─── Withdrawals Tab ──────────────────────────────────────────── */}
       {activeTab === 'withdrawals' && (
-        <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
+        <div className="rounded-2xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-bold text-ink-900">All Withdrawals</h2>
-                <p className="text-xs text-gray-400 mt-0.5">{withdrawalMeta.total || 0} total withdrawals</p>
+                <h2 className="font-bold text-ink-900 dark:text-slate-100">All Withdrawals</h2>
+                <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">{withdrawalMeta.total || 0} total withdrawals</p>
               </div>
               <div className="flex items-center gap-2">
                 <select
                   value={withdrawalFilter}
                   onChange={(e) => { setWithdrawalFilter(e.target.value); setWithdrawalPage(1); }}
-                  className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:border-brand-400 focus:outline-none"
+                  className="rounded-lg border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 text-gray-700 dark:text-slate-200 px-3 py-1.5 text-xs focus:border-brand-400 focus:outline-none"
                 >
                   <option value="">All Status</option>
                   <option value="requested">Requested</option>
@@ -772,14 +772,14 @@ export default function FinanceDashboard() {
                     {showWdExportMenu && (
                       <>
                         <div className="fixed inset-0 z-10" onClick={() => setShowWdExportMenu(false)} />
-                        <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-xl border border-gray-200 bg-white py-1 shadow-xl">
-                          <button onClick={() => { exportAdminWithdrawalsCSV(withdrawals); setShowWdExportMenu(false); showToast('CSV exported!', 'success'); }} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+                        <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-xl border border-gray-200 bg-white dark:border-slate-800 dark:bg-slate-900 py-1 shadow-xl">
+                          <button onClick={() => { exportAdminWithdrawalsCSV(withdrawals); setShowWdExportMenu(false); showToast('CSV exported!', 'success'); }} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer">
                             <FileSpreadsheet className="h-4 w-4 text-emerald-500" />
-                            <div className="text-left"><p className="font-semibold">Export CSV</p><p className="text-[10px] text-gray-400">Spreadsheet</p></div>
+                            <div className="text-left"><p className="font-semibold">Export CSV</p><p className="text-[10px] text-gray-400 dark:text-slate-400">Spreadsheet</p></div>
                           </button>
-                          <button onClick={() => { exportAdminWithdrawalsPDF(withdrawals); setShowWdExportMenu(false); showToast('PDF exported!', 'success'); }} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+                          <button onClick={() => { exportAdminWithdrawalsPDF(withdrawals); setShowWdExportMenu(false); showToast('PDF exported!', 'success'); }} className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer">
                             <FileText className="h-4 w-4 text-red-500" />
-                            <div className="text-left"><p className="font-semibold">Export PDF</p><p className="text-[10px] text-gray-400">Printable</p></div>
+                            <div className="text-left"><p className="font-semibold">Export PDF</p><p className="text-[10px] text-gray-400 dark:text-slate-400">Printable</p></div>
                           </button>
                         </div>
                       </>
@@ -791,8 +791,8 @@ export default function FinanceDashboard() {
           </div>
 
           {/* Date Range Filter */}
-          <div className="px-6 py-3 bg-gray-50/50 border-b border-gray-100 flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+          <div className="px-6 py-3 bg-gray-50/50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800 flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 dark:text-slate-400">
               <Calendar className="h-3.5 w-3.5" /> Filter by date:
             </div>
             <div className="flex items-center gap-2">
@@ -800,20 +800,20 @@ export default function FinanceDashboard() {
                 type="date"
                 value={wdDateFrom}
                 onChange={(e) => { setWdDateFrom(e.target.value); setWithdrawalPage(1); }}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="rounded-lg border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 text-gray-700 dark:text-slate-200 px-3 py-1.5 text-xs focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
               />
-              <span className="text-xs text-gray-400">to</span>
+              <span className="text-xs text-gray-400 dark:text-slate-400">to</span>
               <input
                 type="date"
                 value={wdDateTo}
                 onChange={(e) => { setWdDateTo(e.target.value); setWithdrawalPage(1); }}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-700 focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+                className="rounded-lg border border-gray-200 bg-white dark:border-slate-700 dark:bg-slate-800 text-gray-700 dark:text-slate-200 px-3 py-1.5 text-xs focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
               />
             </div>
             {(wdDateFrom || wdDateTo) && (
               <button
                 onClick={() => { setWdDateFrom(''); setWdDateTo(''); }}
-                className="flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors cursor-pointer"
+                className="flex items-center gap-1 rounded-lg bg-red-50 dark:bg-red-950/40 px-2.5 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors cursor-pointer"
               >
                 <X className="h-3 w-3" /> Clear
               </button>
@@ -827,33 +827,33 @@ export default function FinanceDashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50/80 text-left">
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Reference</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">User</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Method</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Amount</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Fee</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 text-right">Net</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Status</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">Date</th>
-                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400"></th>
+                  <tr className="bg-gray-50/80 dark:bg-slate-800/50 text-left">
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Reference</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">User</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Method</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right">Amount</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right">Fee</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400 text-right">Net</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Status</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400">Date</th>
+                    <th className="px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-400"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                   {withdrawals.map((w) => (
-                    <tr key={w.id} className={`hover:bg-gray-50/50 transition-colors ${w.status === 'requested' ? 'bg-amber-50/30' : ''}`}>
-                      <td className="px-6 py-3.5 font-mono text-xs text-gray-600">{w.reference}</td>
-                      <td className="px-6 py-3.5 text-sm text-gray-700">{w.user?.name || '—'}</td>
-                      <td className="px-6 py-3.5 text-sm text-gray-500">{w.paymentMethod?.type || '—'}</td>
-                      <td className="px-6 py-3.5 text-right font-bold text-ink-900">{formatETB(w.amount)}</td>
+                    <tr key={w.id} className={`hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors ${w.status === 'requested' ? 'bg-amber-50/30 dark:bg-amber-950/20' : ''}`}>
+                      <td className="px-6 py-3.5 font-mono text-xs text-gray-600 dark:text-slate-400">{w.reference}</td>
+                      <td className="px-6 py-3.5 text-sm text-gray-700 dark:text-slate-300">{w.user?.name || '—'}</td>
+                      <td className="px-6 py-3.5 text-sm text-gray-500 dark:text-slate-400">{w.paymentMethod?.type || '—'}</td>
+                      <td className="px-6 py-3.5 text-right font-bold text-ink-900 dark:text-slate-100">{formatETB(w.amount)}</td>
                       <td className="px-6 py-3.5 text-right text-red-400 text-xs">−{formatETB(w.fee)}</td>
-                      <td className="px-6 py-3.5 text-right font-bold text-emerald-600">{formatETB(w.net_amount)}</td>
+                      <td className="px-6 py-3.5 text-right font-bold text-emerald-600 dark:text-emerald-400">{formatETB(w.net_amount)}</td>
                       <td className="px-6 py-3.5">
                         <Badge tone={w.status === 'completed' ? 'success' : w.status === 'requested' ? 'warning' : w.status === 'processing' ? 'info' : 'danger'} size="xs">
                           {w.status}
                         </Badge>
                       </td>
-                      <td className="px-6 py-3.5 text-xs text-gray-400">{formatDate(w.created_at)}</td>
+                      <td className="px-6 py-3.5 text-xs text-gray-400 dark:text-slate-400">{formatDate(w.created_at)}</td>
                       <td className="px-6 py-3.5">
                         <div className="flex items-center justify-end gap-2">
                           {w.status === 'requested' && (
@@ -865,7 +865,7 @@ export default function FinanceDashboard() {
                             <button
                               onClick={() => handleDeleteWithdrawal(w)}
                               title="Delete from history"
-                              className="rounded-lg p-2 text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer"
+                              className="rounded-lg p-2 text-gray-300 dark:text-slate-500 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-500 dark:hover:text-red-400 transition-colors cursor-pointer"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -879,8 +879,8 @@ export default function FinanceDashboard() {
             </div>
           )}
           {withdrawalMeta.last_page > 1 && (
-            <div className="flex items-center justify-between border-t border-gray-100 px-6 py-3">
-              <p className="text-xs text-gray-400">Page {withdrawalMeta.current_page} of {withdrawalMeta.last_page}</p>
+            <div className="flex items-center justify-between border-t border-gray-100 dark:border-slate-800 px-6 py-3">
+              <p className="text-xs text-gray-400 dark:text-slate-400">Page {withdrawalMeta.current_page} of {withdrawalMeta.last_page}</p>
               <div className="flex gap-2">
                 <Button variant="outline" size="xs" disabled={withdrawalPage <= 1} onClick={() => setWithdrawalPage((p) => p - 1)}>
                   <ChevronLeft className="h-3 w-3" /> Prev

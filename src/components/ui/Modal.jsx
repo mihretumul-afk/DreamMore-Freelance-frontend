@@ -67,16 +67,16 @@ export default function Modal({
           className
         )}
       >
-        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-gray-100 px-5 py-4">
+        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-gray-100 dark:border-slate-800 px-5 py-4">
           <div>
-            <h2 className="text-lg font-bold text-ink-900">{title}</h2>
-            {description && <p className="mt-0.5 text-sm text-gray-500">{description}</p>}
+            <h2 className="text-lg font-bold text-ink-900 dark:text-slate-100">{title}</h2>
+            {description && <p className="mt-0.5 text-sm text-gray-500 dark:text-slate-400">{description}</p>}
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-ink-900"
+            className="rounded-lg p-1.5 text-gray-400 dark:text-slate-400 transition-colors hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-ink-900 dark:hover:text-slate-100"
           >
             <X className="h-5 w-5" />
           </button>

@@ -105,8 +105,8 @@ export default function AdminLayout() {
             'group relative flex items-center rounded-xl text-sm font-medium transition-all duration-150',
             showLabel ? 'gap-3 px-3 py-2.5' : 'justify-center px-0 py-2.5',
             isActive
-              ? 'bg-red-50 text-red-700 before:absolute before:left-0 before:top-2 before:h-[calc(100%-1rem)] before:w-0.5 before:rounded-r before:bg-red-500'
-              : 'text-gray-500 hover:bg-gray-100 hover:text-gray-900',
+              ? 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 before:absolute before:left-0 before:top-2 before:h-[calc(100%-1rem)] before:w-0.5 before:rounded-r before:bg-red-500'
+              : 'text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white',
           )
         }
       >
@@ -115,7 +115,7 @@ export default function AdminLayout() {
             <Icon
               className={cn(
                 'h-[18px] w-[18px] shrink-0 transition-colors',
-                isActive ? 'text-red-600' : 'text-gray-400 group-hover:text-gray-700',
+                isActive ? 'text-red-600 dark:text-red-400' : 'text-gray-400 dark:text-slate-400 group-hover:text-gray-700 dark:group-hover:text-slate-200',
               )}
               aria-hidden="true"
             />
@@ -158,13 +158,13 @@ export default function AdminLayout() {
             <div key={groupKey}>
               {/* Group label — only when expanded */}
               {groupMeta.label && showLabel && (
-                <p className="mb-1 px-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                <p className="mb-1 px-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-slate-500">
                   {groupMeta.label}
                 </p>
               )}
               {/* Divider when icon-only */}
               {groupMeta.label && !showLabel && (
-                <div className="my-1 border-t border-gray-100" />
+                <div className="my-1 border-t border-gray-100 dark:border-slate-800" />
               )}
               <div className="space-y-0.5">
                 {items.map((item) => renderNavLink(item, showLabel, onNavigate))}
