@@ -16,6 +16,7 @@ import {
   Check,
   Trash2,
   RotateCcw,
+  Video,
 } from 'lucide-react';
 import Container from '../../components/common/Container';
 import ErrorState from '../../components/common/ErrorState';
@@ -467,12 +468,22 @@ export default function SavedFreelancersPage() {
                   {/* Formal Action Controls Bar with explicit Remove button */}
                   <div className="mt-5 border-t border-gray-100 pt-3.5 flex flex-wrap items-center justify-between gap-2">
                     <Button
-                      type="button"
-                      onClick={() => handleOpenMessageModal(saved)}
+                      as={Link}
+                      to={`/employer/messages?user_id=${f.user_id ?? f.id}&name=${encodeURIComponent(f.name ?? 'Talent')}`}
                       size="sm"
                       className="bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-xs flex-1 justify-center min-w-[130px]"
                     >
-                      <MessageSquare className="mr-1.5 h-4 w-4" /> Message Talent
+                      <Video className="mr-1.5 h-4 w-4" /> Video Call Talent
+                    </Button>
+
+                    <Button
+                      type="button"
+                      onClick={() => handleOpenMessageModal(saved)}
+                      variant="outline"
+                      size="sm"
+                      className="text-ink-700 hover:bg-gray-50 font-semibold"
+                    >
+                      <MessageSquare className="mr-1.5 h-4 w-4" /> Message
                     </Button>
 
                     <Button

@@ -31,7 +31,11 @@ export default function GoogleRolePickerPage() {
     try {
       await authService.completeGoogleRole(role);
       const user = await refreshUser();
-      navigate(getDashboardPath(user.role, user), { replace: true });
+      if (user.role === 'freelancer') {
+        navigate('/freelancer/credentials', { replace: true, state: { newlyRegistered: true } });
+      } else {
+        navigate(getDashboardPath(user.role, user), { replace: true });
+      }
     } catch (err) {
       showToast(getErrorMessage(err, 'Unable to finish creating your account. Please try again.'), 'error');
       setSubmitting(null);

@@ -1,17 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { MessageSquare, Send, ArrowLeft, Loader2, Wifi, WifiOff } from 'lucide-react';
+import { MessageSquare, Send, ArrowLeft, Loader2, Wifi, WifiOff, Video } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
 import Card, { CardBody } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Avatar from '../../components/marketplace/Avatar';
+import LiveVideoCallModal from '../../components/chat/LiveVideoCallModal';
 import { messageService } from '../../services/messageService';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import { useAuth } from '../../hooks/useAuth';
 import { useRealtimeMessages } from '../../hooks/useRealtimeMessages';
+import { useLiveVideoCall } from '../../hooks/useLiveVideoCall';
 
 export default function EmployerMessagesPage() {
   usePageTitle('Messages');
@@ -30,8 +32,9 @@ export default function EmployerMessagesPage() {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Real-time messaging via WebSocket
-  const { connected, onMessageSent, onMessageRead } = useRealtimeMessages(user?.id);
+  // Real-time messaging & call signaling via WebSocket
+  const { connected, onMessageSent, onMessageRead, onCallSignal } = useRealtimeMessages(user?.id);
+  const videoCallProps = useLiveVideoCall(user, onCallSignal);
 
   const loadConversations = useCallback(async () => {
     setLoading(true);
@@ -168,12 +171,24 @@ export default function EmployerMessagesPage() {
           </Button>
           <Avatar name={activeConversation.name} src={activeConversation.avatar} size="sm" />
           <h2 className="text-sm font-bold text-ink-900">{activeConversation.name}</h2>
-          <div className="ml-auto flex items-center gap-1.5">
-            {connected ? (
-              <Wifi className="h-3.5 w-3.5 text-success-500" title="Real-time connected" />
-            ) : (
-              <WifiOff className="h-3.5 w-3.5 text-gray-400" title="Connecting..." />
-            )}
+          <div className="ml-auto flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="xs"
+              onClick={() => videoCallProps.startCall(activeConversation)}
+              className="flex items-center gap-1.5 text-brand-600 border-brand-200 hover:bg-brand-50"
+              title="Start Live Video Call"
+            >
+              <Video className="h-3.5 w-3.5 text-brand-600" />
+              <span className="hidden sm:inline text-xs font-semibold">Live Video</span>
+            </Button>
+            <div className="flex items-center gap-1.5 text-xs text-gray-400 pl-2 border-l border-gray-200">
+              {connected ? (
+                <Wifi className="h-3.5 w-3.5 text-success-500" title="Real-time connected" />
+              ) : (
+                <WifiOff className="h-3.5 w-3.5 text-gray-400" title="Connecting..." />
+              )}
+            </div>
           </div>
         </div>
 
@@ -229,6 +244,7 @@ export default function EmployerMessagesPage() {
             </Button>
           </div>
         </div>
+        <LiveVideoCallModal {...videoCallProps} />
       </div>
     );
   }
@@ -284,6 +300,7 @@ export default function EmployerMessagesPage() {
           ))}
         </div>
       )}
+      <LiveVideoCallModal {...videoCallProps} />
     </div>
   );
 }

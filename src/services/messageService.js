@@ -47,6 +47,12 @@ export const messageService = {
     const response = await apiClient.get('/messages/unread');
     return response.data;
   },
+
+  /** Send WebRTC call signal. */
+  sendCallSignal: async (payload) => {
+    const response = await apiClient.post('/messages/call/signal', payload);
+    return response.data;
+  },
 };
 
 export default messageService;

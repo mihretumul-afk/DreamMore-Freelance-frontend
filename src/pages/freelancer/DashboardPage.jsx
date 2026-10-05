@@ -2,9 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Award, ArrowRight, Briefcase, Check, CheckCircle2, ChevronRight,
-  Clock, DollarSign, FolderOpen, Globe, Handshake, MapPin,
+  Clock, DollarSign, FileText, FolderOpen, Globe, Handshake, MapPin,
   MessageSquare, Pencil, RefreshCw, Send, Star, Target, Wallet,
-  X, Zap,
+  X, XCircle, Zap,
 } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
@@ -392,9 +392,65 @@ export default function FreelancerDashboardPage() {
       link: '/freelancer/withdrawals',
     }] : []),
   ];
+  const isApproved = Boolean(user?.is_fully_approved || user?.profile_approval_status === 'approved');
+  const profileApprovalStatus = user?.profile_approval_status || 'pending';
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* ── Admin Approval Pending / Rejected Banner ── */}
+      {!isApproved && profileApprovalStatus === 'pending' && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-900/50 p-5 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white shadow-md">
+                <Clock className="h-6 w-6" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-bold text-amber-900 dark:text-amber-100">Account Pending Admin Approval</h2>
+                  <Badge tone="warning">Pending Review</Badge>
+                </div>
+                <p className="mt-1 text-xs sm:text-sm text-amber-800 dark:text-amber-300 max-w-2xl">
+                  Your freelancer credentials have been submitted and are currently under review by our administration team. Once approved by an administrator, full job application permissions will be enabled.
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/freelancer/credentials"
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-amber-700 transition-colors self-start sm:self-center"
+            >
+              <FileText className="h-4 w-4" /> View Credentials
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {!isApproved && profileApprovalStatus === 'rejected' && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 dark:bg-red-950/40 dark:border-red-900/50 p-5 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-600 text-white shadow-md">
+                <XCircle className="h-6 w-6" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-bold text-red-900 dark:text-red-100">Account Application Requires Action</h2>
+                  <Badge tone="danger">Action Required</Badge>
+                </div>
+                <p className="mt-1 text-xs sm:text-sm text-red-800 dark:text-red-300 max-w-2xl">
+                  Your freelancer verification requires update or resubmission before admin approval. Please check your credentials and resubmit for review.
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/freelancer/credentials"
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-red-700 transition-colors self-start sm:self-center"
+            >
+              <RefreshCw className="h-4 w-4" /> Resubmit Credentials
+            </Link>
+          </div>
+        </div>
+      )}
       {/* ═══════════════════════════════════════════════════════════════════
          GREETING HEADER — White Cloud Design
          ═══════════════════════════════════════════════════════════════════ */}

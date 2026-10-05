@@ -167,18 +167,21 @@ export default function AdminVerificationsPage() {
   };
 
   /** Open DocumentPreview modal for a certificate file or identity doc */
-  const handleDocumentPreview = async (item) => {
-    setPreviewTarget(item);
+  const handleDocumentPreview = async (item, directUrl = null) => {
+    const targetItem = item || { title: 'Identity Verification Document', document_url: directUrl };
+    setPreviewTarget(targetItem);
     setPreviewLoading(true);
     setPreviewUrl(null);
     try {
-      if (item.item_type === 'credential' || item.file_path) {
+      if (directUrl) {
+        setPreviewUrl(getFullStorageUrl(directUrl));
+      } else if (item?.item_type === 'credential' || item?.file_path) {
         const response = await adminService.downloadCredential(item.id);
         const mime = getMimeType(item.file_original_name) || 'application/pdf';
         const blob = new Blob([response.data], { type: mime });
         const blobUrl = URL.createObjectURL(blob);
         setPreviewUrl(blobUrl);
-      } else if (item.document_url) {
+      } else if (item?.document_url) {
         setPreviewUrl(getFullStorageUrl(item.document_url));
       } else {
         showToast('No previewable document file attached.', 'info');
@@ -656,6 +659,36 @@ export default function AdminVerificationsPage() {
                   </div>
                 </div>
               )}
+
+              {/* Combined Identity Verification Document (if attached with credential) */}
+              {detailTarget.item_type === 'credential' && detailTarget.user?.verifications?.length > 0 && (() => {
+                const identityDoc = detailTarget.user.verifications.find((verif) => verif.document_url || verif.notes);
+                if (!identityDoc) return null;
+                return (
+                  <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-purple-50/60 p-3 rounded-lg border border-purple-100">
+                    <div className="flex items-center gap-2.5">
+                      <ShieldCheck className="h-6 w-6 text-purple-600 shrink-0" />
+                      <div>
+                        <p className="text-xs font-bold text-purple-950">
+                          Attached Identity Verification Document
+                        </p>
+                        <p className="text-[11px] text-purple-700">
+                          {identityDoc.notes ? `Notes: ${identityDoc.notes}` : 'Identity proof file submitted with this credential'}
+                        </p>
+                      </div>
+                    </div>
+                    {identityDoc.document_url && (
+                      <Button
+                        variant="outline"
+                        size="xs"
+                        onClick={() => handleDocumentPreview(null, identityDoc.document_url)}
+                      >
+                        <Eye className="h-3.5 w-3.5 text-purple-600" /> View Identity Doc
+                      </Button>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* 6. Freelancer Identity Verification & Credentials Summary */}

@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft, Plus, ChevronDown, ChevronRight, FileText, AlertCircle,
   ThumbsUp, RotateCcw, Flag, Wallet, CheckCircle2, Clock, Circle, Loader2,
-  Banknote, User, Calendar, Sparkles, Send, Upload, Trash2, Download,
+  Banknote, User, Calendar, Sparkles, Send, Upload, Trash2, Download, Video, MessageSquare,
 } from 'lucide-react';
 import Card, { CardHeader, CardBody } from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
@@ -521,6 +521,15 @@ export default function EmployerContractDetailsPage() {
                 <User className="h-3.5 w-3.5 text-brand-600" />
               </div>
               <p className="text-sm font-semibold text-ink-900">{contract.freelancer?.name || '—'}</p>
+              {contract.freelancer_id && (
+                <Link
+                  to={`/employer/messages?user_id=${contract.freelancer_id}&name=${encodeURIComponent(contract.freelancer?.name || 'Freelancer')}`}
+                  className="inline-flex items-center gap-1 rounded-lg bg-brand-50 px-2 py-1 text-xs font-bold text-brand-600 hover:bg-brand-100 transition-colors ml-1"
+                  title="Start Live Video Call"
+                >
+                  <Video className="h-3.5 w-3.5" /> Video Call
+                </Link>
+              )}
             </div>
           </div>
           <div>

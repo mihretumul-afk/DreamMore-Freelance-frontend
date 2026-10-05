@@ -94,8 +94,12 @@ export default function RegisterPage() {
 
     try {
       const newUser = await register(payload);
-      // Session stored by the provider — go straight to the role dashboard.
-      navigate(getDashboardPath(newUser.role, newUser), { replace: true });
+      // Freelancers go directly to credentials submission step before dashboard approval; employers go to dashboard.
+      if (newUser.role === ROLES.FREELANCER) {
+        navigate('/freelancer/credentials', { replace: true, state: { newlyRegistered: true } });
+      } else {
+        navigate(getDashboardPath(newUser.role, newUser), { replace: true });
+      }
     } catch (error) {
       const errors = getFieldErrors(error);
       const known = {};

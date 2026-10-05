@@ -23,6 +23,7 @@ export function useRealtimeMessages(userId) {
   const callbacksRef = useRef({
     messageSent: [],
     messageRead: [],
+    callSignal: [],
   });
 
   // Subscribe to the user's private chat channel
@@ -44,6 +45,10 @@ export function useRealtimeMessages(userId) {
       callbacksRef.current.messageRead.forEach((cb) => cb(data));
     });
 
+    channel.listen('.call.signal', (data) => {
+      callbacksRef.current.callSignal.forEach((cb) => cb(data));
+    });
+
     // Listen for subscription succeeded
     channel.subscribed(() => {
       setConnected(true);
@@ -59,6 +64,7 @@ export function useRealtimeMessages(userId) {
       if (channelRef.current) {
         channelRef.current.stopListening('.message.sent');
         channelRef.current.stopListening('.message.read');
+        channelRef.current.stopListening('.call.signal');
         echo.leave(`chat.${userId}`);
         channelRef.current = null;
       }
@@ -92,5 +98,18 @@ export function useRealtimeMessages(userId) {
     };
   }, []);
 
-  return { connected, onMessageSent, onMessageRead };
+  /**
+   * Register a callback for incoming call signals.
+   * Returns an unsubscribe function.
+   */
+  const onCallSignal = useCallback((callback) => {
+    callbacksRef.current.callSignal.push(callback);
+    return () => {
+      callbacksRef.current.callSignal = callbacksRef.current.callSignal.filter(
+        (cb) => cb !== callback,
+      );
+    };
+  }, []);
+
+  return { connected, onMessageSent, onMessageRead, onCallSignal };
 }

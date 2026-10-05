@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import {
   Award, FileText, Plus, Trash2, Pencil, CheckCircle, XCircle, Clock,
@@ -22,6 +23,7 @@ import { adminService } from '../../services/adminService';
 import { getErrorMessage } from '../../utils/errors';
 import { formatDate } from '../../utils/format';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
 import { cn } from '../../utils/cn';
 
@@ -120,7 +122,12 @@ function StepIndicator({ steps, currentStep }) {
    ═══════════════════════════════════════════════════════════════════════════ */
 export default function CredentialsPage() {
   usePageTitle('Certificates & Credentials');
+  const location = useLocation();
+  const isNewlyRegistered = location.state?.newlyRegistered;
+  const { user, refreshUser } = useAuth();
   const { showToast } = useToast();
+
+  const isApproved = Boolean(user?.is_fully_approved || user?.profile_approval_status === 'approved');
 
   const [credentials, setCredentials] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -146,14 +153,20 @@ export default function CredentialsPage() {
     setError(null);
     try {
       const response = await credentialService.getMyCredentials();
-      if (response.success) setCredentials(response.data ?? []);
-      else setError(response.message || 'Unable to load credentials.');
+      const list = response.success ? (response.data ?? []) : [];
+      setCredentials(list);
+      if (!response.success) setError(response.message || 'Unable to load credentials.');
+
+      // Auto-open modal if user was redirected from registration or has no credentials & is not approved
+      if (isNewlyRegistered || (!isApproved && list.length === 0)) {
+        setShowWizardModal(true);
+      }
     } catch (err) {
       setError(getErrorMessage(err, 'Unable to load credentials.'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isNewlyRegistered, isApproved]);
 
   useEffect(() => { loadCredentials(); }, [loadCredentials]);
   useEffect(() => () => { if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl); }, [filePreviewUrl]);
@@ -257,13 +270,16 @@ export default function CredentialsPage() {
       if (editingId) {
         if (!form.document && form.type === 'external_certificate') formData.delete('document');
         await credentialService.updateCredential(editingId, formData);
-        showToast('Certificate resubmitted!', 'success');
+        showToast('Certificate resubmitted for admin review!', 'success');
       } else {
         await credentialService.createCredential(formData);
-        showToast('Certificate submitted for verification.', 'success');
+        showToast('Certificate submitted! Admin has been notified for review.', 'success');
       }
 
-      setShowWizardModal(false); resetForm(); loadCredentials();
+      setShowWizardModal(false);
+      resetForm();
+      await refreshUser().catch(() => {});
+      loadCredentials();
     } catch (err) {
       if (err?.response?.status === 422) { setFormErrors(err.response.data?.errors ?? {}); showToast(getErrorMessage(err, 'Validation failed.'), 'error'); }
       else showToast(getErrorMessage(err, 'Submission failed.'), 'error');
@@ -295,7 +311,18 @@ export default function CredentialsPage() {
       setPreviewUrl(window.URL.createObjectURL(blob));
     } catch (err) {
       setPreviewUrl(null);
-      const msg = err?.response?.data?.message || err?.message || 'Unable to load preview.';
+      let msg = 'Unable to load preview.';
+      if (err?.response?.data instanceof Blob) {
+        try {
+          const text = await err.response.data.text();
+          const json = JSON.parse(text);
+          msg = json?.message || msg;
+        } catch {
+          msg = err.message || msg;
+        }
+      } else {
+        msg = err?.response?.data?.message || err?.message || msg;
+      }
       showToast(msg, 'error');
     }
     finally { setPreviewLoading(false); }
@@ -313,14 +340,25 @@ export default function CredentialsPage() {
       const response = await fileClient.get(`/credentials/${cred.id}/download`);
       if (!response.data || response.data.size === 0) { showToast('This certificate has no file attached.', 'warning'); return; }
       const contentType = response.headers?.['content-type'] || '';
-      const mime = getMimeType(cred.file_original_name) || contentType || 'application/octet-stream';
+      const mime = getMimeType(cred.file_original_name) || contentType || 'application/pdf';
       const blob = new Blob([response.data], { type: mime });
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a'); link.href = url; link.download = cred.file_original_name || `credential-${cred.id}`;
+      const link = document.createElement('a'); link.href = url; link.download = cred.file_original_name || `${cred.title || 'Certificate'}.pdf`;
       document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-      showToast('Credential downloaded.', 'success');
+      showToast('Credential downloaded successfully.', 'success');
     } catch (err) {
-      const msg = err?.response?.data?.message || err?.message || 'Unable to download.';
+      let msg = 'Unable to download certificate.';
+      if (err?.response?.data instanceof Blob) {
+        try {
+          const text = await err.response.data.text();
+          const json = JSON.parse(text);
+          msg = json?.message || msg;
+        } catch {
+          msg = err.message || msg;
+        }
+      } else {
+        msg = err?.response?.data?.message || err?.message || msg;
+      }
       showToast(msg, 'error');
     }
   }, [showToast]);
@@ -345,6 +383,30 @@ export default function CredentialsPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Newly Registered Welcome Banner ─────────────────── */}
+      {isNewlyRegistered && (
+        <div className="rounded-2xl border border-brand-200 bg-brand-50 p-5 shadow-sm dark:border-brand-900/50 dark:bg-brand-950/40">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-500 text-white shadow-md">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-brand-900 dark:text-brand-100">
+                  Welcome to DreamMore! Final Step: Submit Your Credentials
+                </h3>
+                <p className="mt-0.5 text-xs sm:text-sm text-brand-700 dark:text-brand-300">
+                  To complete your account creation and activate full dashboard access, please submit your professional credentials below for admin verification and approval.
+                </p>
+              </div>
+            </div>
+            <Button onClick={openNewSubmission} size="sm" className="shrink-0 self-start sm:self-center">
+              <Plus className="h-4 w-4" /> Submit Credentials Now
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* ── Stats ───────────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

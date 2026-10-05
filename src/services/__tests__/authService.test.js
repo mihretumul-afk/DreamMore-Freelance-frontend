@@ -56,4 +56,32 @@ describe('authService - Password Reset Flow', () => {
       expect(result).toEqual(mockResponse.data);
     });
   });
+
+  describe('register', () => {
+    it('sends POST /auth/register with user payload including role', async () => {
+      const mockResponse = {
+        data: {
+          success: true,
+          data: {
+            user: { id: 1, name: 'John Doe', role: 'freelancer', profile_approval_status: 'pending' },
+            token: 'test-token',
+          },
+        },
+      };
+      apiClient.post.mockResolvedValue(mockResponse);
+
+      const payload = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'password123',
+        role: 'freelancer',
+      };
+
+      const result = await authService.register(payload);
+
+      expect(apiClient.post).toHaveBeenCalledWith('/auth/register', payload);
+      expect(result).toEqual(mockResponse.data.data);
+      expect(result.user.role).toBe('freelancer');
+    });
+  });
 });

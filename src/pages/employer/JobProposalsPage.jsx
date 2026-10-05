@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { CheckCircle2, Clock, Inbox, Star, XCircle, ShieldCheck, Briefcase, ExternalLink, Bookmark } from 'lucide-react';
+import { CheckCircle2, Clock, Inbox, Star, XCircle, ShieldCheck, Briefcase, ExternalLink, Bookmark, Video, MessageSquare } from 'lucide-react';
 import ErrorState from '../../components/common/ErrorState';
 import EmptyState from '../../components/common/EmptyState';
 import PageHeader from '../../components/marketplace/PageHeader';
@@ -395,28 +395,40 @@ export default function EmployerJobProposalsPage() {
                       {/* Employer Action Controls */}
                       <div className="flex shrink-0 flex-wrap gap-2 lg:flex-col lg:items-end">
                         {proposal.freelancerId && (
-                          <Button
-                            size="xs"
-                            variant="outline"
-                            onClick={() => handleToggleSave(proposal.freelancerId)}
-                            disabled={String(savingId) === String(proposal.freelancerId)}
-                            className={cn(
-                              savedIds.has(String(proposal.freelancerId))
-                                ? 'border-brand-300 bg-brand-50 text-brand-700 hover:bg-brand-100 font-bold'
-                                : 'text-slate-700 hover:bg-slate-50 font-semibold',
-                            )}
-                          >
-                            <Bookmark
+                          <>
+                            <Button
+                              as={Link}
+                              to={`/employer/messages?user_id=${proposal.freelancerId}&name=${encodeURIComponent(proposal.freelancerName || 'Candidate')}`}
+                              size="xs"
+                              variant="outline"
+                              className="border-brand-200 text-brand-700 hover:bg-brand-50 font-bold"
+                            >
+                              <Video className="h-3.5 w-3.5 mr-1 text-brand-600" aria-hidden="true" />
+                              Video Call Candidate
+                            </Button>
+                            <Button
+                              size="xs"
+                              variant="outline"
+                              onClick={() => handleToggleSave(proposal.freelancerId)}
+                              disabled={String(savingId) === String(proposal.freelancerId)}
                               className={cn(
-                                'h-3.5 w-3.5 mr-1',
                                 savedIds.has(String(proposal.freelancerId))
-                                  ? 'fill-brand-600 text-brand-600'
-                                  : 'text-slate-400',
+                                  ? 'border-brand-300 bg-brand-50 text-brand-700 hover:bg-brand-100 font-bold'
+                                  : 'text-slate-700 hover:bg-slate-50 font-semibold',
                               )}
-                              aria-hidden="true"
-                            />
-                            {savedIds.has(String(proposal.freelancerId)) ? 'Saved Talent' : 'Save Talent'}
-                          </Button>
+                            >
+                              <Bookmark
+                                className={cn(
+                                  'h-3.5 w-3.5 mr-1',
+                                  savedIds.has(String(proposal.freelancerId))
+                                    ? 'fill-brand-600 text-brand-600'
+                                    : 'text-slate-400',
+                                )}
+                                aria-hidden="true"
+                              />
+                              {savedIds.has(String(proposal.freelancerId)) ? 'Saved Talent' : 'Save Talent'}
+                            </Button>
+                          </>
                         )}
                         {proposal.status === 'pending' && (
                           <Button size="xs" variant="outline" onClick={() => openAction(proposal, 'shortlist')}>

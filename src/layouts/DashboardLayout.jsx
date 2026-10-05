@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LogOut, Menu, X } from 'lucide-react';
+import { Lock, LogOut, Menu, X } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import { useAuth } from '../hooks/useAuth';
 import { useI18n } from '../i18n';
@@ -10,17 +10,20 @@ import { cn } from '../utils/cn';
 
 /**
  * DashboardLayout — app-shell for authenticated freelancer / employer areas.
- *
- * Desktop  : Fixed white/cloud sidebar (w-16 collapsed, w-64 on hover).
- *            Expands when cursor enters, collapses when cursor leaves.
- * Mobile   : Slide-out drawer triggered by a hamburger button.
- * Navbar   : Original top Navbar is preserved and shown as-is.
  */
 export default function DashboardLayout({ role }) {
   const { logout, user } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
-  const navItems = role === 'employer' ? EMPLOYER_NAV_LINKS : FREELANCER_NAV_LINKS;
+  const isApprovedFreelancer =
+    role === 'freelancer' && Boolean(user?.is_fully_approved || user?.profile_approval_status === 'approved');
+  const isUnapprovedFreelancer = role === 'freelancer' && !isApprovedFreelancer;
+
+  const rawNavItems = role === 'employer' ? EMPLOYER_NAV_LINKS : FREELANCER_NAV_LINKS;
+  // Once approved by admin, credentials item is removed from navigation
+  const navItems = isApprovedFreelancer
+    ? rawNavItems.filter((item) => item.to !== '/freelancer/credentials')
+    : rawNavItems;
 
   // hovered = sidebar is visually expanded on desktop
   const [hovered, setHovered] = useState(false);
@@ -80,18 +83,22 @@ export default function DashboardLayout({ role }) {
     navItems.map((item) => {
       const Icon = item.icon;
       const isNotif = item.to.includes('notifications');
+      const isAllowedForUnapproved = item.to.includes('credentials') || item.to.endsWith('/profile');
+      const isLocked = isUnapprovedFreelancer && !isAllowedForUnapproved;
+
       return (
         <NavLink
           key={item.to}
-          to={item.to}
+          to={isLocked ? '/freelancer/credentials' : item.to}
           end={item.end}
           onClick={onNavigate}
-          title={!showLabel ? (item.key ? t(item.key) : item.label) : undefined}
+          title={isLocked ? 'Locked until Admin Approval' : (!showLabel ? (item.key ? t(item.key) : item.label) : undefined)}
           className={({ isActive }) =>
             cn(
               'group relative flex items-center rounded-xl text-sm font-medium transition-all duration-150',
               showLabel ? 'gap-3 px-3 py-2.5' : 'justify-center px-0 py-2.5',
-              isActive
+              isLocked && 'opacity-60 hover:opacity-80',
+              isActive && !isLocked
                 ? 'bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-400 before:absolute before:left-0 before:top-2 before:h-[calc(100%-1rem)] before:w-0.5 before:rounded-r before:bg-brand-500'
                 : 'text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white',
             )
@@ -102,7 +109,9 @@ export default function DashboardLayout({ role }) {
               <Icon
                 className={cn(
                   'h-[18px] w-[18px] shrink-0 transition-colors',
-                  isActive ? 'text-brand-600 dark:text-brand-400' : 'text-gray-400 dark:text-slate-400 group-hover:text-gray-700 dark:group-hover:text-slate-200',
+                  isActive && !isLocked
+                    ? 'text-brand-600 dark:text-brand-400'
+                    : 'text-gray-400 dark:text-slate-400 group-hover:text-gray-700 dark:group-hover:text-slate-200',
                 )}
                 aria-hidden="true"
               />
@@ -111,7 +120,10 @@ export default function DashboardLayout({ role }) {
                   {item.key ? t(item.key) : item.label}
                 </span>
               )}
-              {isNotif && unreadCount > 0 && (
+              {isLocked && showLabel && (
+                <Lock className="h-3.5 w-3.5 text-amber-500 shrink-0" aria-label="Locked" />
+              )}
+              {!isLocked && isNotif && unreadCount > 0 && (
                 <span
                   className={cn(
                     'flex items-center justify-center rounded-full bg-red-500 font-bold text-white',
