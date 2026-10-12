@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, BadgeCheck, ShieldCheck, Banknote, MapPin, Briefcase, Users, SearchX } from 'lucide-react';
-import Container from '../common/Container';
 import Button from '../ui/Button';
 import { useI18n } from '../../i18n';
 import { cn } from '../../utils/cn';
@@ -191,96 +190,95 @@ export default function HeroSection() {
   const showNoResults = hasSearched && !loading && results && !hasAnyResults;
 
   return (
-    <section className="relative" aria-label="Hero">
-      <Container className="relative py-6 lg:py-10">
-        <div className="mx-auto max-w-3xl text-center">
-          {/* Badge */}
-          <span className="inline-flex animate-fade-up items-center gap-2 rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-white backdrop-blur-sm">
-            {t('hero.badge')}
-          </span>
+    <section className="relative w-full" aria-label="Hero">
+      <div className="relative mx-auto max-w-3xl text-center">
+        {/* Badge */}
+        <span className="inline-flex animate-fade-up items-center gap-1.5 sm:gap-2 rounded-full border border-white/30 bg-white/10 px-3.5 sm:px-4 py-1 sm:py-1.5 text-[11px] sm:text-xs font-semibold uppercase tracking-widest text-white backdrop-blur-sm">
+          {t('hero.badge')}
+        </span>
 
-          {/* Headline */}
-          <h1 className="mt-4 animate-fade-up text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl" style={{ animationDelay: '80ms' }}>
-            {t('hero.title1')}
-            <span className="block text-brand-400">{t('hero.title2')}</span>
-          </h1>
+        {/* Headline */}
+        <h1 className="mt-3 sm:mt-4 animate-fade-up text-2xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl" style={{ animationDelay: '80ms' }}>
+          {t('hero.title1')}
+          <span className="block text-brand-400">{t('hero.title2')}</span>
+        </h1>
 
-          {/* Subtitle */}
-          <p className="mx-auto mt-3 max-w-2xl animate-fade-up text-sm leading-relaxed text-white/85 sm:text-base" style={{ animationDelay: '160ms' }}>
-            {t('hero.description')}
-          </p>
+        {/* Subtitle */}
+        <p className="mx-auto mt-2.5 sm:mt-3 max-w-2xl animate-fade-up text-xs sm:text-base leading-relaxed text-white/85 px-1" style={{ animationDelay: '160ms' }}>
+          {t('hero.description')}
+        </p>
 
-          {/* ── Hire / Work Mode Switch ───────────────────────── */}
-          <div
-            className="mt-5 inline-flex animate-fade-up rounded-xl border border-white/25 bg-white/10 p-1 backdrop-blur-sm"
-            style={{ animationDelay: '240ms' }}
-            role="group"
-            aria-label="Choose mode"
+        {/* ── Hire / Work Mode Switch ───────────────────────── */}
+        <div
+          className="mt-4 sm:mt-5 inline-flex animate-fade-up rounded-xl border border-white/25 bg-white/10 p-1 backdrop-blur-sm max-w-full"
+          style={{ animationDelay: '240ms' }}
+          role="group"
+          aria-label="Choose mode"
+        >
+          <button
+            type="button"
+            onClick={() => handleModeChange('hire')}
+            aria-pressed={mode === 'hire'}
+            className={cn(
+              'flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg px-3.5 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-all duration-200',
+              mode === 'hire'
+                ? 'bg-brand-500 text-white shadow-md'
+                : 'text-white/80 hover:text-white hover:bg-white/15',
+            )}
           >
-            <button
-              type="button"
-              onClick={() => handleModeChange('hire')}
-              aria-pressed={mode === 'hire'}
-              className={cn(
-                'flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-semibold transition-all duration-200',
-                mode === 'hire'
-                  ? 'bg-brand-500 text-white shadow-md'
-                  : 'text-white/80 hover:text-white hover:bg-white/15',
-              )}
-            >
-              {t('hero.findTalent')}
-            </button>
-            <button
-              type="button"
-              onClick={() => handleModeChange('work')}
-              aria-pressed={mode === 'work'}
-              className={cn(
-                'flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-semibold transition-all duration-200',
-                mode === 'work'
-                  ? 'bg-brand-500 text-white shadow-md'
-                  : 'text-white/80 hover:text-white hover:bg-white/15',
-              )}
-            >
-              {t('hero.findJobs')}
-            </button>
-          </div>
-
-          {/* ── Search Bar with Live Dropdown ────────────────── */}
-          <div
-            className="mx-auto mt-5 max-w-2xl animate-fade-up relative"
-            ref={dropdownRef}
-            style={{ animationDelay: '320ms' }}
+            {t('hero.findTalent')}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleModeChange('work')}
+            aria-pressed={mode === 'work'}
+            className={cn(
+              'flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg px-3.5 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-all duration-200',
+              mode === 'work'
+                ? 'bg-brand-500 text-white shadow-md'
+                : 'text-white/80 hover:text-white hover:bg-white/15',
+            )}
           >
-            <form onSubmit={handleSubmit} role="search">
-              <div className="rounded-2xl border border-white/40 bg-white p-2 shadow-2xl transition-shadow duration-200 focus-within:shadow-2xl">
-                <div className="flex items-center gap-2">
-                  <div className="flex flex-1 items-center gap-2 px-2">
-                    <Search className="h-5 w-5 shrink-0 text-gray-400" aria-hidden="true" />
-                    <input
-                      ref={inputRef}
-                      type="search"
-                      value={query}
-                      onChange={handleInputChange}
-                      onFocus={() => {
-                        if (results && (hasAnyResults || showNoResults)) {
-                          setDropdownOpen(true);
-                        }
-                      }}
-                      placeholder={searchPlaceholder}
-                      aria-label={t('hero.searchAria')}
-                      aria-expanded={dropdownOpen}
-                      aria-controls="hero-search-results"
-                      aria-autocomplete="list"
-                      className="w-full bg-transparent py-2 text-sm text-ink-900 placeholder:text-gray-400 focus:outline-none"
-                    />
-                  </div>
-                  <Button type="submit" className="shrink-0">
-                    {t('hero.search')}
-                  </Button>
+            {t('hero.findJobs')}
+          </button>
+        </div>
+
+        {/* ── Search Bar with Live Dropdown ────────────────── */}
+        <div
+          className="mx-auto mt-4 sm:mt-5 max-w-2xl animate-fade-up relative w-full"
+          ref={dropdownRef}
+          style={{ animationDelay: '320ms' }}
+        >
+          <form onSubmit={handleSubmit} role="search" className="w-full">
+            <div className="rounded-xl sm:rounded-2xl border border-white/40 bg-white p-1.5 sm:p-2 shadow-2xl transition-shadow duration-200 focus-within:shadow-2xl">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <div className="flex flex-1 items-center gap-1.5 sm:gap-2 px-1 sm:px-2 min-w-0">
+                  <Search className="h-4 sm:h-5 w-4 sm:w-5 shrink-0 text-gray-400" aria-hidden="true" />
+                  <input
+                    ref={inputRef}
+                    type="search"
+                    value={query}
+                    onChange={handleInputChange}
+                    onFocus={() => {
+                      if (results && (hasAnyResults || showNoResults)) {
+                        setDropdownOpen(true);
+                      }
+                    }}
+                    placeholder={searchPlaceholder}
+                    aria-label={t('hero.searchAria')}
+                    aria-expanded={dropdownOpen}
+                    aria-controls="hero-search-results"
+                    aria-autocomplete="list"
+                    className="w-full min-w-0 bg-transparent py-1.5 sm:py-2 text-xs sm:text-sm text-ink-900 placeholder:text-gray-400 focus:outline-none"
+                  />
                 </div>
+                <Button type="submit" size="sm" className="shrink-0 px-3 sm:px-5 text-xs sm:text-sm">
+                  {t('hero.search')}
+                </Button>
               </div>
-              <p className="mt-2 text-xs text-white/70">{t('hero.searchHint')}</p>
-            </form>
+            </div>
+            <p className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-white/70">{t('hero.searchHint')}</p>
+          </form>
 
             {/* ── Live Search Results Dropdown ──────────────── */}
             {dropdownOpen && (
@@ -424,7 +422,7 @@ export default function HeroSection() {
 
           {/* ── Category Pills ────────────────────────────────── */}
           <div
-            className="mt-5 flex animate-fade-up flex-wrap items-center justify-center gap-2"
+            className="mt-4 sm:mt-5 flex animate-fade-up flex-wrap items-center justify-center gap-1.5 sm:gap-2"
             style={{ animationDelay: '400ms' }}
           >
             {CATEGORY_PILLS.map((cat) => {
@@ -436,7 +434,7 @@ export default function HeroSection() {
                   key={cat.slug}
                   type="button"
                   onClick={() => handleCategoryClick(cat.slug)}
-                  className="rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-xs font-medium text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/20"
+                  className="rounded-full border border-white/30 bg-white/10 px-3 sm:px-4 py-1 sm:py-1.5 text-[11px] sm:text-xs font-medium text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-white/60 hover:bg-white/20"
                 >
                   {label}
                 </button>
@@ -446,7 +444,7 @@ export default function HeroSection() {
 
           {/* Trust bullets */}
           <ul
-            className="mt-5 flex animate-fade-up flex-wrap items-center justify-center gap-x-6 gap-y-2"
+            className="mt-4 sm:mt-5 flex animate-fade-up flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-2"
             style={{ animationDelay: '480ms' }}
           >
             {TRUST_BULLETS.map((item) => {
@@ -454,16 +452,15 @@ export default function HeroSection() {
               return (
                 <li
                   key={item.key}
-                  className="flex items-center gap-2 text-sm font-medium text-white/85"
+                  className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-white/85"
                 >
-                  <Icon className="h-4 w-4 text-brand-400" aria-hidden="true" />
+                  <Icon className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-brand-400 shrink-0" aria-hidden="true" />
                   {t(item.key)}
                 </li>
               );
             })}
           </ul>
         </div>
-      </Container>
-    </section>
+      </section>
   );
 }

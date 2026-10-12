@@ -11,15 +11,15 @@ import { LOGO_COMPONENTS } from './CompanyLogos';
 /* ------------------------------------------------------------------ */
 function LogoMarquee() {
   return (
-    <div className="relative overflow-hidden py-8">
+    <div className="relative overflow-hidden py-6 sm:py-8">
       {/* Fade edges */}
-      <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white to-transparent z-10" aria-hidden="true" />
-      <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-white to-transparent z-10" aria-hidden="true" />
+      <div className="absolute inset-y-0 left-0 w-8 sm:w-24 bg-gradient-to-r from-white dark:from-slate-800 to-transparent z-10 pointer-events-none" aria-hidden="true" />
+      <div className="absolute inset-y-0 right-0 w-8 sm:w-24 bg-gradient-to-l from-white dark:from-slate-800 to-transparent z-10 pointer-events-none" aria-hidden="true" />
 
-      <div className="flex items-center gap-12 animate-marquee">
+      <div className="flex items-center gap-8 sm:gap-12 animate-marquee">
         {[...LOGO_COMPONENTS, ...LOGO_COMPONENTS].map((logo, i) => (
           <div key={`${logo.name}-${i}`} className="flex-shrink-0 opacity-60 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300">
-            <logo.Component className="h-10 w-auto" />
+            <logo.Component className="h-8 sm:h-10 w-auto" />
           </div>
         ))}
       </div>
@@ -37,15 +37,15 @@ function StatCard({ icon: Icon, numericValue, suffix, label, color, delay }) {
     <Reveal delay={delay} className="h-full">
       <div
         ref={ref}
-        className="flex flex-col items-center rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-sm border border-gray-100 dark:border-slate-800 transition-all duration-300 hover:shadow-md hover:-translate-y-1"
+        className="flex flex-col items-center rounded-2xl bg-white dark:bg-slate-900 p-4 sm:p-6 shadow-sm border border-gray-100 dark:border-slate-800 transition-all duration-300 hover:shadow-md hover:-translate-y-1"
       >
-        <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${color}`}>
-          <Icon className="h-6 w-6 text-white" strokeWidth={1.5} aria-hidden="true" />
+        <div className={`flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl ${color}`}>
+          <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" strokeWidth={1.5} aria-hidden="true" />
         </div>
-        <p className="mt-4 text-3xl font-extrabold text-gray-900 dark:text-slate-100 tabular-nums">
+        <p className="mt-3 sm:mt-4 text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-slate-100 tabular-nums">
           {count.toLocaleString()}{suffix}
         </p>
-        <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">{label}</p>
+        <p className="mt-1 text-xs sm:text-sm text-gray-500 dark:text-slate-400 text-center">{label}</p>
       </div>
     </Reveal>
   );
@@ -57,16 +57,16 @@ function StatCard({ icon: Icon, numericValue, suffix, label, color, delay }) {
 function TestimonialCard({ quote, name, role, delay }) {
   return (
     <Reveal delay={delay} className="h-full">
-      <div className="relative h-full rounded-2xl bg-gradient-to-br from-gray-50 to-white dark:from-slate-900 dark:to-slate-800 p-6 sm:p-8 border border-gray-100 dark:border-slate-800 shadow-sm transition-all duration-300 hover:shadow-md">
-        <Quote className="absolute top-6 right-6 h-8 w-8 text-brand-500/20" aria-hidden="true" />
-        <p className="text-sm leading-relaxed text-gray-600 dark:text-slate-300 italic">"{quote}"</p>
-        <div className="mt-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-500 text-sm font-bold text-white">
+      <div className="relative h-full rounded-2xl bg-gradient-to-br from-gray-50 to-white dark:from-slate-900 dark:to-slate-800 p-5 sm:p-8 border border-gray-100 dark:border-slate-800 shadow-sm transition-all duration-300 hover:shadow-md">
+        <Quote className="absolute top-5 sm:top-6 right-5 sm:right-6 h-6 w-6 sm:h-8 sm:w-8 text-brand-500/20" aria-hidden="true" />
+        <p className="text-xs sm:text-sm leading-relaxed text-gray-600 dark:text-slate-300 italic">"{quote}"</p>
+        <div className="mt-5 sm:mt-6 flex items-center gap-3">
+          <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-brand-500 text-xs sm:text-sm font-bold text-white shrink-0">
             {name.split(' ').map(n => n[0]).join('')}
           </div>
-          <div>
-            <p className="text-sm font-bold text-gray-900 dark:text-slate-100">{name}</p>
-            <p className="text-xs text-gray-500 dark:text-slate-400">{role}</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs sm:text-sm font-bold text-gray-900 dark:text-slate-100 truncate">{name}</p>
+            <p className="text-[11px] sm:text-xs text-gray-500 dark:text-slate-400 truncate">{role}</p>
           </div>
         </div>
       </div>
@@ -99,7 +99,7 @@ function TestimonialCarousel({ testimonials }) {
   return (
     <Reveal delay={400}>
       <div
-        className="mt-14 relative"
+        className="mt-10 sm:mt-14 relative"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         aria-label="Testimonials carousel"
@@ -110,8 +110,8 @@ function TestimonialCarousel({ testimonials }) {
             className="flex transition-transform duration-500 ease-in-out"
             style={{ transform: `translateX(-${current * 100}%)` }}
           >
-            {testimonials.map((testimonial, i) => (
-              <div key={testimonial.name} className="w-full flex-shrink-0 px-2 md:w-1/3 md:px-3">
+            {testimonials.map((testimonial) => (
+              <div key={testimonial.name} className="w-full flex-shrink-0 px-1 sm:px-2 md:w-1/3 md:px-3">
                 <TestimonialCard
                   quote={testimonial.quote}
                   name={testimonial.name}
@@ -123,36 +123,52 @@ function TestimonialCarousel({ testimonials }) {
           </div>
         </div>
 
-        {/* Navigation arrows */}
+        {/* Navigation arrows - hidden on small mobile, visible sm+ */}
         <button
           onClick={prev}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-6 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg border border-gray-100 text-gray-600 transition-all duration-200 hover:bg-brand-500 hover:text-white hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+          className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 lg:-translate-x-6 h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-lg border border-gray-100 dark:border-slate-700 text-gray-600 dark:text-slate-300 transition-all duration-200 hover:bg-brand-500 hover:text-white hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 z-10"
           aria-label="Previous testimonial"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
         <button
           onClick={next}
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-6 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-lg border border-gray-100 text-gray-600 transition-all duration-200 hover:bg-brand-500 hover:text-white hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
+          className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 lg:translate-x-6 h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-full bg-white dark:bg-slate-800 shadow-lg border border-gray-100 dark:border-slate-700 text-gray-600 dark:text-slate-300 transition-all duration-200 hover:bg-brand-500 hover:text-white hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 z-10"
           aria-label="Next testimonial"
         >
           <ChevronRight className="h-5 w-5" />
         </button>
 
-        {/* Dots */}
-        <div className="mt-6 flex items-center justify-center gap-2">
-          {testimonials.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => goTo(i)}
-              aria-label={`Go to testimonial ${i + 1}`}
-              className={`h-2.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 ${
-                i === current
-                  ? 'w-8 bg-brand-500'
-                  : 'w-2.5 bg-gray-300 hover:bg-gray-400'
-              }`}
-            />
-          ))}
+        {/* Dots & mobile controls */}
+        <div className="mt-5 sm:mt-6 flex items-center justify-center gap-3">
+          <button
+            onClick={prev}
+            className="flex sm:hidden h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 transition-colors hover:bg-gray-200"
+            aria-label="Previous testimonial"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <div className="flex items-center gap-2">
+            {testimonials.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                aria-label={`Go to testimonial ${i + 1}`}
+                className={`h-2.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 ${
+                  i === current
+                    ? 'w-8 bg-brand-500'
+                    : 'w-2.5 bg-gray-300 dark:bg-slate-700 hover:bg-gray-400'
+                }`}
+              />
+            ))}
+          </div>
+          <button
+            onClick={next}
+            className="flex sm:hidden h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 transition-colors hover:bg-gray-200"
+            aria-label="Next testimonial"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </Reveal>

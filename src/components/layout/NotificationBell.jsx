@@ -128,7 +128,7 @@ export default function NotificationBell() {
       </button>
 
       {dropdownOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-gray-200 bg-white shadow-lg z-50">
+        <div className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] max-w-xs sm:w-80 rounded-xl border border-gray-200 bg-white shadow-lg z-50">
           <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
             <p className="text-sm font-bold text-ink-900">{t('notifications.title')}</p>
             {unreadCount > 0 && (

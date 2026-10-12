@@ -55,42 +55,45 @@ function FreelancerCard({ freelancer, savedIds, onToggleSave, savingId }) {
 
   return (
     <Card className="group relative flex flex-col justify-between overflow-hidden transition-shadow hover:shadow-lg">
-      <div className="p-5">
-        <div className="flex items-start gap-4">
-          <Avatar
-            name={freelancer.user?.name ?? 'F'}
-            src={freelancer.user?.avatar}
-            size="md"
-            variant="brand"
-          />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <h3 className="truncate text-base font-semibold text-ink-900">
-                {freelancer.user?.name ?? 'Freelancer'}
-              </h3>
-              {freelancer.rating > 0 && (
-                <span className="inline-flex items-center gap-0.5 text-sm text-amber-500">
-                  <Star className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
-                  {Number(freelancer.rating).toFixed(1)}
+      <div className="p-4 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
+          <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
+            <Avatar
+              name={freelancer.user?.name ?? 'F'}
+              src={freelancer.user?.avatar}
+              size="md"
+              variant="brand"
+              className="shrink-0"
+            />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="truncate text-base font-semibold text-ink-900">
+                  {freelancer.user?.name ?? 'Freelancer'}
+                </h3>
+                {freelancer.rating > 0 && (
+                  <span className="inline-flex items-center gap-0.5 text-sm text-amber-500 shrink-0">
+                    <Star className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
+                    {Number(freelancer.rating).toFixed(1)}
+                  </span>
+                )}
+              </div>
+              {freelancer.headline && (
+                <p className="mt-0.5 truncate text-sm text-gray-500">{freelancer.headline}</p>
+              )}
+              {freelancer.location && (
+                <p className="mt-1 flex items-center gap-1 text-xs text-gray-400">
+                  <MapPin className="h-3 w-3 shrink-0" aria-hidden="true" />
+                  <span className="truncate">{freelancer.location}</span>
+                </p>
+              )}
+              {freelancer.categoryName && (
+                <span className="mt-1.5 inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-[11px] font-semibold text-brand-700">
+                  {freelancer.categoryName}
                 </span>
               )}
             </div>
-            {freelancer.headline && (
-              <p className="mt-0.5 truncate text-sm text-gray-500">{freelancer.headline}</p>
-            )}
-            {freelancer.location && (
-              <p className="mt-1 flex items-center gap-1 text-xs text-gray-400">
-                <MapPin className="h-3 w-3" aria-hidden="true" />
-                {freelancer.location}
-              </p>
-            )}
-            {freelancer.categoryName && (
-              <span className="mt-1.5 inline-flex items-center rounded-full bg-brand-50 px-2.5 py-0.5 text-[11px] font-semibold text-brand-700">
-                {freelancer.categoryName}
-              </span>
-            )}
           </div>
-          <div className="text-right">
+          <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-1 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100 dark:border-slate-800">
             {freelancer.hourly_rate > 0 && (
               <p className="text-sm font-semibold text-ink-900">
                 {formatETB(freelancer.hourly_rate)}
@@ -100,7 +103,7 @@ function FreelancerCard({ freelancer, savedIds, onToggleSave, savingId }) {
             {freelancer.experience_level && (
               <Badge
                 tone={freelancer.experience_level === 'expert' ? 'success' : 'neutral'}
-                className="mt-1"
+                className="mt-0.5 sm:mt-1 capitalize"
               >
                 {freelancer.experience_level}
               </Badge>
@@ -129,9 +132,9 @@ function FreelancerCard({ freelancer, savedIds, onToggleSave, savingId }) {
       </div>
 
       {/* Footer */}
-      <div className="px-5 pb-5">
-        <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-          <div className="flex items-center gap-3 text-xs text-gray-400">
+      <div className="px-4 sm:px-5 pb-4 sm:pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-gray-100 pt-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-400">
             {freelancer.completed_jobs_count > 0 && (
               <span>
                 {freelancer.completed_jobs_count} {t('freelancers.completedJobs')}
@@ -154,7 +157,7 @@ function FreelancerCard({ freelancer, savedIds, onToggleSave, savingId }) {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-end">
             <Button
               type="button"
               variant="outline"

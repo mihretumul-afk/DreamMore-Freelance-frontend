@@ -37,11 +37,11 @@ export default function HorizontalFilterBar({
         <div className="flex flex-1 items-center rounded-xl border border-gray-300 bg-white shadow-xs focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20">
           {/* Category Dropdown Left */}
           {categories.length > 0 && (
-            <div className="relative shrink-0 border-r border-gray-200">
+            <div className="relative shrink-0 border-r border-gray-200 max-w-[100px] sm:max-w-[150px] md:max-w-none">
               <select
                 value={values.category_id ?? ''}
                 onChange={(e) => set('category_id', e.target.value)}
-                className="h-11 appearance-none bg-transparent pl-3.5 pr-8 text-xs font-semibold text-ink-800 focus:outline-none cursor-pointer"
+                className="h-11 w-full appearance-none bg-transparent pl-2.5 sm:pl-3.5 pr-6 sm:pr-8 text-xs font-semibold text-ink-800 focus:outline-none cursor-pointer truncate"
                 aria-label="Filter by Category"
               >
                 <option value="">Any Category</option>
@@ -51,12 +51,12 @@ export default function HorizontalFilterBar({
                   </option>
                 ))}
               </select>
-              <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+              <ChevronDown className="pointer-events-none absolute right-2 sm:right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
             </div>
           )}
 
           {/* Search Field */}
-          <div className="relative flex flex-1 items-center px-3">
+          <div className="relative flex flex-1 items-center px-2 sm:px-3 min-w-0">
             <Search className="h-4 w-4 shrink-0 text-gray-400" aria-hidden="true" />
             <input
               type="text"
@@ -68,14 +68,14 @@ export default function HorizontalFilterBar({
                   : 'Search freelancers, skills, or headline…'
               }
               aria-label="Search term"
-              className="w-full bg-transparent py-2.5 pl-2 pr-7 text-sm text-ink-900 placeholder:text-gray-400 focus:outline-none"
+              className="w-full min-w-0 bg-transparent py-2.5 pl-2 pr-6 sm:pr-7 text-xs sm:text-sm text-ink-900 placeholder:text-gray-400 focus:outline-none"
             />
             {values.search && (
               <button
                 type="button"
                 onClick={() => set('search', '')}
                 aria-label="Clear search"
-                className="absolute right-2 text-gray-400 hover:text-ink-900"
+                className="absolute right-1.5 sm:right-2 text-gray-400 hover:text-ink-900"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -85,7 +85,7 @@ export default function HorizontalFilterBar({
           {/* Submit Button */}
           <button
             type="submit"
-            className="flex h-11 items-center justify-center rounded-r-xl bg-brand-600 px-5 text-sm font-medium text-white transition-colors hover:bg-brand-700"
+            className="flex h-11 items-center justify-center rounded-r-xl bg-brand-600 px-3 sm:px-5 text-sm font-medium text-white transition-colors hover:bg-brand-700 shrink-0"
           >
             <Search className="h-4 w-4 md:mr-1.5" />
             <span className="hidden md:inline">Search</span>

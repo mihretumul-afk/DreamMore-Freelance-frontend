@@ -170,12 +170,12 @@ export default function FreelancerDetailsPage() {
         {/* Main column */}
         <div className="min-w-0 space-y-6">
           {/* Header card */}
-          <Card className="p-6 sm:p-8">
-            <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:items-start sm:text-left">
-              <Avatar name={profile.name} size="xl" variant="brand" />
-              <div className="min-w-0">
+          <Card className="p-4 sm:p-6 lg:p-8">
+            <div className="flex flex-col items-center gap-4 sm:gap-5 text-center sm:flex-row sm:items-start sm:text-left">
+              <Avatar name={profile.name} size="xl" variant="brand" className="shrink-0" />
+              <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-                  <h1 className="text-2xl font-extrabold tracking-tight text-ink-900 sm:text-3xl">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-ink-900 break-words">
                     {profile.name ?? 'Freelancer'}
                   </h1>
                   <StatusBadge status={profile.availability} dot />
@@ -221,7 +221,7 @@ export default function FreelancerDetailsPage() {
             </div>
 
             {/* Stats (real API data) */}
-            <div className="mt-8 grid grid-cols-2 gap-4 border-t border-gray-100 pt-6 sm:grid-cols-4">
+            <div className="mt-6 sm:mt-8 grid grid-cols-2 gap-3 sm:gap-4 border-t border-gray-100 pt-5 sm:pt-6 sm:grid-cols-4">
               <div>
                 <p className="text-xs font-medium text-gray-500">Hourly rate</p>
                 <p className="mt-1 text-lg font-extrabold text-ink-900">

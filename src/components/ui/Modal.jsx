@@ -48,7 +48,7 @@ export default function Modal({
   if (!open) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 overflow-y-auto p-4 sm:p-6 flex min-h-full items-center justify-center">
+    <div className="fixed inset-0 z-50 overflow-y-auto p-2.5 sm:p-6 flex min-h-full items-center justify-center">
       <div
         className="fixed inset-0 bg-ink-950/60 backdrop-blur-sm"
         aria-hidden="true"
@@ -62,26 +62,26 @@ export default function Modal({
         aria-label={title}
         tabIndex={-1}
         className={cn(
-          'relative w-full max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-3rem)] flex flex-col shadow-modal outline-none my-auto z-10',
+          'relative w-full max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-3rem)] flex flex-col shadow-modal outline-none my-auto z-10 rounded-xl sm:rounded-card',
           sizes[size],
           className
         )}
       >
-        <div className="flex shrink-0 items-start justify-between gap-4 border-b border-gray-100 dark:border-slate-800 px-5 py-4">
-          <div>
-            <h2 className="text-lg font-bold text-ink-900 dark:text-slate-100">{title}</h2>
-            {description && <p className="mt-0.5 text-sm text-gray-500 dark:text-slate-400">{description}</p>}
+        <div className="flex shrink-0 items-start justify-between gap-3 sm:gap-4 border-b border-gray-100 dark:border-slate-800 px-4 sm:px-5 py-3.5 sm:py-4">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base sm:text-lg font-bold text-ink-900 dark:text-slate-100 truncate">{title}</h2>
+            {description && <p className="mt-0.5 text-xs sm:text-sm text-gray-500 dark:text-slate-400">{description}</p>}
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="rounded-lg p-1.5 text-gray-400 dark:text-slate-400 transition-colors hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-ink-900 dark:hover:text-slate-100"
+            className="rounded-lg p-1.5 text-gray-400 dark:text-slate-400 transition-colors hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-ink-900 dark:hover:text-slate-100 shrink-0"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="px-5 py-5 overflow-y-auto flex-1">{children}</div>
+        <div className="px-4 sm:px-5 py-3.5 sm:py-5 overflow-y-auto flex-1">{children}</div>
       </Card>
     </div>,
     document.body,

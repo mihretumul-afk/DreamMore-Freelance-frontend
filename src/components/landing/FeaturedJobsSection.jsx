@@ -154,7 +154,7 @@ function FeaturedJobCard({ job }) {
 /* ─── Skeleton ───────────────────────────────────────────────────────────── */
 function CardSkeleton() {
   return (
-    <div className="w-[310px] sm:w-[340px] md:w-[360px] shrink-0 rounded-2xl border border-gray-200 bg-white p-5 animate-pulse snap-start">
+    <div className="w-[82vw] max-w-[340px] sm:w-[340px] md:w-[360px] shrink-0 rounded-2xl border border-gray-200 bg-white p-5 animate-pulse snap-start">
       <div className="flex justify-between items-center pb-3 border-b border-gray-100">
         <div className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-full bg-gray-200" />
@@ -255,7 +255,7 @@ export default function FeaturedJobsSection() {
             jobs.map((job) => (
               <div
                 key={job.id}
-                className="w-[310px] sm:w-[340px] md:w-[360px] shrink-0 snap-start flex"
+                className="w-[82vw] max-w-[340px] sm:w-[340px] md:w-[360px] shrink-0 snap-start flex"
               >
                 <FeaturedJobCard job={job} />
               </div>

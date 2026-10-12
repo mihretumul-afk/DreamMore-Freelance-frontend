@@ -28,9 +28,9 @@ export default function VideoShowcase({ children }) {
   const showVideo = !isReducedMotion && !hasError;
 
   return (
-    <section className="relative w-full">
-      <Container className="py-6 lg:py-10">
-        <div className="relative flex min-h-[650px] w-full items-center justify-center overflow-hidden rounded-[2rem] bg-ink-900">
+    <section className="relative w-full overflow-hidden">
+      <Container className="py-3 sm:py-6 lg:py-10 px-3 sm:px-6 lg:px-8">
+        <div className="relative flex min-h-[480px] sm:min-h-[560px] lg:min-h-[640px] w-full items-center justify-center overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[2rem] bg-ink-900">
           {showVideo && (
             <video
               ref={videoRef}
@@ -52,7 +52,7 @@ export default function VideoShowcase({ children }) {
           <div className="absolute inset-0 bg-black/45" />
 
           {/* Content */}
-          <div className="relative z-10 w-full max-w-4xl mx-auto px-6 py-16">
+          <div className="relative z-10 w-full max-w-4xl mx-auto px-3 sm:px-6 py-6 sm:py-12 lg:py-16">
             {children}
           </div>
         </div>

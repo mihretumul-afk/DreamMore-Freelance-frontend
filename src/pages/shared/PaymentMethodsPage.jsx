@@ -39,25 +39,25 @@ function MethodCard({ method, onSetDefault, onRemove }) {
   const typeColors = { card: 'primary', bank: 'info', mobile_money: 'success' };
 
   return (
-    <div className={`rounded-xl border ${method.is_default ? 'border-brand-300 bg-brand-50/30' : 'border-gray-200 bg-white'} p-5 transition-all hover:shadow-sm`}>
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${method.is_default ? 'bg-brand-100' : 'bg-gray-100'}`}>
-            <CreditCard className={`h-5 w-5 ${method.is_default ? 'text-brand-600' : 'text-gray-500'}`} />
+    <div className={`rounded-xl border ${method.is_default ? 'border-brand-300 bg-brand-50/30 dark:bg-brand-950/20' : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900'} p-4 sm:p-5 transition-all hover:shadow-sm`}>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div className="flex items-start gap-3 min-w-0">
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${method.is_default ? 'bg-brand-100 text-brand-600 dark:bg-brand-900/40 dark:text-brand-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
+            <CreditCard className="h-5 w-5" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-ink-900">{method.display_label || method.nickname || 'Payment Method'}</h3>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <h3 className="font-semibold text-ink-900 dark:text-gray-100 break-words">{method.display_label || method.nickname || 'Payment Method'}</h3>
               {method.is_default && (
                 <Badge tone="primary" size="xs">
                   <Star className="mr-0.5 h-2.5 w-2.5" /> Default
                 </Badge>
               )}
             </div>
-            <p className="text-sm text-gray-500">{typeLabels[method.type]} · {method.provider}</p>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{typeLabels[method.type]} · {method.provider}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t border-gray-100 sm:border-0 dark:border-gray-800">
           {!method.is_default && (
             <Button variant="ghost" size="xs" onClick={() => onSetDefault(method.id)}>
               Set Default
@@ -65,7 +65,8 @@ function MethodCard({ method, onSetDefault, onRemove }) {
           )}
           <button
             onClick={() => onRemove(method.id)}
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 cursor-pointer"
+            className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30 dark:hover:text-red-400 cursor-pointer"
+            aria-label="Remove payment method"
           >
             <Trash2 className="h-4 w-4" />
           </button>

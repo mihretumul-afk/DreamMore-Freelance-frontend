@@ -165,7 +165,7 @@ export default function JobDetailsPage() {
         {/* Main column */}
         <div className="min-w-0 space-y-6">
           {/* Header */}
-          <Card className="p-6 sm:p-8">
+          <Card className="p-4 sm:p-6 lg:p-8">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-2">
                 {job.categoryName && <Badge tone="primary">{job.categoryName}</Badge>}
@@ -185,7 +185,7 @@ export default function JobDetailsPage() {
                 />
               </button>
             </div>
-            <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-ink-900 sm:text-3xl">
+            <h1 className="mt-3 text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-ink-900 break-words">
               {job.title}
             </h1>
             {job.employer?.name && (

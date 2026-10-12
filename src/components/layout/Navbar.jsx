@@ -479,11 +479,11 @@ export default function Navbar() {
           <div className="space-y-2 border-t border-slate-100 px-3 py-4">
             {user ? (
               <>
-                <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <div className="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/80 p-3">
                   <Avatar name={user.name} src={user.avatar} size="sm" variant="brand" />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-bold text-slate-900">{user.name}</p>
-                    <p className="truncate text-xs text-slate-500">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold text-slate-900 dark:text-slate-100">{user.name}</p>
+                    <p className="truncate text-xs text-slate-500 dark:text-slate-400">
                       {ROLE_LABELS[user.role] ?? user.role}
                     </p>
                   </div>
@@ -494,17 +494,17 @@ export default function Navbar() {
                   </Button>
                 )}
                 {profilePath && (
-                  <Button as={Link} to={profilePath} variant="outline" className="w-full" size="sm">
+                  <Button as={Link} to={profilePath} variant="outline" className="w-full border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200" size="sm">
                     {t('nav.profile')}
                   </Button>
                 )}
-                <Button variant="outline" className="w-full" size="sm" onClick={handleLogout}>
+                <Button variant="outline" className="w-full border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200" size="sm" onClick={handleLogout}>
                   <LogOut className="h-4 w-4" aria-hidden="true" /> {t('nav.signOut')}
                 </Button>
               </>
             ) : (
               <>
-                <Button as={Link} to="/login" variant="outline" className="w-full border-slate-200 text-slate-700" size="sm">
+                <Button as={Link} to="/login" variant="outline" className="w-full border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200" size="sm">
                   {t('nav.signIn')}
                 </Button>
                 <Button as={Link} to="/register" className="w-full" size="sm">

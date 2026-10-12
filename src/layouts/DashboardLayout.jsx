@@ -253,7 +253,7 @@ export default function DashboardLayout({ role }) {
             </span>
           </div>
 
-          <main id="main-content" className="flex-1 p-4 sm:p-6 lg:p-8" tabIndex={-1}>
+          <main id="main-content" className="flex-1 p-3 sm:p-6 lg:p-8 min-w-0" tabIndex={-1}>
             <Outlet />
           </main>
         </div>

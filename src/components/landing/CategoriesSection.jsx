@@ -150,7 +150,7 @@ export default function CategoriesSection() {
                     'Find top-rated courses and high-demand skill categories to boost your career or hire expert talent.'
                   }
                 />
-                <div className="flex items-center justify-center gap-3 sm:gap-4 shrink-0">
+                <div className="flex items-center justify-between sm:justify-center gap-3 sm:gap-4 w-full sm:w-auto shrink-0">
                   <Link
                     to="/categories"
                     className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-brand-200 dark:border-brand-800 bg-brand-50/60 dark:bg-brand-950/40 px-3.5 py-2 text-xs sm:text-sm font-semibold text-brand-600 dark:text-brand-400 shadow-2xs transition-all duration-200 hover:border-brand-300 hover:bg-brand-100/70 dark:hover:bg-brand-900/60 hover:text-brand-700 dark:hover:text-brand-300"
@@ -172,7 +172,7 @@ export default function CategoriesSection() {
             Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
-                className="h-80 w-[240px] sm:w-[260px] md:w-[270px] shrink-0 animate-pulse rounded-2xl border border-gray-100 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-800/80 snap-start"
+                className="h-80 w-[75vw] max-w-[260px] sm:w-[260px] md:w-[270px] shrink-0 animate-pulse rounded-2xl border border-gray-100 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-800/80 snap-start"
               />
             ))
           ) : (
@@ -180,7 +180,7 @@ export default function CategoriesSection() {
               {categories.map((category, index) => (
                 <div
                   key={category.id ?? category.slug ?? index}
-                  className="w-[240px] sm:w-[260px] md:w-[270px] shrink-0 snap-start"
+                  className="w-[75vw] max-w-[260px] sm:w-[260px] md:w-[270px] shrink-0 snap-start"
                 >
                   <CategoryCard
                     category={category}
@@ -192,7 +192,7 @@ export default function CategoriesSection() {
               ))}
 
               {/* Student Success Highlight Card (Direct match to reference image) */}
-              <div className="w-[240px] sm:w-[260px] md:w-[270px] shrink-0 snap-start flex">
+              <div className="w-[75vw] max-w-[260px] sm:w-[260px] md:w-[270px] shrink-0 snap-start flex">
                 <div className="w-full flex flex-col items-center justify-center rounded-2xl border border-gray-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 text-center shadow-xs transition-all duration-300 hover:shadow-md hover:border-orange-200">
                   <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-orange-50 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400">
                     <Award className="h-6 w-6" />

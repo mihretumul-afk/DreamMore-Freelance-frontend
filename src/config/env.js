@@ -1,5 +1,5 @@
-/** Base URL of the Laravel REST API (versioned at /api/v1). */
-export const API_BASE_URL = 'https://my-laravel-backend-4gyz.onrender.com/api/v1';
+/** Base URL of the Laravel REST API. */
+export const API_BASE_URL = 'https://my-laravel-backend-4gyz.onrender.com/api';
 
 /** Origin (scheme://host[:port]) of the Laravel backend. Used for browser
  *  navigations like the Google OAuth redirect (/auth/google/redirect). */

@@ -280,7 +280,7 @@ export default function AdminLayout() {
             <span className="ml-3 text-sm font-semibold text-gray-700 dark:text-slate-200">Admin Panel</span>
           </div>
 
-          <main id="main-content" className="flex-1 p-4 sm:p-6 lg:p-8" tabIndex={-1}>
+          <main id="main-content" className="flex-1 p-3 sm:p-6 lg:p-8 min-w-0" tabIndex={-1}>
             <Outlet />
           </main>
         </div>

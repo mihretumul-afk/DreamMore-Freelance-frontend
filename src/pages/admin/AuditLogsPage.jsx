@@ -80,15 +80,15 @@ function TableSkeleton() {
   return (
     <div className="animate-pulse divide-y divide-gray-100">
       {[...Array(8)].map((_, i) => (
-        <div key={i} className="flex items-center gap-4 px-5 py-4">
+        <div key={i} className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 sm:py-4">
           <div className="h-8 w-8 shrink-0 rounded-lg bg-gray-200" />
-          <div className="flex-1 space-y-2">
+          <div className="flex-1 min-w-0 space-y-2">
             <div className="h-3.5 w-2/3 rounded bg-gray-200" />
             <div className="h-3 w-1/2 rounded bg-gray-100" />
           </div>
-          <div className="h-5 w-28 rounded-full bg-gray-200" />
-          <div className="h-4 w-20 rounded bg-gray-100" />
-          <div className="h-8 w-8 rounded-lg bg-gray-100" />
+          <div className="hidden sm:block h-5 w-24 sm:w-28 rounded-full bg-gray-200 shrink-0" />
+          <div className="hidden md:block h-4 w-20 rounded bg-gray-100 shrink-0" />
+          <div className="h-8 w-8 shrink-0 rounded-lg bg-gray-100" />
         </div>
       ))}
     </div>

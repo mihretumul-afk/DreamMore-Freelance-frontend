@@ -129,7 +129,7 @@ export default function UserMenu() {
           ref={panelRef}
           role="menu"
           aria-label={t('nav.accountMenu')}
-          className="absolute right-0 top-full z-50 mt-2 w-64 origin-top-right rounded-card border border-gray-200 bg-white py-2 shadow-elevated"
+          className="absolute right-0 top-full z-50 mt-2 w-[calc(100vw-2rem)] max-w-xs sm:w-64 origin-top-right rounded-card border border-gray-200 bg-white py-2 shadow-elevated"
         >
           <div className="border-b border-gray-100 px-4 py-3">
             <p className="truncate text-sm font-bold text-ink-900">{user.name}</p>

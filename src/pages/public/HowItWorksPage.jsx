@@ -297,10 +297,10 @@ export default function HowItWorksPage() {
             </Reveal>
             <Reveal delay={200}>
               <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <Button as={Link} to="/register" variant="secondary" size="lg" className="min-w-[200px]">
+                <Button as={Link} to="/register" variant="secondary" size="lg" className="w-full sm:w-auto sm:min-w-[200px]">
                   {t('how.pageCtaSignUp')}
                 </Button>
-                <Button as={Link} to="/register" variant="outline" size="lg" className="min-w-[200px] border-white/30 text-white hover:bg-white/10 hover:text-white">
+                <Button as={Link} to="/register" variant="outline" size="lg" className="w-full sm:w-auto sm:min-w-[200px] border-white/30 text-white hover:bg-white/10 hover:text-white">
                   {t('how.pageCtaPostJob')}
                 </Button>
               </div>

@@ -94,7 +94,7 @@ export default function HorizontalScrollRow({
       <div
         ref={containerRef}
         className={cn(
-          'flex gap-4 sm:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory py-2 pb-4',
+          'flex gap-3 sm:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory py-2 pb-4 touch-pan-x overscroll-x-contain',
           '[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
           className,
         )}

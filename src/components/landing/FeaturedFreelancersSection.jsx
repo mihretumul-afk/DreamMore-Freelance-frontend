@@ -71,7 +71,7 @@ export default function FeaturedFreelancersSection() {
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="h-80 w-[280px] sm:w-[320px] shrink-0 animate-pulse rounded-2xl border border-gray-200 bg-white"
+                className="h-80 w-[80vw] max-w-[320px] sm:w-[320px] shrink-0 animate-pulse rounded-2xl border border-gray-200 bg-white"
               />
             ))}
           </div>
@@ -95,13 +95,13 @@ export default function FeaturedFreelancersSection() {
             </h2>
 
             {realFreelancers.map((freelancer, idx) => (
-              <div key={freelancer.id || idx} className="w-[280px] sm:w-[320px] shrink-0 snap-start">
+              <div key={freelancer.id || idx} className="w-[80vw] max-w-[320px] sm:w-[320px] shrink-0 snap-start">
                 <FreelancerCard freelancer={freelancer} index={idx} className="h-full" />
               </div>
             ))}
 
             {/* Rightmost "Discover More Talent" Call-To-Action Card */}
-            <div className="w-[280px] sm:w-[320px] shrink-0 snap-start flex">
+            <div className="w-[80vw] max-w-[320px] sm:w-[320px] shrink-0 snap-start flex">
               <div className="relative w-full flex flex-col justify-between overflow-hidden rounded-2xl bg-blue-950 p-6 text-center text-white shadow-md border border-blue-900">
                 {/* Background Glow */}
                 <div className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-brand-500/20 blur-2xl pointer-events-none" />

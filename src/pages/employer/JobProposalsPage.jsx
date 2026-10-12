@@ -248,8 +248,8 @@ export default function EmployerJobProposalsPage() {
                 {proposals.map((proposal) => (
                   <li key={proposal.id} className="px-3 py-6 sm:px-5">
                     <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="flex min-w-0 items-start gap-4">
-                        <Avatar name={proposal.freelancer?.name} src={proposal.freelancer?.avatar} size="xl" className="ring-2 ring-brand-100 shadow-sm" />
+                      <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+                        <Avatar name={proposal.freelancer?.name} src={proposal.freelancer?.avatar} size="xl" className="shrink-0 ring-2 ring-brand-100 shadow-sm" />
                         <div className="min-w-0 flex-1 space-y-3">
                           {/* Freelancer Header & Badges */}
                           <div>

@@ -187,10 +187,10 @@ export default function FreelancerProposalDetailsPage() {
             <CardHeader title="Job" />
             <CardBody>
               {proposal.jobTitle ? (
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                   <Link
                     to={`/jobs/${proposal.jobId}`}
-                    className="text-base font-bold text-ink-900 transition-colors hover:text-brand-600"
+                    className="text-base font-bold text-ink-900 transition-colors hover:text-brand-600 break-words"
                   >
                     {proposal.jobTitle}
                   </Link>

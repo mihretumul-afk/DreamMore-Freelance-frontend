@@ -85,7 +85,7 @@ export default function JobCard({
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
       className={cn(
-        'group relative flex h-full flex-col justify-between rounded-card border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-brand-300 dark:hover:border-brand-500 hover:shadow-xl',
+        'group relative flex h-full flex-col justify-between rounded-card border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-brand-300 dark:hover:border-brand-500 hover:shadow-xl',
         href && 'cursor-pointer',
         className,
       )}
