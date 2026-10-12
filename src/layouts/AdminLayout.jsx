@@ -11,17 +11,6 @@ import { cn } from '../utils/cn';
 
 /**
  * AdminLayout — permission-aware shell for the admin section.
- *
- * Visually identical to DashboardLayout (white/cloud sidebar, same Navbar).
- *
- * Desktop  : Fixed white sidebar (w-16 icon-only by default, w-64 on hover).
- *            Expands when cursor enters, collapses when cursor leaves.
- * Mobile   : Slide-out drawer triggered by hamburger button below Navbar.
- * Navbar   : Reuses the existing <Navbar /> component — logo → /, bell,
- *            language selector, and user menu are all provided by it.
- *
- * RBAC     : Permission checks are untouched — only items the logged-in admin
- *            is authorised to see are rendered (via useAdminPermissions).
  */
 export default function AdminLayout() {
   const { logout, user } = useAuth();
@@ -75,12 +64,16 @@ export default function AdminLayout() {
     .join('')
     .toUpperCase();
 
-  // ── Permission-filtered + grouped nav ─────────────────────────────────
-  const visibleLinks = permLoading
-    ? []
-    : ADMIN_NAV_LINKS.filter(
-        (item) => !item.permission || isSuperAdmin || can(item.permission),
-      );
+  // ── Unlocked Navigation Filtering ─────────────────────────────────────
+  // If user is primary 'admin' or 'super_admin', bypass filtering to reveal all links
+  const isPrimaryAdmin = user?.role === 'admin' || isSuperAdmin;
+
+  const visibleLinks = ADMIN_NAV_LINKS.filter((item) => {
+    if (!item.permission) return true; // Dashboard
+    if (isPrimaryAdmin) return true;  // Primary Admin unlocks all
+    if (permLoading) return true;     // Show links while loading rather than hiding
+    return can(item.permission);
+  });
 
   const grouped = visibleLinks.reduce((acc, item) => {
     const g = item.group ?? 'overview';
@@ -185,7 +178,7 @@ export default function AdminLayout() {
               <p className="truncate text-xs font-semibold text-gray-800 dark:text-slate-200">{user?.name}</p>
               <p className="truncate text-[10px] text-gray-400 dark:text-slate-400">
                 {(() => {
-                  if (isSuperAdmin) return 'Super Admin';
+                  if (isPrimaryAdmin) return 'Super Admin';
                   const slugs = adminRoleSlugs || [];
                   if (slugs.includes('support_admin')) return 'Support Admin';
                   if (slugs.includes('finance_admin')) return 'Finance Admin';
@@ -257,7 +250,7 @@ export default function AdminLayout() {
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold text-gray-800 dark:text-slate-200">Admin Menu</span>
               <span className="rounded-full bg-red-100 dark:bg-red-950/60 px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest text-red-600 dark:text-red-400">
-                {isSuperAdmin ? 'Super' : 'Admin'}
+                {isPrimaryAdmin ? 'Super' : 'Admin'}
               </span>
             </div>
             <button
